@@ -115,44 +115,44 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | TBD | Pending |
-| DATA-02 | TBD | Pending |
-| DATA-03 | TBD | Pending |
-| DATA-04 | TBD | Pending |
-| DATA-05 | TBD | Pending |
-| DTRN-01 | TBD | Pending |
-| DTRN-02 | TBD | Pending |
-| DTRN-03 | TBD | Pending |
-| DTRN-04 | TBD | Pending |
-| SIMU-01 | TBD | Pending |
-| SIMU-02 | TBD | Pending |
-| SIMU-03 | TBD | Pending |
-| SIMU-04 | TBD | Pending |
-| SIMU-05 | TBD | Pending |
-| INTV-01 | TBD | Pending |
-| INTV-02 | TBD | Pending |
-| INTV-03 | TBD | Pending |
-| INTV-04 | TBD | Pending |
-| OPTM-01 | TBD | Pending |
-| OPTM-02 | TBD | Pending |
-| OPTM-03 | TBD | Pending |
-| OPTM-04 | TBD | Pending |
-| OUTP-01 | TBD | Pending |
-| OUTP-02 | TBD | Pending |
-| OUTP-03 | TBD | Pending |
-| OUTP-04 | TBD | Pending |
-| OUTP-05 | TBD | Pending |
-| OUTP-06 | TBD | Pending |
-| DEVX-01 | TBD | Pending |
-| DEVX-02 | TBD | Pending |
-| DEVX-03 | TBD | Pending |
-| DEVX-04 | TBD | Pending |
+| DATA-01 | Phase 1 | Pending |
+| DATA-02 | Phase 1 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| DATA-04 | Phase 1 | Pending |
+| DATA-05 | Phase 1 | Pending |
+| DTRN-01 | Phase 2 | Pending |
+| DTRN-02 | Phase 2 | Pending |
+| DTRN-03 | Phase 2 | Pending |
+| DTRN-04 | Phase 2 | Pending |
+| SIMU-01 | Phase 3 | Pending |
+| SIMU-02 | Phase 3 | Pending |
+| SIMU-03 | Phase 3 | Pending |
+| SIMU-04 | Phase 3 | Pending |
+| SIMU-05 | Phase 3 | Pending |
+| INTV-01 | Phase 3 | Pending |
+| INTV-02 | Phase 3 | Pending |
+| INTV-03 | Phase 3 | Pending |
+| INTV-04 | Phase 3 | Pending |
+| OPTM-01 | Phase 4 | Pending |
+| OPTM-02 | Phase 4 | Pending |
+| OPTM-03 | Phase 4 | Pending |
+| OPTM-04 | Phase 4 | Pending |
+| OUTP-01 | Phase 5 | Pending |
+| OUTP-02 | Phase 5 | Pending |
+| OUTP-03 | Phase 5 | Pending |
+| OUTP-04 | Phase 5 | Pending |
+| OUTP-05 | Phase 5 | Pending |
+| OUTP-06 | Phase 5 | Pending |
+| DEVX-01 | Phase 1 | Pending |
+| DEVX-02 | Phase 5 | Pending |
+| DEVX-03 | Phase 5 | Pending |
+| DEVX-04 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 32 total
-- Mapped to phases: 0
-- Unmapped: 32 ⚠️
+- Mapped to phases: 32
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-01-30*
-*Last updated: 2026-01-30 after initial definition*
+*Last updated: 2026-01-30 after roadmap creation*
