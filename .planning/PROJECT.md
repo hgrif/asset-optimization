@@ -57,6 +57,7 @@ Enable data-driven intervention decisions that minimize cost and risk across ass
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Python SDK first, UI later | Consultants need flexibility; templated UI can wrap SDK | — Pending |
+| scikit-learn style API | Balance of OOP (classes for models, optimizers) and functional (helper functions). Familiar pattern for data scientists. | — Pending |
 | Water pipes for v1 | Concrete domain to validate architecture before generalizing | — Pending |
 | Weibull deterioration model | Well-understood statistical model, good starting point | — Pending |
 | Pluggable optimizer interface | Start with heuristics, swap in MILP when needed | — Pending |
