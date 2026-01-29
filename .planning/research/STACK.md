@@ -35,8 +35,10 @@
 
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
-| SimPy | 4.1.1 | Discrete-event simulation | **Recommended**. Process-based DES for modeling asset lifecycles and failure events. Supports both real-time and fast-forward simulation. |
+| SimPy | 4.1.1 | Discrete-event simulation | **Not needed for v1**. For fixed annual timesteps, simple for-loops with NumPy vectorization are simpler and sufficient. Consider SimPy only if event-driven logic emerges (e.g., failures triggering cascades mid-year). |
 | Mesa | 3.0+ | Agent-based modeling with discrete events | Alternative if agent-based approach needed. Mesa 3 (2025) adds DiscreteEventSimulator for hybrid ABM/DES. Likely overkill for asset portfolio. |
+
+**v1 Approach:** Use simple `for year in range(horizon):` loops with vectorized NumPy/Pandas operations. No simulation framework needed initially.
 
 ### Reliability Analysis
 
@@ -49,7 +51,7 @@
 
 | Tool | Version | Purpose | Notes |
 |------|---------|---------|-------|
-| Poetry | 2.3.1 | Dependency management and packaging | Modern standard for Python SDKs. Lock files ensure reproducible builds. PEP 621 compliant. |
+| uv | 0.5+ | Dependency management and packaging | **Recommended**. 10-100x faster than pip/Poetry. Rust-based, handles venvs + deps + Python versions. Lock files via `uv.lock`. |
 | pytest | 9.0.2 | Testing framework | Industry standard. Fast, plugin ecosystem (pytest-cov, pytest-benchmark). |
 | Hypothesis | 6.151.4 | Property-based testing | Essential for SDK testing. Finds edge cases in distribution/optimization code. Seamless pytest integration. |
 | mypy | 1.19.1 | Type checking (CI/CD) | Reference implementation. Run in CI for strict type enforcement. |
@@ -66,26 +68,31 @@
 ## Installation
 
 ```bash
-# Core dependencies (SDK production)
-pip install numpy>=2.4.1 pandas>=3.0.0 scipy>=1.17.0 pydantic>=2.12.5
+# Initialize project with uv
+uv init asset-optimization
+cd asset-optimization
 
-# Optimization
-pip install pulp>=3.3.0
+# Add core dependencies
+uv add numpy pandas scipy pydantic
 
-# Simulation
-pip install simpy>=4.1.2
+# Add optimization
+uv add pulp
 
-# High-performance data (for large portfolios)
-pip install polars>=1.37.1 pyarrow>=23.0.0
+# Add high-performance data (for large portfolios)
+uv add polars pyarrow
 
-# Development dependencies
-pip install -D poetry>=2.3.1 pytest>=9.0.2 hypothesis>=6.151.4 mypy>=1.19.1
+# Add development dependencies
+uv add --dev pytest hypothesis mypy ruff
 
 # Optional: Advanced reliability analysis
-pip install reliability>=0.9.0
+uv add reliability
 
 # Optional: Premium solver (if budget allows)
-# pip install gurobipy>=12.0  # Requires license
+# uv add gurobipy  # Requires license
+
+# Run commands in the venv
+uv run python -c "import numpy; print(numpy.__version__)"
+uv run pytest
 ```
 
 ## Alternatives Considered
@@ -97,7 +104,7 @@ pip install reliability>=0.9.0
 | PuLP | Pyomo | PuLP simpler and sufficient for MILP. Pyomo better for complex nonlinear models not needed here. |
 | PuLP | cvxpy | cvxpy better for convex optimization. This SDK needs MILP for discrete intervention decisions. |
 | SimPy | Custom timestep loop | SimPy only if event-based logic needed. For fixed timesteps, NumPy/Pandas vectorization simpler. |
-| Poetry | setuptools + pip-tools | Legacy projects. Poetry provides superior dependency resolution and lock files. |
+| uv | Poetry / pip-tools | uv is faster (10-100x) and handles Python versions too. Poetry still viable but slower. |
 
 ## What NOT to Use
 
@@ -109,7 +116,7 @@ pip install reliability>=0.9.0
 | Excel for large datasets | Extremely slow (100-1000x vs Parquet), row limits (1M rows) | Parquet (convert Excel to Parquet on import) |
 | pickle for data | Not portable, version-dependent, security risk | Parquet (portable, fast, type-safe) |
 | CPLEX/Gurobi initially | Expensive licenses, overkill for prototyping | PuLP with open-source solvers (CBC/GLPK). Add Gurobi later if needed. |
-| Anaconda | License restrictions for commercial use, slow resolver | Poetry + pip for dependency management |
+| Anaconda | License restrictions for commercial use, slow resolver | uv for dependency management |
 
 ## Stack Patterns by Variant
 
@@ -146,7 +153,7 @@ pip install reliability>=0.9.0
 | NumPy 2.4.1 | Polars 1.37.1 | Polars has optional NumPy backend, compatible |
 | Pydantic 2.12.5 | Python >=3.9 | Requires Python 3.9+. Recommend 3.11+ for performance. |
 | Pandas 3.0.0 | Python >=3.11 | **Breaking change**: Pandas 3.0 drops Python <3.11 support |
-| Poetry 2.3.1 | Python >=3.10 | Poetry requires Python 3.10+. Use 3.11+ for consistency. |
+| uv 0.5+ | Python >=3.8 | uv supports Python 3.8+. Use 3.11+ for Pandas 3.0 compatibility. |
 
 **Recommended Python version:** 3.11 or 3.12
 - Pandas 3.0 requires >=3.11
@@ -285,18 +292,19 @@ pip install reliability>=0.9.0
 
 **Confidence:** MEDIUM - Depends on final simulation architecture (fixed timestep vs event-driven).
 
-### Why Poetry (Not setuptools/pip-tools)?
+### Why uv (Not Poetry/pip-tools)?
 
-**Decision:** Poetry for packaging and dependency management.
+**Decision:** uv for packaging and dependency management.
 
 **Rationale:**
-- **Lock files:** Reproducible builds critical for SDK users
-- **Dependency resolution:** Poetry resolver better than pip
+- **Speed:** 10-100x faster than pip/Poetry (Rust-based)
+- **All-in-one:** Handles venvs, deps, Python version management
+- **Lock files:** `uv.lock` for reproducible builds
 - **Modern:** PEP 517/518/621 compliant, future-proof
-- **Developer experience:** Single `pyproject.toml`, no `setup.py`
-- **SDK best practice:** Modern Python SDKs overwhelmingly use Poetry
+- **Developer experience:** Single `pyproject.toml`, fast iteration
+- **Ecosystem momentum:** Rapidly becoming the new standard (2025-2026)
 
-**Confidence:** HIGH - Industry momentum strongly toward Poetry for new projects.
+**Confidence:** HIGH - uv has strong momentum and solves Poetry's speed issues.
 
 ### Why pytest + Hypothesis (Not unittest)?
 
