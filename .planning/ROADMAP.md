@@ -54,10 +54,12 @@ Plans:
   3. System evaluates failure probabilities across entire portfolio in vectorized operations
   4. User can swap Weibull model for custom deterioration model via pluggable interface
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] TBD
+- [ ] 02-01-PLAN.md — Abstract base class and scipy dependency
+- [ ] 02-02-PLAN.md — Weibull deterioration model implementation
+- [ ] 02-03-PLAN.md — Test suite for deterioration models
 
 ### Phase 3: Simulation Core
 **Goal**: Users can run multi-timestep simulations with intervention effects on asset states
@@ -126,7 +128,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | ✓ Complete | 2026-01-30 |
-| 2. Deterioration Models | 0/TBD | Not started | - |
+| 2. Deterioration Models | 0/3 | Not started | - |
 | 3. Simulation Core | 0/TBD | Not started | - |
 | 4. Optimization | 0/TBD | Not started | - |
 | 5. Results & Polish | 0/TBD | Not started | - |
