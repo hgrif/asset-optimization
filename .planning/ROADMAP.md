@@ -34,10 +34,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. System reports data quality metrics (completeness percentages, missing value counts)
   5. User can query and filter assets by age, type, condition, location
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] TBD
+- [ ] 01-01-PLAN.md — Package setup, exceptions, and Pandera schema
+- [ ] 01-02-PLAN.md — Portfolio class with loading and quality metrics
+- [ ] 01-03-PLAN.md — Test suite for all functionality
 
 ### Phase 2: Deterioration Models
 **Goal**: System calculates failure rates using Weibull deterioration model with pluggable architecture
@@ -123,7 +125,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/TBD | Not started | - |
+| 1. Foundation | 0/3 | Planned | - |
 | 2. Deterioration Models | 0/TBD | Not started | - |
 | 3. Simulation Core | 0/TBD | Not started | - |
 | 4. Optimization | 0/TBD | Not started | - |
