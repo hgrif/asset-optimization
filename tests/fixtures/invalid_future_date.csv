@@ -1,0 +1,3 @@
+asset_id,install_date,asset_type,material,diameter_mm,length_m,condition_score
+PIPE-001,2030-03-15,pipe,PVC,150,100.5,85.0
+PIPE-002,2012-06-20,pipe,Cast Iron,200,50.3,72.5
