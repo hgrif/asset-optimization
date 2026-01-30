@@ -11,28 +11,28 @@ See: .planning/PROJECT.md (updated 2025-01-29)
 ## Current Position
 
 Phase: 2 of 5 (Deterioration Models)
-Plan: 1 of 4 completed
+Plan: 2 of 4 completed
 Status: In progress
-Last activity: 2026-01-30 — Completed 02-01-PLAN.md (Model Base Class)
+Last activity: 2026-01-30 — Completed 02-02-PLAN.md (Weibull Model)
 
-Progress: [██░░░░░░░░] 25%
+Progress: [███░░░░░░░] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 3m 1s
-- Total execution time: 0.20 hours
+- Total plans completed: 5
+- Average duration: 3m 0s
+- Total execution time: 0.25 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 3 | 9m 44s | 3m 15s |
-| 02-deterioration-models | 1 | 2m 0s | 2m 0s |
+| 02-deterioration-models | 2 | 5m 0s | 2m 30s |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2m 18s), 01-02 (5m 0s), 01-03 (2m 26s), 02-01 (2m 0s)
+- Last 5 plans: 01-02 (5m 0s), 01-03 (2m 26s), 02-01 (2m 0s), 02-02 (3m 0s)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -61,6 +61,9 @@ Recent decisions affecting current work:
 - **test-organization-by-functionality (01-03)** — Organize tests by functionality (portfolio, validation, quality)
 - **abc-for-pluggable-models (02-01)** — Use ABC pattern for pluggable deterioration model architecture
 - **immutable-transform-pattern (02-01)** — transform() methods return copies, never mutate input
+- **direct-hazard-formula (02-02)** — Use direct h(t) formula instead of scipy pdf/sf for 3-5x performance
+- **groupby-vectorization (02-02)** — Process each asset type separately with groupby for parameter lookup
+- **zero-age-handling (02-02)** — Define h(0)=0 for numerical stability in hazard calculations
 
 ### Pending Todos
 
@@ -73,5 +76,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-30
-Stopped at: Completed 02-01-PLAN.md (Model Base Class)
+Stopped at: Completed 02-02-PLAN.md (Weibull Model)
 Resume file: None
