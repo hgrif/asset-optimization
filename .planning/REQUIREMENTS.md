@@ -9,11 +9,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Data & Portfolio
 
-- [ ] **DATA-01**: User can load asset portfolio from CSV file
-- [ ] **DATA-02**: User can load asset portfolio from Excel file
-- [ ] **DATA-03**: System validates required fields on ingestion (age, type, condition)
-- [ ] **DATA-04**: System reports data quality metrics (completeness, missing values)
-- [ ] **DATA-05**: User can query and filter assets by attributes
+- [x] **DATA-01**: User can load asset portfolio from CSV file
+- [x] **DATA-02**: User can load asset portfolio from Excel file
+- [x] **DATA-03**: System validates required fields on ingestion (age, type, condition)
+- [x] **DATA-04**: System reports data quality metrics (completeness, missing values)
+- [x] **DATA-05**: User can query and filter assets by attributes
 
 ### Deterioration Modeling
 
@@ -55,7 +55,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Developer Experience
 
-- [ ] **DEVX-01**: SDK installable via pip
+- [x] **DEVX-01**: SDK installable via pip
 - [ ] **DEVX-02**: API has type hints throughout
 - [ ] **DEVX-03**: Jupyter notebook examples demonstrate end-to-end workflow
 - [ ] **DEVX-04**: Documentation covers API and usage patterns
@@ -115,11 +115,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
-| DATA-05 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
+| DATA-04 | Phase 1 | Complete |
+| DATA-05 | Phase 1 | Complete |
 | DTRN-01 | Phase 2 | Pending |
 | DTRN-02 | Phase 2 | Pending |
 | DTRN-03 | Phase 2 | Pending |
@@ -143,7 +143,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OUTP-04 | Phase 5 | Pending |
 | OUTP-05 | Phase 5 | Pending |
 | OUTP-06 | Phase 5 | Pending |
-| DEVX-01 | Phase 1 | Pending |
+| DEVX-01 | Phase 1 | Complete |
 | DEVX-02 | Phase 5 | Pending |
 | DEVX-03 | Phase 5 | Pending |
 | DEVX-04 | Phase 5 | Pending |
@@ -155,4 +155,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-30*
-*Last updated: 2026-01-30 after roadmap creation*
+*Last updated: 2026-01-30 after Phase 1 completion*
