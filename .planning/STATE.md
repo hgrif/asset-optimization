@@ -11,28 +11,28 @@ See: .planning/PROJECT.md (updated 2025-01-29)
 ## Current Position
 
 Phase: 2 of 5 (Deterioration Models)
-Plan: 2 of 4 completed
+Plan: 3 of 4 completed
 Status: In progress
-Last activity: 2026-01-30 — Completed 02-02-PLAN.md (Weibull Model)
+Last activity: 2026-01-30 — Completed 02-03-PLAN.md (Deterioration Tests)
 
-Progress: [███░░░░░░░] 30%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 3m 0s
-- Total execution time: 0.25 hours
+- Total plans completed: 6
+- Average duration: 2m 50s
+- Total execution time: 0.28 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 3 | 9m 44s | 3m 15s |
-| 02-deterioration-models | 2 | 5m 0s | 2m 30s |
+| 02-deterioration-models | 3 | 7m 0s | 2m 20s |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (5m 0s), 01-03 (2m 26s), 02-01 (2m 0s), 02-02 (3m 0s)
+- Last 5 plans: 01-03 (2m 26s), 02-01 (2m 0s), 02-02 (3m 0s), 02-03 (2m 0s)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -64,6 +64,8 @@ Recent decisions affecting current work:
 - **direct-hazard-formula (02-02)** — Use direct h(t) formula instead of scipy pdf/sf for 3-5x performance
 - **groupby-vectorization (02-02)** — Process each asset type separately with groupby for parameter lookup
 - **zero-age-handling (02-02)** — Define h(0)=0 for numerical stability in hazard calculations
+- **scipy-for-cdf-verification (02-03)** — Use scipy.stats.weibull_min.cdf to verify failure_probability calculations
+- **direct-formula-for-hazard-verification (02-03)** — Verify hazard rate matches h(t)=(k/lambda)*(t/lambda)^(k-1)
 
 ### Pending Todos
 
@@ -76,5 +78,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-30
-Stopped at: Completed 02-02-PLAN.md (Weibull Model)
+Stopped at: Completed 02-03-PLAN.md (Deterioration Tests)
 Resume file: None
