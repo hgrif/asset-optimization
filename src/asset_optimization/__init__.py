@@ -8,6 +8,7 @@ from .exceptions import (
     MissingFieldError,
     DataQualityError,
 )
+from .models import WeibullModel
 
 __all__ = [
     "__version__",
@@ -15,4 +16,5 @@ __all__ = [
     "ValidationError",
     "MissingFieldError",
     "DataQualityError",
+    "WeibullModel",
 ]
