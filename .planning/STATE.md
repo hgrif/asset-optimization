@@ -6,14 +6,14 @@ See: .planning/PROJECT.md (updated 2025-01-29)
 
 **Core value:** Enable data-driven intervention decisions that minimize cost and risk across asset portfolios
 
-**Current focus:** Phase 2: Deterioration Models
+**Current focus:** Phase 3: Simulation Core
 
 ## Current Position
 
-Phase: 2 of 5 (Deterioration Models)
-Plan: 3 of 4 completed
-Status: In progress
-Last activity: 2026-01-30 — Completed 02-03-PLAN.md (Deterioration Tests)
+Phase: 3 of 5 (Simulation Core)
+Plan: 0 of TBD completed
+Status: Ready to plan
+Last activity: 2026-01-31 — Completed Phase 2 (Deterioration Models)
 
 Progress: [████░░░░░░] 40%
 
@@ -77,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-30
-Stopped at: Completed 02-03-PLAN.md (Deterioration Tests)
+Last session: 2026-01-31
+Stopped at: Completed Phase 2 (Deterioration Models) — verified and committed
 Resume file: None

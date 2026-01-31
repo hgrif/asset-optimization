@@ -13,7 +13,7 @@ Build a Python SDK for simulating and optimizing infrastructure asset portfolios
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Project structure, data loading, validation
-- [ ] **Phase 2: Deterioration Models** - Weibull failure rates and pluggable interface
+- [x] **Phase 2: Deterioration Models** - Weibull failure rates and pluggable interface
 - [ ] **Phase 3: Simulation Core** - Multi-timestep simulation with interventions
 - [ ] **Phase 4: Optimization** - Constraint-based intervention selection
 - [ ] **Phase 5: Results & Polish** - Outputs, visualization, documentation
@@ -57,9 +57,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Abstract base class and scipy dependency
-- [ ] 02-02-PLAN.md — Weibull deterioration model implementation
-- [ ] 02-03-PLAN.md — Test suite for deterioration models
+- [x] 02-01-PLAN.md — Abstract base class and scipy dependency
+- [x] 02-02-PLAN.md — Weibull deterioration model implementation
+- [x] 02-03-PLAN.md — Test suite for deterioration models
 
 ### Phase 3: Simulation Core
 **Goal**: Users can run multi-timestep simulations with intervention effects on asset states
@@ -128,7 +128,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | ✓ Complete | 2026-01-30 |
-| 2. Deterioration Models | 0/3 | Not started | - |
+| 2. Deterioration Models | 3/3 | ✓ Complete | 2026-01-31 |
 | 3. Simulation Core | 0/TBD | Not started | - |
 | 4. Optimization | 0/TBD | Not started | - |
 | 5. Results & Polish | 0/TBD | Not started | - |

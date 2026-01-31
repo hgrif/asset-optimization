@@ -17,10 +17,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Deterioration Modeling
 
-- [ ] **DTRN-01**: System calculates failure rates using Weibull 2-parameter model
-- [ ] **DTRN-02**: User can configure Weibull shape and scale per asset type
-- [ ] **DTRN-03**: System evaluates failure probabilities across entire portfolio efficiently
-- [ ] **DTRN-04**: Model interface is pluggable (can swap Weibull for other models later)
+- [x] **DTRN-01**: System calculates failure rates using Weibull 2-parameter model
+- [x] **DTRN-02**: User can configure Weibull shape and scale per asset type
+- [x] **DTRN-03**: System evaluates failure probabilities across entire portfolio efficiently
+- [x] **DTRN-04**: Model interface is pluggable (can swap Weibull for other models later)
 
 ### Simulation
 
@@ -120,10 +120,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-03 | Phase 1 | Complete |
 | DATA-04 | Phase 1 | Complete |
 | DATA-05 | Phase 1 | Complete |
-| DTRN-01 | Phase 2 | Pending |
-| DTRN-02 | Phase 2 | Pending |
-| DTRN-03 | Phase 2 | Pending |
-| DTRN-04 | Phase 2 | Pending |
+| DTRN-01 | Phase 2 | Complete |
+| DTRN-02 | Phase 2 | Complete |
+| DTRN-03 | Phase 2 | Complete |
+| DTRN-04 | Phase 2 | Complete |
 | SIMU-01 | Phase 3 | Pending |
 | SIMU-02 | Phase 3 | Pending |
 | SIMU-03 | Phase 3 | Pending |
@@ -155,4 +155,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-30*
-*Last updated: 2026-01-30 after Phase 1 completion*
+*Last updated: 2026-01-31 after Phase 2 completion*
