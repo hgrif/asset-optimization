@@ -76,10 +76,13 @@ Plans:
   5. Simulation produces deterministic results with random seed control
   6. System tracks cumulative cost and failure counts across timesteps
 
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] TBD
+- [ ] 03-01-PLAN.md — Simulation configuration and result dataclasses
+- [ ] 03-02-PLAN.md — Intervention types with costs and effects
+- [ ] 03-03-PLAN.md — Simulator core with multi-timestep loop
+- [ ] 03-04-PLAN.md — Test suite for simulation module
 
 ### Phase 4: Optimization
 **Goal**: System selects optimal interventions within budget constraints using pluggable optimizer
@@ -129,6 +132,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | ✓ Complete | 2026-01-30 |
 | 2. Deterioration Models | 3/3 | ✓ Complete | 2026-01-31 |
-| 3. Simulation Core | 0/TBD | Not started | - |
+| 3. Simulation Core | 0/4 | Not started | - |
 | 4. Optimization | 0/TBD | Not started | - |
 | 5. Results & Polish | 0/TBD | Not started | - |
