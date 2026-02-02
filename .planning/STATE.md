@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2025-01-29)
 ## Current Position
 
 Phase: 3 of 5 (Simulation Core)
-Plan: 0 of TBD completed
-Status: Ready to plan
-Last activity: 2026-01-31 — Completed Phase 2 (Deterioration Models)
+Plan: 2 of TBD completed
+Status: In progress
+Last activity: 2026-02-02 — Completed 03-02-PLAN.md (Intervention Types)
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 2m 50s
-- Total execution time: 0.28 hours
+- Total plans completed: 8
+- Average duration: 2m 30s
+- Total execution time: 0.33 hours
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: [████░░░░░░] 40%
 |-------|-------|-------|----------|
 | 01-foundation | 3 | 9m 44s | 3m 15s |
 | 02-deterioration-models | 3 | 7m 0s | 2m 20s |
+| 03-simulation-core | 2 | 3m 16s | 1m 38s |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (2m 26s), 02-01 (2m 0s), 02-02 (3m 0s), 02-03 (2m 0s)
-- Trend: Stable
+- Last 5 plans: 02-01 (2m 0s), 02-02 (3m 0s), 02-03 (2m 0s), 03-01 (1m 47s), 03-02 (1m 29s)
+- Trend: Improving
 
 *Updated after each plan completion*
 
@@ -66,6 +67,9 @@ Recent decisions affecting current work:
 - **zero-age-handling (02-02)** — Define h(0)=0 for numerical stability in hazard calculations
 - **scipy-for-cdf-verification (02-03)** — Use scipy.stats.weibull_min.cdf to verify failure_probability calculations
 - **direct-formula-for-hazard-verification (02-03)** — Verify hazard rate matches h(t)=(k/lambda)*(t/lambda)^(k-1)
+- **frozen-dataclass-immutable (03-02)** — Use frozen=True for InterventionType immutability
+- **callable-age-effect (03-02)** — Use Callable[[float], float] for pluggable age transformations
+- **post-init-validation (03-02)** — Validate cost >= 0 and non-empty name in __post_init__
 
 ### Pending Todos
 
@@ -77,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-31
-Stopped at: Completed Phase 2 (Deterioration Models) — verified and committed
+Last session: 2026-02-02
+Stopped at: Completed 03-02-PLAN.md (Intervention Types) — verified and committed
 Resume file: None
