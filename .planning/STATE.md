@@ -67,6 +67,9 @@ Recent decisions affecting current work:
 - **zero-age-handling (02-02)** — Define h(0)=0 for numerical stability in hazard calculations
 - **scipy-for-cdf-verification (02-03)** — Use scipy.stats.weibull_min.cdf to verify failure_probability calculations
 - **direct-formula-for-hazard-verification (02-03)** — Verify hazard rate matches h(t)=(k/lambda)*(t/lambda)^(k-1)
+- **frozen-dataclass-for-config (03-01)** — Use frozen=True for immutable configuration
+- **post-init-validation (03-01)** — Validate parameters in __post_init__ method
+- **convenience-methods-on-result (03-01)** — Add total_cost() and total_failures() for common queries
 - **frozen-dataclass-immutable (03-02)** — Use frozen=True for InterventionType immutability
 - **callable-age-effect (03-02)** — Use Callable[[float], float] for pluggable age transformations
 - **post-init-validation (03-02)** — Validate cost >= 0 and non-empty name in __post_init__
