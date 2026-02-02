@@ -9,6 +9,16 @@ from .exceptions import (
     DataQualityError,
 )
 from .models import WeibullModel
+from .simulation import (
+    Simulator,
+    SimulationConfig,
+    SimulationResult,
+    InterventionType,
+    DO_NOTHING,
+    INSPECT,
+    REPAIR,
+    REPLACE,
+)
 
 __all__ = [
     "__version__",
@@ -17,4 +27,12 @@ __all__ = [
     "MissingFieldError",
     "DataQualityError",
     "WeibullModel",
+    "Simulator",
+    "SimulationConfig",
+    "SimulationResult",
+    "InterventionType",
+    "DO_NOTHING",
+    "INSPECT",
+    "REPAIR",
+    "REPLACE",
 ]
