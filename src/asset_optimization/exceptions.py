@@ -42,3 +42,34 @@ class MissingFieldError(ValidationError):
 class DataQualityError(ValidationError):
     """Raised when data quality is below acceptable threshold."""
     pass
+
+
+class SimulationError(AssetOptimizationError):
+    """Raised when simulation encounters an error.
+
+    Attributes
+    ----------
+    message : str
+        Human-readable error description.
+    year : int, optional
+        Simulation year when error occurred.
+    details : dict
+        Additional error context.
+    """
+
+    def __init__(self, message, year=None, details=None):
+        self.message = message
+        self.year = year
+        self.details = details or {}
+        super().__init__(self._format_message())
+
+    def _format_message(self):
+        """Format error message with year and details."""
+        if self.year is not None:
+            msg = f"Simulation error at year {self.year}: {self.message}"
+        else:
+            msg = f"Simulation error: {self.message}"
+        if self.details:
+            detail_str = ", ".join(f"{k}={v}" for k, v in self.details.items())
+            msg += f" ({detail_str})"
+        return msg
