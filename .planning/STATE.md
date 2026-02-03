@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2025-01-29)
 ## Current Position
 
 Phase: 3 of 5 (Simulation Core)
-Plan: 2 of TBD completed
+Plan: 3 of TBD completed
 Status: In progress
-Last activity: 2026-02-02 — Completed 03-02-PLAN.md (Intervention Types)
+Last activity: 2026-02-02 — Completed 03-03-PLAN.md (Simulator Class)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 2m 30s
-- Total execution time: 0.33 hours
+- Total execution time: 0.38 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [█████░░░░░] 50%
 |-------|-------|-------|----------|
 | 01-foundation | 3 | 9m 44s | 3m 15s |
 | 02-deterioration-models | 3 | 7m 0s | 2m 20s |
-| 03-simulation-core | 2 | 3m 16s | 1m 38s |
+| 03-simulation-core | 3 | 6m 8s | 2m 3s |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (2m 0s), 02-02 (3m 0s), 02-03 (2m 0s), 03-01 (1m 47s), 03-02 (1m 29s)
-- Trend: Improving
+- Last 5 plans: 02-02 (3m 0s), 02-03 (2m 0s), 03-01 (1m 47s), 03-02 (1m 29s), 03-03 (2m 52s)
+- Trend: Consistent
 
 *Updated after each plan completion*
 
@@ -73,6 +73,9 @@ Recent decisions affecting current work:
 - **frozen-dataclass-immutable (03-02)** — Use frozen=True for InterventionType immutability
 - **callable-age-effect (03-02)** — Use Callable[[float], float] for pluggable age transformations
 - **post-init-validation (03-02)** — Validate cost >= 0 and non-empty name in __post_init__
+- **conditional-probability-via-survival (03-03)** — Use S(t)-S(t+1)/S(t) for accurate failure sampling
+- **isolated-rng-per-simulator (03-03)** — Each Simulator instance has own RNG for reproducibility
+- **direct-params-access (03-03)** — Access model.params directly (not transform()) for survival function
 
 ### Pending Todos
 
@@ -85,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-02
-Stopped at: Completed 03-02-PLAN.md (Intervention Types) — verified and committed
+Stopped at: Completed 03-03-PLAN.md (Simulator Class) — verified and committed
 Resume file: None
