@@ -97,10 +97,12 @@ Plans:
   3. User can swap greedy optimizer for MILP solver via pluggable interface
   4. System reports which interventions were selected and why (e.g., "selected due to high failure probability + low cost")
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] TBD
+- [ ] 04-01-PLAN.md — OptimizationResult dataclass and OptimizationError exception
+- [ ] 04-02-PLAN.md — Optimizer class with scikit-learn-style fit() and greedy algorithm
+- [ ] 04-03-PLAN.md — Test suite for optimization module
 
 ### Phase 5: Results & Polish
 **Goal**: Users can export results, visualize outcomes, and understand the SDK through documentation
@@ -133,5 +135,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation | 3/3 | ✓ Complete | 2026-01-30 |
 | 2. Deterioration Models | 3/3 | ✓ Complete | 2026-01-31 |
 | 3. Simulation Core | 4/4 | ✓ Complete | 2026-02-03 |
-| 4. Optimization | 0/TBD | Not started | - |
+| 4. Optimization | 0/3 | Not started | - |
 | 5. Results & Polish | 0/TBD | Not started | - |
