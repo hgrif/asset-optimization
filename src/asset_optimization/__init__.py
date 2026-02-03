@@ -7,6 +7,7 @@ from .exceptions import (
     ValidationError,
     MissingFieldError,
     DataQualityError,
+    OptimizationError,
 )
 from .models import WeibullModel
 from .simulation import (
@@ -19,6 +20,7 @@ from .simulation import (
     REPAIR,
     REPLACE,
 )
+from .optimization import Optimizer, OptimizationResult
 
 __all__ = [
     "__version__",
@@ -26,6 +28,7 @@ __all__ = [
     "ValidationError",
     "MissingFieldError",
     "DataQualityError",
+    "OptimizationError",
     "WeibullModel",
     "Simulator",
     "SimulationConfig",
@@ -35,4 +38,6 @@ __all__ = [
     "INSPECT",
     "REPAIR",
     "REPLACE",
+    "Optimizer",
+    "OptimizationResult",
 ]
