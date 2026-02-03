@@ -73,3 +73,28 @@ class SimulationError(AssetOptimizationError):
             detail_str = ", ".join(f"{k}={v}" for k, v in self.details.items())
             msg += f" ({detail_str})"
         return msg
+
+
+class OptimizationError(AssetOptimizationError):
+    """Raised when optimization encounters an error.
+
+    Attributes
+    ----------
+    message : str
+        Human-readable error description.
+    details : dict
+        Additional error context (budget, strategy, etc.).
+    """
+
+    def __init__(self, message, details=None):
+        self.message = message
+        self.details = details or {}
+        super().__init__(self._format_message())
+
+    def _format_message(self):
+        """Format error message with details."""
+        msg = f"Optimization error: {self.message}"
+        if self.details:
+            detail_str = ", ".join(f"{k}={v}" for k, v in self.details.items())
+            msg += f" ({detail_str})"
+        return msg
