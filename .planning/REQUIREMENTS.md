@@ -24,18 +24,18 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Simulation
 
-- [ ] **SIMU-01**: User can run multi-timestep simulation (configurable years, e.g., 10-30)
-- [ ] **SIMU-02**: System updates asset states after each timestep (age increments)
-- [ ] **SIMU-03**: System applies intervention effects to asset state (age reset on replace, condition improvement on repair)
-- [ ] **SIMU-04**: Simulation is deterministic with random seed control
-- [ ] **SIMU-05**: System tracks cumulative metrics across timesteps (total cost, total failures)
+- [x] **SIMU-01**: User can run multi-timestep simulation (configurable years, e.g., 10-30)
+- [x] **SIMU-02**: System updates asset states after each timestep (age increments)
+- [x] **SIMU-03**: System applies intervention effects to asset state (age reset on replace, condition improvement on repair)
+- [x] **SIMU-04**: Simulation is deterministic with random seed control
+- [x] **SIMU-05**: System tracks cumulative metrics across timesteps (total cost, total failures)
 
 ### Interventions
 
-- [ ] **INTV-01**: System supports 4 intervention types: DoNothing, Inspect, Repair, Replace
-- [ ] **INTV-02**: User can configure cost per intervention type
-- [ ] **INTV-03**: User can configure state effects per intervention type
-- [ ] **INTV-04**: System generates intervention options per asset per timestep
+- [x] **INTV-01**: System supports 4 intervention types: DoNothing, Inspect, Repair, Replace
+- [x] **INTV-02**: User can configure cost per intervention type
+- [x] **INTV-03**: User can configure state effects per intervention type
+- [x] **INTV-04**: System generates intervention options per asset per timestep
 
 ### Optimization
 
@@ -124,15 +124,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DTRN-02 | Phase 2 | Complete |
 | DTRN-03 | Phase 2 | Complete |
 | DTRN-04 | Phase 2 | Complete |
-| SIMU-01 | Phase 3 | Pending |
-| SIMU-02 | Phase 3 | Pending |
-| SIMU-03 | Phase 3 | Pending |
-| SIMU-04 | Phase 3 | Pending |
-| SIMU-05 | Phase 3 | Pending |
-| INTV-01 | Phase 3 | Pending |
-| INTV-02 | Phase 3 | Pending |
-| INTV-03 | Phase 3 | Pending |
-| INTV-04 | Phase 3 | Pending |
+| SIMU-01 | Phase 3 | Complete |
+| SIMU-02 | Phase 3 | Complete |
+| SIMU-03 | Phase 3 | Complete |
+| SIMU-04 | Phase 3 | Complete |
+| SIMU-05 | Phase 3 | Complete |
+| INTV-01 | Phase 3 | Complete |
+| INTV-02 | Phase 3 | Complete |
+| INTV-03 | Phase 3 | Complete |
+| INTV-04 | Phase 3 | Complete |
 | OPTM-01 | Phase 4 | Pending |
 | OPTM-02 | Phase 4 | Pending |
 | OPTM-03 | Phase 4 | Pending |
@@ -155,4 +155,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-30*
-*Last updated: 2026-01-31 after Phase 2 completion*
+*Last updated: 2026-02-03 after Phase 3 completion*

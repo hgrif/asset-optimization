@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Project structure, data loading, validation
 - [x] **Phase 2: Deterioration Models** - Weibull failure rates and pluggable interface
-- [ ] **Phase 3: Simulation Core** - Multi-timestep simulation with interventions
+- [x] **Phase 3: Simulation Core** - Multi-timestep simulation with interventions
 - [ ] **Phase 4: Optimization** - Constraint-based intervention selection
 - [ ] **Phase 5: Results & Polish** - Outputs, visualization, documentation
 
@@ -79,10 +79,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Simulation configuration and result dataclasses
-- [ ] 03-02-PLAN.md — Intervention types with costs and effects
-- [ ] 03-03-PLAN.md — Simulator core with multi-timestep loop
-- [ ] 03-04-PLAN.md — Test suite for simulation module
+- [x] 03-01-PLAN.md — Simulation configuration and result dataclasses
+- [x] 03-02-PLAN.md — Intervention types with costs and effects
+- [x] 03-03-PLAN.md — Simulator core with multi-timestep loop
+- [x] 03-04-PLAN.md — Test suite for simulation module
 
 ### Phase 4: Optimization
 **Goal**: System selects optimal interventions within budget constraints using pluggable optimizer
@@ -132,6 +132,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | ✓ Complete | 2026-01-30 |
 | 2. Deterioration Models | 3/3 | ✓ Complete | 2026-01-31 |
-| 3. Simulation Core | 0/4 | Not started | - |
+| 3. Simulation Core | 4/4 | ✓ Complete | 2026-02-03 |
 | 4. Optimization | 0/TBD | Not started | - |
 | 5. Results & Polish | 0/TBD | Not started | - |
