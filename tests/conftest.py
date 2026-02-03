@@ -4,6 +4,10 @@ import pandas as pd
 import pytest
 from pathlib import Path
 
+from asset_optimization import Portfolio
+from asset_optimization.models import WeibullModel
+from asset_optimization.simulation import SimulationConfig
+
 
 @pytest.fixture
 def fixtures_dir():
@@ -53,3 +57,34 @@ def sample_dataframe():
         'length_m': [100.5, 50.3, 1.2],
         'condition_score': [85.0, 72.5, 90.0],
     })
+
+
+@pytest.fixture
+def sample_portfolio():
+    """Create sample portfolio for simulation tests."""
+    n_assets = 100
+    test_data = pd.DataFrame({
+        'asset_id': [f'PIPE-{i:03d}' for i in range(n_assets)],
+        'asset_type': ['pipe'] * n_assets,
+        'material': ['PVC'] * 50 + ['Cast Iron'] * 50,
+        'install_date': pd.date_range('2000-01-01', periods=n_assets, freq='30D'),
+        'diameter_mm': [100] * n_assets,
+        'length_m': [50.0] * n_assets,
+        'condition_score': [80.0] * n_assets,
+    })
+    return Portfolio.from_dataframe(test_data)
+
+
+@pytest.fixture
+def weibull_model():
+    """Create WeibullModel for simulation tests."""
+    return WeibullModel({
+        'PVC': (2.5, 50.0),
+        'Cast Iron': (3.0, 40.0),
+    })
+
+
+@pytest.fixture
+def simulation_config():
+    """Create default simulation config."""
+    return SimulationConfig(n_years=5, random_seed=42)
