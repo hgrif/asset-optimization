@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2025-01-29)
 ## Current Position
 
 Phase: 4 of 5 (Optimization)
-Plan: 1 of 3 completed
+Plan: 2 of 3 completed
 Status: In progress
-Last activity: 2026-02-03 — Completed 04-01-PLAN.md
+Last activity: 2026-02-03 — Completed 04-02-PLAN.md
 
-Progress: [████████░░] 85%
+Progress: [█████████░] 92%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 2m 48s
-- Total execution time: 0.52 hours
+- Total plans completed: 12
+- Average duration: 2m 51s
+- Total execution time: 0.57 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [████████░░] 85%
 | 01-foundation | 3 | 9m 44s | 3m 15s |
 | 02-deterioration-models | 3 | 7m 0s | 2m 20s |
 | 03-simulation-core | 4 | 12m 5s | 3m 1s |
-| 04-optimization | 1 | 2m 7s | 2m 7s |
+| 04-optimization | 2 | 6m 7s | 3m 4s |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (1m 47s), 03-02 (1m 29s), 03-03 (2m 52s), 03-04 (5m 57s), 04-01 (2m 7s)
+- Last 5 plans: 03-02 (1m 29s), 03-03 (2m 52s), 03-04 (5m 57s), 04-01 (2m 7s), 04-02 (4m)
 - Trend: Consistent
 
 *Updated after each plan completion*
@@ -82,6 +82,10 @@ Recent decisions affecting current work:
 - **scipy-formula-verification (03-04)** — Verify conditional probability implementation against scipy.stats.weibull_min
 - **follow-simulation-result-pattern (04-01)** — Use non-frozen dataclass with convenience properties for OptimizationResult
 - **inherit-from-base-exception (04-01)** — OptimizationError inherits AssetOptimizationError for package exception hierarchy
+- **two-stage-greedy (04-02)** — Stage 1 finds best intervention per asset, Stage 2 ranks by risk-to-cost ratio
+- **cost-effectiveness-metric (04-02)** — Use (risk_before - risk_after) / cost for intervention selection
+- **risk-to-cost-ranking (04-02)** — Use risk_before / cost for budget filling prioritization
+- **scikit-learn-fit-api (04-02)** — fit() returns self with result_ attribute
 
 ### Pending Todos
 
@@ -94,5 +98,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 04-01-PLAN.md
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None
