@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2025-01-29)
 ## Current Position
 
 Phase: 5 of 5 (Results & Polish)
-Plan: 1 of 3 completed
+Plan: 2 of 5 completed
 Status: In progress
-Last activity: 2026-02-04 — Completed 05-01-PLAN.md (Parquet Export)
+Last activity: 2026-02-04 — Completed 05-02-PLAN.md (Scenario Comparison)
 
-Progress: [████████▒░] 87%
+Progress: [████████▒░] 83% (15/18 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 2m 46s
-- Total execution time: 0.65 hours
+- Total plans completed: 15
+- Average duration: 2m 44s
+- Total execution time: 0.68 hours
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: [████████▒░] 87%
 | 02-deterioration-models | 3 | 7m 0s | 2m 20s |
 | 03-simulation-core | 4 | 12m 5s | 3m 1s |
 | 04-optimization | 3 | 8m 7s | 2m 42s |
-| 05-results-polish | 1 | 3m 0s | 3m 0s |
+| 05-results-polish | 2 | 5m 0s | 2m 30s |
 
 **Recent Trend:**
-- Last 5 plans: 03-04 (5m 57s), 04-01 (2m 7s), 04-02 (4m), 04-03 (2m), 05-01 (3m)
+- Last 5 plans: 04-01 (2m 7s), 04-02 (4m), 04-03 (2m), 05-01 (3m), 05-02 (2m)
 - Trend: Consistent
 
 *Updated after each plan completion*
@@ -92,6 +92,8 @@ Recent decisions affecting current work:
 - **pandas-style-api (05-01)** — Use result.to_parquet(path) pattern familiar to pandas users
 - **long-format-for-plotting (05-01)** — Cost projections use year/metric/value format for seaborn
 - **optional-portfolio-join (05-01)** — Detailed export optionally joins portfolio for material/age columns
+- **long-format-output (05-02)** — Output comparison as scenario,year,metric,value DataFrame for seaborn compatibility
+- **auto-baseline (05-02)** — create_do_nothing_baseline estimates no-intervention scenario via heuristics
 
 ### Pending Todos
 
@@ -104,5 +106,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-04
-Stopped at: Completed 05-01-PLAN.md — verified and committed
+Stopped at: Completed 05-02-PLAN.md — verified and committed
 Resume file: None
