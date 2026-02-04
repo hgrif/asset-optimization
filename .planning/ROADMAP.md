@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Project structure, data loading, validation
 - [x] **Phase 2: Deterioration Models** - Weibull failure rates and pluggable interface
 - [x] **Phase 3: Simulation Core** - Multi-timestep simulation with interventions
-- [ ] **Phase 4: Optimization** - Constraint-based intervention selection
+- [x] **Phase 4: Optimization** - Constraint-based intervention selection
 - [ ] **Phase 5: Results & Polish** - Outputs, visualization, documentation
 
 ## Phase Details
@@ -100,9 +100,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — OptimizationResult dataclass and OptimizationError exception
-- [ ] 04-02-PLAN.md — Optimizer class with scikit-learn-style fit() and greedy algorithm
-- [ ] 04-03-PLAN.md — Test suite for optimization module
+- [x] 04-01-PLAN.md — OptimizationResult dataclass and OptimizationError exception
+- [x] 04-02-PLAN.md — Optimizer class with scikit-learn-style fit() and greedy algorithm
+- [x] 04-03-PLAN.md — Test suite for optimization module
 
 ### Phase 5: Results & Polish
 **Goal**: Users can export results, visualize outcomes, and understand the SDK through documentation
@@ -135,5 +135,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation | 3/3 | ✓ Complete | 2026-01-30 |
 | 2. Deterioration Models | 3/3 | ✓ Complete | 2026-01-31 |
 | 3. Simulation Core | 4/4 | ✓ Complete | 2026-02-03 |
-| 4. Optimization | 0/3 | Not started | - |
+| 4. Optimization | 3/3 | ✓ Complete | 2026-02-03 |
 | 5. Results & Polish | 0/TBD | Not started | - |

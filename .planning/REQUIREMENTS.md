@@ -39,10 +39,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Optimization
 
-- [ ] **OPTM-01**: System selects interventions within budget constraint
-- [ ] **OPTM-02**: System uses greedy heuristic (prioritize by risk/cost ratio)
-- [ ] **OPTM-03**: Optimizer interface is pluggable (can swap heuristic for MILP later)
-- [ ] **OPTM-04**: System reports which interventions were selected and why
+- [x] **OPTM-01**: System selects interventions within budget constraint
+- [x] **OPTM-02**: System uses greedy heuristic (prioritize by risk/cost ratio)
+- [x] **OPTM-03**: Optimizer interface is pluggable (can swap heuristic for MILP later)
+- [x] **OPTM-04**: System reports which interventions were selected and why
 
 ### Outputs
 
@@ -133,10 +133,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTV-02 | Phase 3 | Complete |
 | INTV-03 | Phase 3 | Complete |
 | INTV-04 | Phase 3 | Complete |
-| OPTM-01 | Phase 4 | Pending |
-| OPTM-02 | Phase 4 | Pending |
-| OPTM-03 | Phase 4 | Pending |
-| OPTM-04 | Phase 4 | Pending |
+| OPTM-01 | Phase 4 | Complete |
+| OPTM-02 | Phase 4 | Complete |
+| OPTM-03 | Phase 4 | Complete |
+| OPTM-04 | Phase 4 | Complete |
 | OUTP-01 | Phase 5 | Pending |
 | OUTP-02 | Phase 5 | Pending |
 | OUTP-03 | Phase 5 | Pending |
@@ -155,4 +155,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-30*
-*Last updated: 2026-02-03 after Phase 3 completion*
+*Last updated: 2026-02-03 after Phase 4 completion*
