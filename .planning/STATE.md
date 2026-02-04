@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2025-01-29)
 ## Current Position
 
 Phase: 5 of 5 (Results & Polish)
-Plan: 0 of TBD completed
-Status: Ready to plan
-Last activity: 2026-02-03 — Completed Phase 4 (Optimization)
+Plan: 1 of 3 completed
+Status: In progress
+Last activity: 2026-02-04 — Completed 05-01-PLAN.md (Parquet Export)
 
-Progress: [████████░░] 80%
+Progress: [████████▒░] 87%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: 2m 47s
-- Total execution time: 0.60 hours
+- Total plans completed: 14
+- Average duration: 2m 46s
+- Total execution time: 0.65 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [████████░░] 80%
 | 02-deterioration-models | 3 | 7m 0s | 2m 20s |
 | 03-simulation-core | 4 | 12m 5s | 3m 1s |
 | 04-optimization | 3 | 8m 7s | 2m 42s |
+| 05-results-polish | 1 | 3m 0s | 3m 0s |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (2m 52s), 03-04 (5m 57s), 04-01 (2m 7s), 04-02 (4m), 04-03 (2m)
+- Last 5 plans: 03-04 (5m 57s), 04-01 (2m 7s), 04-02 (4m), 04-03 (2m), 05-01 (3m)
 - Trend: Consistent
 
 *Updated after each plan completion*
@@ -88,6 +89,9 @@ Recent decisions affecting current work:
 - **scikit-learn-fit-api (04-02)** — fit() returns self with result_ attribute
 - **asset-type-required-in-fixtures (04-03)** — Portfolio schema requires asset_type column in test fixtures
 - **test-class-by-concern (04-03)** — Organize optimization tests into classes by concern (Init, Fit, Budget, Greedy, Threshold, Exclusions, Result, EdgeCases)
+- **pandas-style-api (05-01)** — Use result.to_parquet(path) pattern familiar to pandas users
+- **long-format-for-plotting (05-01)** — Cost projections use year/metric/value format for seaborn
+- **optional-portfolio-join (05-01)** — Detailed export optionally joins portfolio for material/age columns
 
 ### Pending Todos
 
@@ -99,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-03
-Stopped at: Completed Phase 4 (Optimization) — verified and committed
+Last session: 2026-02-04
+Stopped at: Completed 05-01-PLAN.md — verified and committed
 Resume file: None
