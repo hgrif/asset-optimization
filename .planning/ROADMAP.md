@@ -112,18 +112,22 @@ Plans:
 **Requirements**: OUTP-01, OUTP-02, OUTP-03, OUTP-04, OUTP-05, OUTP-06, DEVX-02, DEVX-03, DEVX-04
 
 **Success Criteria** (what must be TRUE):
-  1. User can export intervention schedule to CSV (asset ID, year, action, cost)
-  2. User can export cost projections and failure metrics by year to CSV
+  1. User can export intervention schedule to parquet (asset ID, year, action, cost)
+  2. User can export cost projections and failure metrics by year to parquet
   3. User can compare 2-3 scenarios side-by-side (e.g., "do nothing" vs "optimized")
   4. User can generate basic visualizations (cost over time, failures avoided, risk reduction)
   5. All public API functions have type hints
   6. User can run Jupyter notebook examples demonstrating end-to-end workflow
-  7. Documentation covers API reference and usage patterns
+  7. Documentation covers API reference and usage patterns (via docstrings)
 
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] TBD
+- [ ] 05-01-PLAN.md — Parquet exports and dependencies
+- [ ] 05-02-PLAN.md — Scenario comparison utilities
+- [ ] 05-03-PLAN.md — Visualization module with SDK theme
+- [ ] 05-04-PLAN.md — Tests and type hint audit
+- [ ] 05-05-PLAN.md — Jupyter notebook examples
 
 ## Progress
 
@@ -136,4 +140,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Deterioration Models | 3/3 | ✓ Complete | 2026-01-31 |
 | 3. Simulation Core | 4/4 | ✓ Complete | 2026-02-03 |
 | 4. Optimization | 3/3 | ✓ Complete | 2026-02-03 |
-| 5. Results & Polish | 0/TBD | Not started | - |
+| 5. Results & Polish | 0/5 | Planning complete | - |
