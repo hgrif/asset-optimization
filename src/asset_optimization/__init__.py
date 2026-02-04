@@ -27,6 +27,13 @@ from .exports import (
     export_cost_projections,
 )
 from .scenarios import compare_scenarios, create_do_nothing_baseline, compare
+from .visualization import (
+    set_sdk_theme,
+    plot_cost_over_time,
+    plot_failures_by_year,
+    plot_risk_distribution,
+    plot_scenario_comparison,
+)
 
 __all__ = [
     "__version__",
@@ -52,4 +59,9 @@ __all__ = [
     "compare_scenarios",
     "create_do_nothing_baseline",
     "compare",
+    "set_sdk_theme",
+    "plot_cost_over_time",
+    "plot_failures_by_year",
+    "plot_risk_distribution",
+    "plot_scenario_comparison",
 ]
