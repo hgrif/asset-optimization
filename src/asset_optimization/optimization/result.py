@@ -1,6 +1,8 @@
 """Optimization result dataclass."""
 
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional, Union
 
 import pandas as pd
 
@@ -86,6 +88,47 @@ class OptimizationResult:
         if self.budget_summary.empty or 'utilization_pct' not in self.budget_summary.columns:
             return 0.0
         return float(self.budget_summary['utilization_pct'].iloc[0])
+
+    def to_parquet(
+        self,
+        path: Union[str, Path],
+        format: str = 'minimal',
+        year: int = 2024,
+        portfolio: Optional[pd.DataFrame] = None,
+    ) -> None:
+        """Export optimization results to parquet.
+
+        Parameters
+        ----------
+        path : str or Path
+            Output path for parquet file
+        format : str, default 'minimal'
+            Export format:
+            - 'minimal': asset_id, year, intervention_type, cost
+            - 'detailed': adds risk_score, rank, material, age, risk columns
+        year : int, default 2024
+            Year to associate with interventions
+        portfolio : pd.DataFrame, optional
+            Portfolio DataFrame for detailed format (provides material, age columns)
+
+        Raises
+        ------
+        ValueError
+            If format is not 'minimal' or 'detailed'.
+
+        Examples
+        --------
+        >>> result.to_parquet('schedule.parquet')
+        >>> result.to_parquet('schedule_detailed.parquet', format='detailed', portfolio=portfolio.data)
+        """
+        from asset_optimization.exports import export_schedule_minimal, export_schedule_detailed
+
+        if format == 'minimal':
+            export_schedule_minimal(self.selections, path, year=year)
+        elif format == 'detailed':
+            export_schedule_detailed(self.selections, path, year=year, portfolio=portfolio)
+        else:
+            raise ValueError(f"Unknown format: {format}. Use 'minimal' or 'detailed'")
 
     def __repr__(self) -> str:
         """Rich representation showing key metrics."""

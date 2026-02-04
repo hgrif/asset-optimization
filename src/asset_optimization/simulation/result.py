@@ -1,7 +1,8 @@
 """Simulation result dataclass."""
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional
+from pathlib import Path
+from typing import TYPE_CHECKING, Optional, Union
 
 import pandas as pd
 
@@ -81,6 +82,40 @@ class SimulationResult:
         if self.summary.empty or 'failure_count' not in self.summary.columns:
             return 0
         return int(self.summary['failure_count'].sum())
+
+    def to_parquet(self, path: Union[str, Path], format: str = 'summary') -> None:
+        """Export simulation results to parquet.
+
+        Parameters
+        ----------
+        path : str or Path
+            Output path for parquet file
+        format : str, default 'summary'
+            Export format:
+            - 'summary': Year-by-year summary with cost, failures, interventions
+            - 'cost_projections': Long format for plotting (year, metric, value)
+            - 'failure_log': Detailed failure event log
+
+        Raises
+        ------
+        ValueError
+            If format is not one of the supported options.
+
+        Examples
+        --------
+        >>> result.to_parquet('simulation_summary.parquet')
+        >>> result.to_parquet('projections.parquet', format='cost_projections')
+        """
+        from asset_optimization.exports import export_cost_projections
+
+        if format == 'summary':
+            self.summary.to_parquet(path, index=False)
+        elif format == 'cost_projections':
+            export_cost_projections(self.summary, path)
+        elif format == 'failure_log':
+            self.failure_log.to_parquet(path, index=False)
+        else:
+            raise ValueError(f"Unknown format: {format}. Use 'summary', 'cost_projections', or 'failure_log'")
 
     def __repr__(self) -> str:
         """Rich representation showing key metrics."""

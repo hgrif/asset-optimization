@@ -21,6 +21,11 @@ from .simulation import (
     REPLACE,
 )
 from .optimization import Optimizer, OptimizationResult
+from .exports import (
+    export_schedule_minimal,
+    export_schedule_detailed,
+    export_cost_projections,
+)
 
 __all__ = [
     "__version__",
@@ -40,4 +45,7 @@ __all__ = [
     "REPLACE",
     "Optimizer",
     "OptimizationResult",
+    "export_schedule_minimal",
+    "export_schedule_detailed",
+    "export_cost_projections",
 ]
