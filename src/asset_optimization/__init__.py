@@ -26,6 +26,7 @@ from .exports import (
     export_schedule_detailed,
     export_cost_projections,
 )
+from .scenarios import compare_scenarios, create_do_nothing_baseline, compare
 
 __all__ = [
     "__version__",
@@ -48,4 +49,7 @@ __all__ = [
     "export_schedule_minimal",
     "export_schedule_detailed",
     "export_cost_projections",
+    "compare_scenarios",
+    "create_do_nothing_baseline",
+    "compare",
 ]
