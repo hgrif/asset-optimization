@@ -59,6 +59,19 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DEVX-02**: API has type hints throughout
 - [x] **DEVX-03**: Jupyter notebook examples demonstrate end-to-end workflow
 - [x] **DEVX-04**: Documentation covers API and usage patterns
+- [ ] **DEVX-05**: End-to-end test validates deterministic simulation results from portfolio data
+
+### API & Data Handling
+
+- [ ] **API-01**: Portfolio is a DataFrame interface (no public Portfolio class); validation happens in consumers
+
+### Traceability
+
+- [ ] **TRACE-01**: Simulation returns asset-level event history per year (action, failure flag, costs, age)
+
+### Visualization Enhancements
+
+- [ ] **VIS-01**: Heatmap visualizes asset actions over years with categorical colors
 
 ## v2 Requirements
 
@@ -147,12 +160,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEVX-02 | Phase 5 | Complete |
 | DEVX-03 | Phase 5 | Complete |
 | DEVX-04 | Phase 5 | Complete |
+| DEVX-05 | Phase 6 | Planned |
+| API-01 | Phase 6 | Planned |
+| TRACE-01 | Phase 6 | Planned |
+| VIS-01 | Phase 6 | Planned |
 
 **Coverage:**
-- v1 requirements: 32 total
-- Mapped to phases: 32
+- v1 requirements: 36 total
+- Mapped to phases: 36
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-01-30*
-*Last updated: 2026-02-05 after Phase 5 completion*
+*Last updated: 2026-02-05 after Phase 6 planning*

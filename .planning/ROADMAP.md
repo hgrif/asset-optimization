@@ -17,6 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Simulation Core** - Multi-timestep simulation with interventions
 - [x] **Phase 4: Optimization** - Constraint-based intervention selection
 - [x] **Phase 5: Results & Polish** - Outputs, visualization, documentation
+- [ ] **Phase 6: Asset Traceability** - End-to-end determinism test, portfolio interface cleanup, asset-level tracking, heatmap visualization
 
 ## Phase Details
 
@@ -129,10 +130,31 @@ Plans:
 - [x] 05-04-PLAN.md — Tests and type hint audit
 - [x] 05-05-PLAN.md — Jupyter notebook examples
 
+### Phase 6: Asset Traceability
+**Goal**: Provide asset-level traceability, simplify portfolio interface, and add action heatmap visualization with end-to-end test coverage
+
+**Depends on**: Phase 5
+
+**Requirements**: API-01, TRACE-01, VIS-01, DEVX-05
+
+**Success Criteria** (what must be TRUE):
+  1. End-to-end test validates deterministic simulation results from portfolio data
+  2. Portfolio class is not part of the public API; DataFrame is the input interface
+  3. Simulation returns asset-level history by default (action, failure flag, costs, age per year)
+  4. Users can visualize asset actions over years via a heatmap plot
+
+**Plans**: 4 plans
+
+Plans:
+- [x] 06-01-PLAN.md — End-to-end determinism test
+- [ ] 06-02-PLAN.md — Portfolio interface simplification
+- [ ] 06-03-PLAN.md — Asset history tracking in simulation
+- [ ] 06-04-PLAN.md — Action heatmap visualization
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -141,3 +163,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. Simulation Core | 4/4 | ✓ Complete | 2026-02-03 |
 | 4. Optimization | 3/3 | ✓ Complete | 2026-02-03 |
 | 5. Results & Polish | 5/5 | ✓ Complete | 2026-02-05 |
+| 6. Asset Traceability | 1/4 | ◐ In progress | — |
