@@ -1,7 +1,7 @@
 """Portfolio class for loading and querying asset data."""
 
 import pandas as pd
-import pandera as pa
+import pandera.pandas as pa
 from pathlib import Path
 from .schema import portfolio_schema
 from .quality import QualityMetrics

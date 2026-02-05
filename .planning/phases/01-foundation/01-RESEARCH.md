@@ -303,7 +303,7 @@ def validate_required_fields(df, required_fields):
 **Example:**
 ```python
 # Source: https://towardsdatascience.com/data-validation-with-pandera-in-python-f07b0f845040
-import pandera as pa
+import pandera.pandas as pa
 from pandera import Column, DataFrameSchema, Check
 import pandas as pd
 
@@ -630,7 +630,7 @@ addopts = ["--import-mode=importlib"]
 ### Pandera Schema with Custom Checks
 ```python
 # Source: https://towardsdatascience.com/data-validation-with-pandera-in-python-f07b0f845040
-import pandera as pa
+import pandera.pandas as pa
 from pandera import Column, DataFrameSchema, Check
 import pandas as pd
 
