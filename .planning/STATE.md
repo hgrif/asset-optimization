@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 
 ## Current Position
 
-Phase: v1 complete (6 phases, 22 plans)
-Plan: N/A — milestone shipped
-Status: Ready for next milestone
-Last activity: 2026-02-05 — v1 milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for v2
+Last activity: 2026-02-05 — Milestone v2 started
 
-Progress: [██████████] 100% v1 shipped
+Progress: [░░░░░░░░░░] 0% v2 requirements
 
 ## v1 Summary
 
@@ -49,8 +49,6 @@ Resume file: None
 
 ## Next Steps
 
-Run `/gsd:new-milestone` to:
-1. Define v2 scope and goals
-2. Create new REQUIREMENTS.md
-3. Create new ROADMAP.md
-4. Begin v2 phases
+1. Complete requirements definition
+2. Create ROADMAP.md with phase structure
+3. Run `/gsd:plan-phase 7` to start execution

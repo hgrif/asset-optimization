@@ -47,7 +47,15 @@ Enable data-driven intervention decisions that minimize cost and risk across ass
 
 ### Active
 
-(None — v1 complete, v2 scope TBD)
+**Current Milestone: v2 Multi-Property Hazard Modeling**
+
+**Goal:** Enable failure rates to depend on multiple asset attributes (diameter, soil conditions, installation quality), not just age and type.
+
+- [ ] ProportionalHazardsModel class implementing DeteriorationModel interface
+- [ ] Configurable covariates (which DataFrame columns affect failure rate)
+- [ ] Configurable coefficients per covariate (β values)
+- [ ] Integration with existing Simulator and Optimizer
+- [ ] Documentation and notebook examples
 
 ### Out of Scope
 
@@ -86,4 +94,4 @@ Enable data-driven intervention decisions that minimize cost and risk across ass
 | Always-on asset history | Track per-asset events by default for traceability | ✓ Good — enables debugging |
 
 ---
-*Last updated: 2026-02-05 after v1 milestone*
+*Last updated: 2026-02-05 after v2 milestone start*
