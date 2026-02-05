@@ -2,110 +2,36 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2025-01-29)
+See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Enable data-driven intervention decisions that minimize cost and risk across asset portfolios
 
-**Current focus:** Phase 6 complete (Asset Traceability)
+**Current focus:** v1 complete — planning next milestone
 
 ## Current Position
 
-Phase: 6 of 6 (Asset Traceability)
-Plan: 4 of 4 completed
-Status: Phase complete
-Last activity: 2026-02-05 — Completed 06-04-PLAN.md
+Phase: v1 complete (6 phases, 22 plans)
+Plan: N/A — milestone shipped
+Status: Ready for next milestone
+Last activity: 2026-02-05 — v1 milestone complete
 
-Progress: [██████████] 100% (22/22 plans)
+Progress: [██████████] 100% v1 shipped
 
-## Performance Metrics
+## v1 Summary
 
-**Velocity:**
-- Total plans completed: 22
-- Average duration: 4m 2s
-- Total execution time: 1.48 hours
+**Shipped:** 2026-02-05
+**Stats:** 6 phases, 22 plans, 164 tests, 5,447 LOC
+**Timeline:** 7 days (1.48 hours execution)
 
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 01-foundation | 3 | 9m 44s | 3m 15s |
-| 02-deterioration-models | 3 | 7m 0s | 2m 20s |
-| 03-simulation-core | 4 | 12m 5s | 3m 1s |
-| 04-optimization | 3 | 8m 7s | 2m 42s |
-| 05-results-polish | 5 | 13m 23s | 2m 41s |
-| 06-asset-traceability | 4 | 40m 53s | 10m 13s |
-
-**Recent Trend:**
-- Last 5 plans: 05-05 (4m), 06-01 (12m), 06-02 (15m), 06-03 (12m), 06-04 (2m)
-- Trend: Stable
-
-*Updated after each plan completion*
+**See:** .planning/MILESTONES.md for full details
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
-
-- Python SDK first, UI later — Balance flexibility for consultants with templated UI later
-- scikit-learn style API — OOP for models/optimizers, functional helpers, familiar to data scientists
-- Water pipes for v1 — Validate architecture before generalizing to other domains
-- Weibull deterioration model — Well-understood statistical baseline
-- Pluggable optimizer interface — Greedy heuristic first, MILP later via same interface
-- Single deterministic run — No Monte Carlo in v1, but architecture allows it later
-- **use-src-layout (01-01)** — Use src layout instead of flat layout for package structure
-- **pandera-for-validation (01-01)** — Use Pandera for DataFrame schema validation
-- **strict-false-coerce-true (01-01)** — Set Pandera schema with strict=False, coerce=True
-- **eager-quality-metrics (01-02)** — Compute quality metrics at load time, not lazily
-- **property-based-analysis (01-02)** — Use @property for portfolio analysis methods
-- **isinstance-check-failure-cases (01-02)** — Check type before accessing Pandera failure_cases
-- **pytest-as-test-framework (01-03)** — Use pytest for test suite (standard choice)
-- **fixtures-in-conftest (01-03)** — Centralize shared fixtures in conftest.py
-- **test-organization-by-functionality (01-03)** — Organize tests by functionality (portfolio, validation, quality)
-- **abc-for-pluggable-models (02-01)** — Use ABC pattern for pluggable deterioration model architecture
-- **immutable-transform-pattern (02-01)** — transform() methods return copies, never mutate input
-- **direct-hazard-formula (02-02)** — Use direct h(t) formula instead of scipy pdf/sf for 3-5x performance
-- **groupby-vectorization (02-02)** — Process each asset type separately with groupby for parameter lookup
-- **zero-age-handling (02-02)** — Define h(0)=0 for numerical stability in hazard calculations
-- **scipy-for-cdf-verification (02-03)** — Use scipy.stats.weibull_min.cdf to verify failure_probability calculations
-- **direct-formula-for-hazard-verification (02-03)** — Verify hazard rate matches h(t)=(k/lambda)*(t/lambda)^(k-1)
-- **frozen-dataclass-for-config (03-01)** — Use frozen=True for immutable configuration
-- **post-init-validation (03-01)** — Validate parameters in __post_init__ method
-- **convenience-methods-on-result (03-01)** — Add total_cost() and total_failures() for common queries
-- **frozen-dataclass-immutable (03-02)** — Use frozen=True for InterventionType immutability
-- **callable-age-effect (03-02)** — Use Callable[[float], float] for pluggable age transformations
-- **post-init-validation (03-02)** — Validate cost >= 0 and non-empty name in __post_init__
-- **conditional-probability-via-survival (03-03)** — Use S(t)-S(t+1)/S(t) for accurate failure sampling
-- **isolated-rng-per-simulator (03-03)** — Each Simulator instance has own RNG for reproducibility
-- **direct-params-access (03-03)** — Access model.params directly (not transform()) for survival function
-- **test-class-organization (03-04)** — Organize tests by component (Config, Result, Intervention, Simulator)
-- **parametrize-failure-responses (03-04)** — Use @pytest.mark.parametrize for testing all valid failure_response values
-- **scipy-formula-verification (03-04)** — Verify conditional probability implementation against scipy.stats.weibull_min
-- **follow-simulation-result-pattern (04-01)** — Use non-frozen dataclass with convenience properties for OptimizationResult
-- **inherit-from-base-exception (04-01)** — OptimizationError inherits AssetOptimizationError for package exception hierarchy
-- **two-stage-greedy (04-02)** — Stage 1 finds best intervention per asset, Stage 2 ranks by risk-to-cost ratio
-- **cost-effectiveness-metric (04-02)** — Use (risk_before - risk_after) / cost for intervention selection
-- **risk-to-cost-ranking (04-02)** — Use risk_before / cost for budget filling prioritization
-- **scikit-learn-fit-api (04-02)** — fit() returns self with result_ attribute
-- **asset-type-required-in-fixtures (04-03)** — Portfolio schema requires asset_type column in test fixtures
-- **test-class-by-concern (04-03)** — Organize optimization tests into classes by concern (Init, Fit, Budget, Greedy, Threshold, Exclusions, Result, EdgeCases)
-- **pandas-style-api (05-01)** — Use result.to_parquet(path) pattern familiar to pandas users
-- **long-format-for-plotting (05-01)** — Cost projections use year/metric/value format for seaborn
-- **optional-portfolio-join (05-01)** — Detailed export optionally joins portfolio for material/age columns
-- **long-format-output (05-02)** — Output comparison as scenario,year,metric,value DataFrame for seaborn compatibility
-- **auto-baseline (05-02)** — create_do_nothing_baseline estimates no-intervention scenario via heuristics
-- **SDK-colors-semantic-naming (05-03)** — Use semantic names (primary, warning, danger) instead of color names
-- **axes-return-pattern (05-03)** — All plot functions return axes for chained customization
-- **matplotlib-agg-backend (05-04)** — Use Agg backend for non-interactive testing
-- **close-plots-after-test (05-04)** — Call plt.close('all') after each plot test
-- **synthetic-data-generation (05-05)** — Generate portfolio data in notebooks to avoid external file dependencies
-- **tutorial-style-markdown (05-05)** — Use explanatory markdown cells between code for educational flow
-- **cleanup-temporary-files (05-05)** — Include cleanup cell at end of each notebook
-- **dataframe-first-portfolio (06-02)** — Remove Portfolio class from public API; treat portfolios as DataFrames
-- **centralized-portfolio-validation (06-02)** — Validate DataFrames at Simulator.run and Optimizer.fit entrypoints
-- **asset-history-action-values (06-03)** — Use lowercase action values (none, record_only, repair, replace) in asset history
-- **asset-history-always-on (06-03)** — Always collect asset history; remove opt-out flag
+All decisions from v1 are archived in:
+- `.planning/PROJECT.md` Key Decisions table
+- `.planning/milestones/v1-ROADMAP.md`
 
 ### Pending Todos
 
@@ -118,5 +44,13 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 06-04-PLAN.md
+Stopped at: v1 milestone complete
 Resume file: None
+
+## Next Steps
+
+Run `/gsd:new-milestone` to:
+1. Define v2 scope and goals
+2. Create new REQUIREMENTS.md
+3. Create new ROADMAP.md
+4. Begin v2 phases

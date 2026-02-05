@@ -1,3 +1,13 @@
+# Requirements Archive: v1 MVP
+
+**Archived:** 2026-02-05
+**Status:** SHIPPED
+
+This is the archived requirements specification for v1.
+For current requirements, see `.planning/REQUIREMENTS.md` (created for next milestone).
+
+---
+
 # Requirements: Asset Optimization
 
 **Defined:** 2026-01-30
@@ -59,72 +69,21 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DEVX-02**: API has type hints throughout
 - [x] **DEVX-03**: Jupyter notebook examples demonstrate end-to-end workflow
 - [x] **DEVX-04**: Documentation covers API and usage patterns
-- [ ] **DEVX-05**: End-to-end test validates deterministic simulation results from portfolio data
+- [x] **DEVX-05**: End-to-end test validates deterministic simulation results from portfolio data
 
 ### API & Data Handling
 
-- [ ] **API-01**: Portfolio is a DataFrame interface (no public Portfolio class); validation happens in consumers
+- [x] **API-01**: Portfolio is a DataFrame interface (no public Portfolio class); validation happens in consumers
 
 ### Traceability
 
-- [ ] **TRACE-01**: Simulation returns asset-level event history per year (action, failure flag, costs, age)
+- [x] **TRACE-01**: Simulation returns asset-level event history per year (action, failure flag, costs, age)
 
 ### Visualization Enhancements
 
-- [ ] **VIS-01**: Heatmap visualizes asset actions over years with categorical colors
-
-## v2 Requirements
-
-Deferred to future release. Tracked but not in current roadmap.
-
-### Extended Modeling
-
-- **DTRN-05**: ML-based deterioration models (survival analysis, gradient boosting)
-- **DTRN-06**: Cohort-based rate models (group-level vs per-asset)
-- **DTRN-07**: Multiple failure modes per asset type
-
-### Advanced Optimization
-
-- **OPTM-05**: MILP solver integration (PuLP with CBC/Gurobi)
-- **OPTM-06**: Multiple constraint types (crew capacity, seasonal restrictions)
-- **OPTM-07**: Risk-weighted optimization objective
-
-### Simulation Extensions
-
-- **SIMU-06**: Monte Carlo simulation (multiple stochastic runs)
-- **SIMU-07**: State rollback and scenario branching
-- **SIMU-08**: Batch scenario execution with parameter sweeps
-
-### Additional Domains
-
-- **DOMN-01**: Data center server management domain
-- **DOMN-02**: Rail infrastructure domain
-- **DOMN-03**: Generic asset type framework
-
-### Integration
-
-- **INTG-01**: Excel export for stakeholder reports
-- **INTG-02**: Parquet persistence for large portfolios
-- **INTG-03**: Geographic visualization (lat/lon on maps)
-
-## Out of Scope
-
-Explicitly excluded. Documented to prevent scope creep.
-
-| Feature | Reason |
-|---------|--------|
-| Web UI | SDK first; consultants build custom UIs; add templated UI in v2 if patterns emerge |
-| Real-time data integration | Users have batch exports; focus on CSV/Excel import |
-| Auto-tuning deterioration models | Statistical complexity; users want control over assumptions |
-| Multi-objective optimization | Single objective + constraints sufficient; Pareto fronts add complexity |
-| Geographic mapping (interactive) | Heavy dependencies; users have GIS tools |
-| Database storage | Users want files for version control; pickle/parquet sufficient |
-| Network topology modeling | Asset interdependencies are v2; validate core loop first |
-| Automatic report generation | Opinionated formatting; export structured data instead |
+- [x] **VIS-01**: Heatmap visualizes asset actions over years with categorical colors
 
 ## Traceability
-
-Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
@@ -160,16 +119,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEVX-02 | Phase 5 | Complete |
 | DEVX-03 | Phase 5 | Complete |
 | DEVX-04 | Phase 5 | Complete |
-| DEVX-05 | Phase 6 | Planned |
-| API-01 | Phase 6 | Planned |
-| TRACE-01 | Phase 6 | Planned |
-| VIS-01 | Phase 6 | Planned |
+| DEVX-05 | Phase 6 | Complete |
+| API-01 | Phase 6 | Complete |
+| TRACE-01 | Phase 6 | Complete |
+| VIS-01 | Phase 6 | Complete |
 
 **Coverage:**
 - v1 requirements: 36 total
-- Mapped to phases: 36
-- Unmapped: 0 ✓
+- Shipped: 36
+- Adjusted: 0
+- Dropped: 0
 
 ---
-*Requirements defined: 2026-01-30*
-*Last updated: 2026-02-05 after Phase 6 planning*
+
+## Milestone Summary
+
+**Shipped:** 36 of 36 v1 requirements
+**Adjusted:** None
+**Dropped:** None
+
+All requirements were implemented as specified. No scope changes during milestone.
+
+---
+
+*Archived: 2026-02-05 as part of v1 milestone completion*
