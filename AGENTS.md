@@ -1,24 +1,34 @@
-# AGENTS.md (.planning)
+# AGENTS.md
 
 ## Scope
-- This directory holds planning, research, and status artifacts. Treat it as the source of truth for project intent and progress.
-- Prefer editing planning docs here; avoid changing code unless a plan explicitly requires it.
+- This is the root agent guide for the repository.
+- Planning artifacts live in `.planning/`; follow the planning guidance below when working there.
 
-## Read-First Context
+## Build & Test
+- Install dependencies (uv): `uv pip install -e ".[dev]"`
+- Run tests: `uv run pytest`
+- Run a single test: `uv run pytest tests/path/to/test_file.py -k test_name`
+- If `uv` is unavailable: `pip install -e ".[dev]"` and `pytest`
+
+## Repo Layout
+- Package code lives under `src/asset_optimization/` (src layout).
+- Tests live under `tests/` and use pytest.
+- Example notebooks live under `notebooks/`.
+- Planning docs and status live under `.planning/`.
+
+## Coding Conventions
+- Use type hints for public APIs and dataclasses.
+- Use NumPy-style docstrings (see existing modules for format).
+- Prefer dataclasses for config/result objects; keep them immutable (`frozen=True`) unless mutability is required.
+- Avoid mutating input DataFrames; copy before modification when transforming data.
+- Use custom exceptions from `src/asset_optimization/exceptions.py` for validation and user-facing errors.
+
+## Planning Docs (.planning)
 - `.planning/PROJECT.md` for product intent, constraints, and key decisions.
-- `.planning/STATE.md` for current phase, status, and last activity (update with real dates).
-- `.planning/ROADMAP.md` and `.planning/REQUIREMENTS.md` for scope and completion tracking.
-
-## Planning Workflow (When Asked to Add or Update Plans)
-- Use phase folders under `.planning/phases/<phase>/` and follow existing `*-PLAN.md` structure.
-- Keep front matter fields consistent (`phase`, `plan`, `type`, `wave`, `depends_on`, `files_modified`, `autonomous`).
+- `.planning/STATE.md` for phase/status and last activity (use absolute dates, for example `2026-02-05`).
+- `.planning/ROADMAP.md` and `.planning/REQUIREMENTS.md` for scope tracking.
+- Phase plans live under `.planning/phases/<phase>/` and follow existing `*-PLAN.md` structure.
 - If a plan is executed, create or update the matching `*-SUMMARY.md` in the same phase folder.
-- Reflect progress in `.planning/STATE.md` and `.planning/ROADMAP.md` with absolute dates (for example, `2026-02-05`).
-
-## Research and Decisions
-- Log research in `.planning/research/` or the phase `*-RESEARCH.md` file; cite sources or paths.
-- Record durable decisions in the `Key Decisions` table in `.planning/PROJECT.md` with a brief rationale.
-- Keep "Last updated" lines accurate when you change a document.
 
 ## Guardrails
 - Do not edit `.planning/config.json` or planning templates unless explicitly requested.
