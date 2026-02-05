@@ -11,7 +11,7 @@ Requirements for Extended Asset Modeling milestone. Each maps to roadmap phases.
 
 - [ ] **HAZD-01**: User can create ProportionalHazardsModel with a baseline deterioration model
 - [ ] **HAZD-02**: User can specify which DataFrame columns are covariates affecting hazard rate
-- [ ] **HAZD-03**: User can provide coefficient (β) values for each covariate
+- [ ] **HAZD-03**: User can provide coefficient (beta) values for each covariate
 - [ ] **HAZD-04**: ProportionalHazardsModel implements DeteriorationModel interface (works with Simulator)
 - [ ] **HAZD-05**: Portfolios without covariate columns use baseline hazard only (backward compatible)
 
@@ -33,7 +33,7 @@ Requirements for Extended Asset Modeling milestone. Each maps to roadmap phases.
 ### Asset Hierarchy
 
 - [ ] **HIER-01**: User can define asset hierarchy via parent_id column in portfolio
-- [ ] **HIER-02**: User can enable dependency failures (parent fails → children fail)
+- [ ] **HIER-02**: User can enable dependency failures (parent fails -> children fail)
 - [ ] **HIER-03**: Simulator propagates failures down hierarchy tree
 
 ### Documentation
@@ -91,34 +91,34 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HAZD-01 | TBD | Pending |
-| HAZD-02 | TBD | Pending |
-| HAZD-03 | TBD | Pending |
-| HAZD-04 | TBD | Pending |
-| HAZD-05 | TBD | Pending |
-| ROAD-01 | TBD | Pending |
-| ROAD-02 | TBD | Pending |
-| ROAD-03 | TBD | Pending |
-| ROAD-04 | TBD | Pending |
-| ROAD-05 | TBD | Pending |
-| GRUP-01 | TBD | Pending |
-| GRUP-02 | TBD | Pending |
-| GRUP-03 | TBD | Pending |
-| GRUP-04 | TBD | Pending |
-| HIER-01 | TBD | Pending |
-| HIER-02 | TBD | Pending |
-| HIER-03 | TBD | Pending |
-| DOCS-01 | TBD | Pending |
-| DOCS-02 | TBD | Pending |
-| DOCS-03 | TBD | Pending |
-| DOCS-04 | TBD | Pending |
-| DOCS-05 | TBD | Pending |
+| HAZD-01 | Phase 7 | Pending |
+| HAZD-02 | Phase 7 | Pending |
+| HAZD-03 | Phase 7 | Pending |
+| HAZD-04 | Phase 7 | Pending |
+| HAZD-05 | Phase 7 | Pending |
+| ROAD-01 | Phase 8 | Pending |
+| ROAD-02 | Phase 8 | Pending |
+| ROAD-03 | Phase 8 | Pending |
+| ROAD-04 | Phase 8 | Pending |
+| ROAD-05 | Phase 8 | Pending |
+| GRUP-01 | Phase 9 | Pending |
+| GRUP-02 | Phase 9 | Pending |
+| GRUP-03 | Phase 9 | Pending |
+| GRUP-04 | Phase 9 | Pending |
+| HIER-01 | Phase 10 | Pending |
+| HIER-02 | Phase 10 | Pending |
+| HIER-03 | Phase 10 | Pending |
+| DOCS-01 | Phase 7 | Pending |
+| DOCS-02 | Phase 8 | Pending |
+| DOCS-03 | Phase 9 | Pending |
+| DOCS-04 | Phase 10 | Pending |
+| DOCS-05 | Phase 10 | Pending |
 
 **Coverage:**
 - v2 requirements: 22 total
-- Mapped to phases: 0
-- Unmapped: 22 (pending roadmap creation)
+- Mapped to phases: 22
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-05*
-*Last updated: 2026-02-05 after initial definition*
+*Last updated: 2026-02-05 after roadmap creation*
