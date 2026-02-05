@@ -46,19 +46,19 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Outputs
 
-- [ ] **OUTP-01**: System generates intervention schedule (asset ID, year, action)
-- [ ] **OUTP-02**: System generates cost projection by year
-- [ ] **OUTP-03**: System generates expected failure metrics by year
-- [ ] **OUTP-04**: User can compare multiple scenarios side-by-side
-- [ ] **OUTP-05**: User can export results to CSV
-- [ ] **OUTP-06**: System generates basic visualizations (cost over time, failures avoided)
+- [x] **OUTP-01**: System generates intervention schedule (asset ID, year, action)
+- [x] **OUTP-02**: System generates cost projection by year
+- [x] **OUTP-03**: System generates expected failure metrics by year
+- [x] **OUTP-04**: User can compare multiple scenarios side-by-side
+- [x] **OUTP-05**: User can export results to parquet
+- [x] **OUTP-06**: System generates basic visualizations (cost over time, failures avoided)
 
 ### Developer Experience
 
 - [x] **DEVX-01**: SDK installable via pip
-- [ ] **DEVX-02**: API has type hints throughout
-- [ ] **DEVX-03**: Jupyter notebook examples demonstrate end-to-end workflow
-- [ ] **DEVX-04**: Documentation covers API and usage patterns
+- [x] **DEVX-02**: API has type hints throughout
+- [x] **DEVX-03**: Jupyter notebook examples demonstrate end-to-end workflow
+- [x] **DEVX-04**: Documentation covers API and usage patterns
 
 ## v2 Requirements
 
@@ -137,16 +137,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OPTM-02 | Phase 4 | Complete |
 | OPTM-03 | Phase 4 | Complete |
 | OPTM-04 | Phase 4 | Complete |
-| OUTP-01 | Phase 5 | Pending |
-| OUTP-02 | Phase 5 | Pending |
-| OUTP-03 | Phase 5 | Pending |
-| OUTP-04 | Phase 5 | Pending |
-| OUTP-05 | Phase 5 | Pending |
-| OUTP-06 | Phase 5 | Pending |
+| OUTP-01 | Phase 5 | Complete |
+| OUTP-02 | Phase 5 | Complete |
+| OUTP-03 | Phase 5 | Complete |
+| OUTP-04 | Phase 5 | Complete |
+| OUTP-05 | Phase 5 | Complete |
+| OUTP-06 | Phase 5 | Complete |
 | DEVX-01 | Phase 1 | Complete |
-| DEVX-02 | Phase 5 | Pending |
-| DEVX-03 | Phase 5 | Pending |
-| DEVX-04 | Phase 5 | Pending |
+| DEVX-02 | Phase 5 | Complete |
+| DEVX-03 | Phase 5 | Complete |
+| DEVX-04 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 32 total
@@ -155,4 +155,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-30*
-*Last updated: 2026-02-03 after Phase 4 completion*
+*Last updated: 2026-02-05 after Phase 5 completion*
