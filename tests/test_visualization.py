@@ -9,11 +9,13 @@ import pytest
 from asset_optimization import (
     SimulationResult,
     SimulationConfig,
+    MissingFieldError,
     set_sdk_theme,
     plot_cost_over_time,
     plot_failures_by_year,
     plot_risk_distribution,
     plot_scenario_comparison,
+    plot_asset_action_heatmap,
     compare,
 )
 
@@ -152,3 +154,31 @@ class TestPlotScenarioComparison:
         """Invalid metric raises ValueError."""
         with pytest.raises(ValueError, match="not found"):
             plot_scenario_comparison(comparison_df, metric='nonexistent_metric')
+
+
+class TestPlotAssetActionHeatmap:
+    """Tests for plot_asset_action_heatmap function."""
+
+    @pytest.fixture
+    def asset_history(self) -> pd.DataFrame:
+        """Create sample asset history data."""
+        return pd.DataFrame({
+            'asset_id': [101, 101, 101, 202, 202, 202],
+            'year': [2024, 2025, 2026, 2024, 2025, 2026],
+            'action': ['none', 'repair', 'none', 'record_only', 'replace', 'none'],
+        })
+
+    def test_returns_axes(self, asset_history: pd.DataFrame) -> None:
+        """Function returns matplotlib Axes object."""
+        ax = plot_asset_action_heatmap(asset_history, max_assets=2)
+
+        assert ax is not None
+        import matplotlib.pyplot as plt
+        plt.close('all')
+
+    def test_missing_columns_raise(self) -> None:
+        """Missing required columns raises MissingFieldError."""
+        data = pd.DataFrame({'asset_id': [1], 'year': [2024]})
+
+        with pytest.raises(MissingFieldError, match="Missing required columns"):
+            plot_asset_action_heatmap(data)

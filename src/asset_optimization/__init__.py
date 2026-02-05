@@ -33,6 +33,7 @@ from .visualization import (
     plot_failures_by_year,
     plot_risk_distribution,
     plot_scenario_comparison,
+    plot_asset_action_heatmap,
 )
 
 __all__ = [
@@ -65,4 +66,5 @@ __all__ = [
     "plot_failures_by_year",
     "plot_risk_distribution",
     "plot_scenario_comparison",
+    "plot_asset_action_heatmap",
 ]

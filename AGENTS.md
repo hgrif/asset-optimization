@@ -10,6 +10,9 @@
 - Run a single test: `uv run pytest tests/path/to/test_file.py -k test_name`
 - If `uv` is unavailable: `pip install -e ".[dev]"` and `pytest`
 
+## Notebooks
+- Execute all notebooks: `uv run python -m jupyter nbconvert --execute --inplace notebooks/*.ipynb`
+
 ## Repo Layout
 - Package code lives under `src/asset_optimization/` (src layout).
 - Tests live under `tests/` and use pytest.

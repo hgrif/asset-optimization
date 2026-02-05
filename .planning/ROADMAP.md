@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Simulation Core** - Multi-timestep simulation with interventions
 - [x] **Phase 4: Optimization** - Constraint-based intervention selection
 - [x] **Phase 5: Results & Polish** - Outputs, visualization, documentation
-- [ ] **Phase 6: Asset Traceability** - End-to-end determinism test, portfolio interface cleanup, asset-level tracking, heatmap visualization
+- [x] **Phase 6: Asset Traceability** - End-to-end determinism test, portfolio interface cleanup, asset-level tracking, heatmap visualization
 
 ## Phase Details
 
@@ -147,9 +147,9 @@ Plans:
 
 Plans:
 - [x] 06-01-PLAN.md — End-to-end determinism test
-- [ ] 06-02-PLAN.md — Portfolio interface simplification
+- [x] 06-02-PLAN.md — Portfolio interface simplification
 - [x] 06-03-PLAN.md — Asset history tracking in simulation
-- [ ] 06-04-PLAN.md — Action heatmap visualization
+- [x] 06-04-PLAN.md — Action heatmap visualization
 
 ## Progress
 
@@ -163,4 +163,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Simulation Core | 4/4 | ✓ Complete | 2026-02-03 |
 | 4. Optimization | 3/3 | ✓ Complete | 2026-02-03 |
 | 5. Results & Polish | 5/5 | ✓ Complete | 2026-02-05 |
-| 6. Asset Traceability | 1/4 | ◐ In progress | — |
+| 6. Asset Traceability | 4/4 | ✓ Complete | 2026-02-05 |
