@@ -35,4 +35,5 @@ testpaths = ["tests"]
 [dependency-groups]
 dev = [
     "notebook>=7.5.3",
+    "pytest>=9.0.2",
 ]
