@@ -148,7 +148,7 @@ Plans:
 Plans:
 - [x] 06-01-PLAN.md — End-to-end determinism test
 - [ ] 06-02-PLAN.md — Portfolio interface simplification
-- [ ] 06-03-PLAN.md — Asset history tracking in simulation
+- [x] 06-03-PLAN.md — Asset history tracking in simulation
 - [ ] 06-04-PLAN.md — Action heatmap visualization
 
 ## Progress

@@ -48,7 +48,6 @@ class TestSimulationConfig:
         config = SimulationConfig(n_years=5)
         assert config.start_year == 2026
         assert config.random_seed is None
-        assert config.track_asset_history is False
         assert config.failure_response == 'replace'
 
     def test_config_immutable(self):
@@ -152,12 +151,17 @@ class TestSimulationResult:
         assert 'failures=19' in repr_str
 
     def test_result_with_asset_history(self):
-        """Result should accept optional asset_history DataFrame."""
-        config = SimulationConfig(n_years=1, track_asset_history=True)
+        """Result should accept asset_history DataFrame."""
+        config = SimulationConfig(n_years=1)
         asset_history = pd.DataFrame({
             'year': [2026, 2026],
             'asset_id': ['PIPE-001', 'PIPE-002'],
             'age': [10.0, 15.0],
+            'action': ['none', 'replace'],
+            'failed': [False, True],
+            'failure_cost': [0.0, 15000.0],
+            'intervention_cost': [0.0, 50000.0],
+            'total_cost': [0.0, 65000.0],
         })
         result = SimulationResult(
             summary=pd.DataFrame({'year': [2026], 'total_cost': [0.0], 'failure_count': [0]}),
@@ -408,18 +412,29 @@ class TestSimulator:
             assert 'direct_cost' in result.failure_log.columns
             assert 'consequence_cost' in result.failure_log.columns
 
-    def test_simulator_track_asset_history(self, sample_portfolio, weibull_model):
-        """track_asset_history=True should populate asset_history."""
-        config = SimulationConfig(n_years=3, random_seed=42, track_asset_history=True)
+    def test_simulator_asset_history_default(self, sample_portfolio, weibull_model):
+        """Asset history should be populated by default."""
+        config = SimulationConfig(n_years=3, random_seed=42)
         sim = Simulator(weibull_model, config)
         result = sim.run(sample_portfolio)
 
         assert result.asset_history is not None
         # 100 assets x 3 years = 300 rows
         assert len(result.asset_history) == 300
-        assert 'year' in result.asset_history.columns
-        assert 'asset_id' in result.asset_history.columns
-        assert 'age' in result.asset_history.columns
+        required_cols = {
+            'year',
+            'asset_id',
+            'age',
+            'action',
+            'failed',
+            'failure_cost',
+            'intervention_cost',
+            'total_cost',
+        }
+        assert required_cols.issubset(result.asset_history.columns)
+        allowed_actions = {'none', 'record_only', 'repair', 'replace'}
+        assert set(result.asset_history['action'].unique()).issubset(allowed_actions)
+
 
     def test_simulator_repr(self, weibull_model, simulation_config):
         """__repr__ should show model and config info."""

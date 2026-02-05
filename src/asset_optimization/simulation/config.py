@@ -20,8 +20,6 @@ class SimulationConfig:
         Calendar year to start simulation (default: 2026)
     random_seed : int, optional
         Seed for reproducible results (None = non-deterministic)
-    track_asset_history : bool
-        Whether to save full asset-level traces (memory-intensive)
     failure_response : str
         How to handle failures: 'replace', 'repair', 'record_only'
 
@@ -39,7 +37,6 @@ class SimulationConfig:
     n_years: int
     start_year: int = 2026
     random_seed: Optional[int] = None
-    track_asset_history: bool = False
     failure_response: str = 'replace'
 
     def __post_init__(self):

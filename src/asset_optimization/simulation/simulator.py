@@ -158,7 +158,7 @@ class Simulator:
             year = self.config.start_year + year_offset
 
             # Simulate one timestep
-            state, failures_mask, costs = self._simulate_timestep(state, year)
+            state, failures_mask, costs, asset_events = self._simulate_timestep(state, year)
 
             # Count failures and interventions
             n_failures = failures_mask.sum()
@@ -195,14 +195,16 @@ class Simulator:
                     })
 
             # Track asset history if enabled
-            if self.config.track_asset_history:
-                for _, asset in state.iterrows():
-                    asset_history_rows.append({
-                        'year': year,
-                        'asset_id': asset['asset_id'],
-                        'age': asset['age'],
-                        'material': asset['material'],
-                    })
+            asset_history_rows.append(pd.DataFrame({
+                'year': year,
+                'asset_id': state['asset_id'].values,
+                'age': state['age'].values,
+                'action': asset_events['action'].values,
+                'failed': asset_events['failed'].values,
+                'failure_cost': asset_events['failure_cost'].values,
+                'intervention_cost': asset_events['intervention_cost'].values,
+                'total_cost': asset_events['total_cost'].values,
+            }))
 
         # Build result DataFrames
         summary = pd.DataFrame(summary_rows)
@@ -210,7 +212,19 @@ class Simulator:
         failure_log = pd.DataFrame(failure_log_rows) if failure_log_rows else pd.DataFrame(
             columns=['year', 'asset_id', 'age_at_failure', 'material', 'direct_cost', 'consequence_cost']
         )
-        asset_history = pd.DataFrame(asset_history_rows) if asset_history_rows else None
+        if asset_history_rows:
+            asset_history = pd.concat(asset_history_rows, ignore_index=True)
+        else:
+            asset_history = pd.DataFrame(columns=[
+                'year',
+                'asset_id',
+                'age',
+                'action',
+                'failed',
+                'failure_cost',
+                'intervention_cost',
+                'total_cost',
+            ])
 
         return SimulationResult(
             summary=summary,
@@ -222,7 +236,7 @@ class Simulator:
 
     def _simulate_timestep(
         self, state: pd.DataFrame, year: int
-    ) -> tuple[pd.DataFrame, pd.Series, dict]:
+    ) -> tuple[pd.DataFrame, pd.Series, dict, dict]:
         """Simulate a single timestep.
 
         Order: Age -> Failures -> Interventions
@@ -236,8 +250,9 @@ class Simulator:
 
         Returns
         -------
-        tuple[pd.DataFrame, pd.Series, dict]
-            Updated state, boolean mask of failures, cost dictionary.
+        tuple[pd.DataFrame, pd.Series, dict, dict]
+            Updated state, boolean mask of failures, cost dictionary,
+            and per-asset event data.
         """
         state = state.copy()
 
@@ -249,7 +264,7 @@ class Simulator:
 
         # Step 3: Sample failures using RNG
         random_draws = self.rng.random(len(state))
-        failures_mask = random_draws < probs
+        failures_mask = pd.Series(random_draws < probs, index=state.index)
 
         # Record age at failure before interventions modify it
         state.loc[failures_mask, 'age_at_failure'] = state.loc[failures_mask, 'age']
@@ -261,12 +276,19 @@ class Simulator:
             'intervention': 0.0,
             'total': 0.0,
         }
+        actions = np.full(len(state), 'none', dtype=object)
+        failure_costs = np.zeros(len(state), dtype=float)
+        intervention_costs = np.zeros(len(state), dtype=float)
 
         n_failures = failures_mask.sum()
         if n_failures > 0:
             # Failure costs
             costs['failure_direct'] = n_failures * DEFAULT_FAILURE_DIRECT_COST
             costs['failure_consequence'] = n_failures * DEFAULT_FAILURE_CONSEQUENCE_COST
+            failure_costs[failures_mask.to_numpy()] = (
+                DEFAULT_FAILURE_DIRECT_COST + DEFAULT_FAILURE_CONSEQUENCE_COST
+            )
+            actions[failures_mask.to_numpy()] = self.config.failure_response
 
             # Apply intervention based on failure_response config
             if self.config.failure_response == 'replace':
@@ -275,6 +297,7 @@ class Simulator:
                     intervention.apply_age_effect
                 )
                 costs['intervention'] = n_failures * intervention.cost
+                intervention_costs[failures_mask.to_numpy()] = intervention.cost
 
             elif self.config.failure_response == 'repair':
                 intervention = self.interventions.get('repair', REPAIR)
@@ -282,6 +305,7 @@ class Simulator:
                     intervention.apply_age_effect
                 )
                 costs['intervention'] = n_failures * intervention.cost
+                intervention_costs[failures_mask.to_numpy()] = intervention.cost
 
             # 'record_only' doesn't apply intervention or add intervention cost
 
@@ -291,7 +315,15 @@ class Simulator:
             + costs['intervention']
         )
 
-        return state, failures_mask, costs
+        asset_events = {
+            'action': pd.Series(actions, index=state.index),
+            'failed': pd.Series(failures_mask.to_numpy(), index=state.index),
+            'failure_cost': pd.Series(failure_costs, index=state.index),
+            'intervention_cost': pd.Series(intervention_costs, index=state.index),
+            'total_cost': pd.Series(failure_costs + intervention_costs, index=state.index),
+        }
+
+        return state, failures_mask, costs, asset_events
 
     def _calculate_conditional_probability(self, state: pd.DataFrame) -> np.ndarray:
         """Calculate conditional failure probability for each asset.

@@ -186,11 +186,22 @@ class TestSimulationResultToParquet:
             'failure_count': [5, 7, 6],
             'intervention_count': [10, 12, 11],
         })
+        asset_history = pd.DataFrame({
+            'year': [2024, 2024],
+            'asset_id': ['A1', 'A2'],
+            'age': [10.0, 20.0],
+            'action': ['none', 'replace'],
+            'failed': [False, True],
+            'failure_cost': [0.0, 15000.0],
+            'intervention_cost': [0.0, 50000.0],
+            'total_cost': [0.0, 65000.0],
+        })
         return SimulationResult(
             summary=summary,
             cost_breakdown=pd.DataFrame(),
             failure_log=pd.DataFrame({'year': [2024], 'asset_id': ['A1']}),
             config=config,
+            asset_history=asset_history,
         )
 
     def test_summary_format(self, sim_result: SimulationResult, tmp_path: Path) -> None:
@@ -219,6 +230,16 @@ class TestSimulationResultToParquet:
 
         result = pd.read_parquet(output_path)
         assert 'asset_id' in result.columns
+
+    def test_asset_history_format(self, sim_result: SimulationResult, tmp_path: Path) -> None:
+        """Asset history format exports asset_history DataFrame."""
+        output_path = tmp_path / 'asset_history.parquet'
+        sim_result.to_parquet(output_path, format='asset_history')
+
+        result = pd.read_parquet(output_path)
+        assert 'asset_id' in result.columns
+        assert 'action' in result.columns
+        assert 'total_cost' in result.columns
 
     def test_invalid_format_raises(self, sim_result: SimulationResult, tmp_path: Path) -> None:
         """Invalid format raises ValueError."""

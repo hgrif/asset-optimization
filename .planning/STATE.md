@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2025-01-29)
 ## Current Position
 
 Phase: 6 of 6 (Asset Traceability)
-Plan: 2 of 4 completed
+Plan: 3 of 4 completed
 Status: In progress
-Last activity: 2026-02-05 — Completed 06-02-PLAN.md
+Last activity: 2026-02-05 — Completed 06-03-PLAN.md
 
-Progress: [█████████░] 91% (20/22 plans)
+Progress: [█████████▌] 95% (21/22 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
-- Average duration: 3m 45s
-- Total execution time: 1.25 hours
+- Total plans completed: 21
+- Average duration: 4m 8s
+- Total execution time: 1.45 hours
 
 **By Phase:**
 
@@ -33,11 +33,11 @@ Progress: [█████████░] 91% (20/22 plans)
 | 03-simulation-core | 4 | 12m 5s | 3m 1s |
 | 04-optimization | 3 | 8m 7s | 2m 42s |
 | 05-results-polish | 5 | 13m 23s | 2m 41s |
-| 06-asset-traceability | 2 | 27m 0s | 13m 30s |
+| 06-asset-traceability | 3 | 39m 0s | 13m 0s |
 
 **Recent Trend:**
-- Last 5 plans: 05-03 (2m), 05-04 (2m), 05-05 (4m), 06-01 (12m), 06-02 (15m)
-- Trend: Slight slowdown
+- Last 5 plans: 05-04 (2m), 05-05 (4m), 06-01 (12m), 06-02 (15m), 06-03 (12m)
+- Trend: Stable
 
 *Updated after each plan completion*
 
@@ -104,10 +104,12 @@ Recent decisions affecting current work:
 - **cleanup-temporary-files (05-05)** — Include cleanup cell at end of each notebook
 - **dataframe-first-portfolio (06-02)** — Remove Portfolio class from public API; treat portfolios as DataFrames
 - **centralized-portfolio-validation (06-02)** — Validate DataFrames at Simulator.run and Optimizer.fit entrypoints
+- **asset-history-action-values (06-03)** — Use lowercase action values (none, record_only, repair, replace) in asset history
+- **asset-history-always-on (06-03)** — Always collect asset history; remove opt-out flag
 
 ### Pending Todos
 
-- Execute Phase 6 plans (06-03 through 06-04)
+- Execute Phase 6 plans (06-04)
 
 ### Blockers/Concerns
 
@@ -116,5 +118,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 06-02-PLAN.md
+Stopped at: Completed 06-03-PLAN.md
 Resume file: None

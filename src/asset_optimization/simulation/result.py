@@ -1,8 +1,8 @@
 """Simulation result dataclass."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Union
 
 import pandas as pd
 
@@ -26,8 +26,11 @@ class SimulationResult:
         - year, asset_id, age_at_failure, material, direct_cost, consequence_cost
     config : SimulationConfig
         Configuration used for this run (for reproducibility)
-    asset_history : pd.DataFrame, optional
-        Full asset-level traces (only if config.track_asset_history=True)
+    asset_history : pd.DataFrame
+        Full asset-level traces with schema columns:
+        - year, asset_id, age, action, failed, failure_cost,
+          intervention_cost, total_cost
+        Action values are one of: none, record_only, repair, replace.
 
     Examples
     --------
@@ -55,7 +58,7 @@ class SimulationResult:
     cost_breakdown: pd.DataFrame
     failure_log: pd.DataFrame
     config: 'SimulationConfig'
-    asset_history: Optional[pd.DataFrame] = None
+    asset_history: pd.DataFrame = field(default_factory=pd.DataFrame)
 
     def total_cost(self) -> float:
         """Calculate total cost across all simulation years.
@@ -95,6 +98,7 @@ class SimulationResult:
             - 'summary': Year-by-year summary with cost, failures, interventions
             - 'cost_projections': Long format for plotting (year, metric, value)
             - 'failure_log': Detailed failure event log
+            - 'asset_history': Asset-level event history
 
         Raises
         ------
@@ -105,6 +109,7 @@ class SimulationResult:
         --------
         >>> result.to_parquet('simulation_summary.parquet')
         >>> result.to_parquet('projections.parquet', format='cost_projections')
+        >>> result.to_parquet('asset_history.parquet', format='asset_history')
         """
         from asset_optimization.exports import export_cost_projections
 
@@ -114,8 +119,13 @@ class SimulationResult:
             export_cost_projections(self.summary, path)
         elif format == 'failure_log':
             self.failure_log.to_parquet(path, index=False)
+        elif format == 'asset_history':
+            self.asset_history.to_parquet(path, index=False)
         else:
-            raise ValueError(f"Unknown format: {format}. Use 'summary', 'cost_projections', or 'failure_log'")
+            raise ValueError(
+                f"Unknown format: {format}. Use 'summary', 'cost_projections', "
+                "'failure_log', or 'asset_history'"
+            )
 
     def __repr__(self) -> str:
         """Rich representation showing key metrics."""

@@ -148,12 +148,23 @@ def create_do_nothing_baseline(
         base_age = summary['avg_age'].iloc[0] if len(summary) > 0 else 25
         summary['avg_age'] = [base_age + i * 1.2 for i in range(len(summary))]
 
+    asset_history = pd.DataFrame(columns=[
+        'year',
+        'asset_id',
+        'age',
+        'action',
+        'failed',
+        'failure_cost',
+        'intervention_cost',
+        'total_cost',
+    ])
+
     return SimulationResult(
         summary=summary,
         cost_breakdown=pd.DataFrame(),  # Not applicable for baseline
         failure_log=pd.DataFrame(),  # Not applicable for baseline
         config=result.config,
-        asset_history=None,
+        asset_history=asset_history,
     )
 
 
