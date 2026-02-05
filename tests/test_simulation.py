@@ -15,7 +15,6 @@ import pytest
 from dataclasses import FrozenInstanceError
 from scipy.stats import weibull_min
 
-from asset_optimization import Portfolio
 from asset_optimization.models import WeibullModel
 from asset_optimization.simulation import (
     DO_NOTHING,
@@ -301,7 +300,7 @@ class TestSimulator:
             'length_m': [50.0],
             'condition_score': [80.0],
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         # Use record_only to prevent age resets from interventions
         config = SimulationConfig(
@@ -331,7 +330,7 @@ class TestSimulator:
             'length_m': [50.0] * 50,
             'condition_score': [50.0] * 50,
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         config = SimulationConfig(n_years=5, random_seed=42)
         sim = Simulator(weibull_model, config)
@@ -355,7 +354,7 @@ class TestSimulator:
             'length_m': [50.0],
             'condition_score': [30.0],
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         config = SimulationConfig(
             n_years=10,
@@ -394,7 +393,7 @@ class TestSimulator:
             'length_m': [50.0] * 20,
             'condition_score': [50.0] * 20,
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         config = SimulationConfig(n_years=10, random_seed=42)
         sim = Simulator(weibull_model, config)
@@ -443,7 +442,7 @@ class TestInterventionOptions:
     def test_get_intervention_options_returns_dataframe(self, sample_portfolio, weibull_model, simulation_config):
         """get_intervention_options should return a DataFrame."""
         sim = Simulator(weibull_model, simulation_config)
-        state = sample_portfolio.data.copy()
+        state = sample_portfolio.copy()
         state['age'] = 20.0
 
         options = sim.get_intervention_options(state, year=2026)
@@ -452,7 +451,7 @@ class TestInterventionOptions:
     def test_get_intervention_options_includes_all_assets(self, sample_portfolio, weibull_model, simulation_config):
         """All assets should have intervention options."""
         sim = Simulator(weibull_model, simulation_config)
-        state = sample_portfolio.data.copy()
+        state = sample_portfolio.copy()
         state['age'] = 20.0
 
         options = sim.get_intervention_options(state, year=2026)
@@ -473,10 +472,10 @@ class TestInterventionOptions:
             'length_m': [50.0],
             'condition_score': [80.0],
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         sim = Simulator(weibull_model, simulation_config)
-        state = portfolio.data.copy()
+        state = portfolio.copy()
         state['age'] = 20.0
 
         options = sim.get_intervention_options(state, year=2026)
@@ -491,7 +490,7 @@ class TestInterventionOptions:
     def test_get_intervention_options_has_required_columns(self, sample_portfolio, weibull_model, simulation_config):
         """Options DataFrame should have required columns."""
         sim = Simulator(weibull_model, simulation_config)
-        state = sample_portfolio.data.copy()
+        state = sample_portfolio.copy()
         state['age'] = 20.0
 
         options = sim.get_intervention_options(state, year=2026)
@@ -511,10 +510,10 @@ class TestInterventionOptions:
             'length_m': [50.0],
             'condition_score': [80.0],
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         sim = Simulator(weibull_model, simulation_config)
-        state = portfolio.data.copy()
+        state = portfolio.copy()
         state['age'] = 20.0
 
         options = sim.get_intervention_options(state, year=2026)
@@ -540,10 +539,10 @@ class TestInterventionOptions:
             'length_m': [50.0],
             'condition_score': [80.0],
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         sim = Simulator(weibull_model, simulation_config)
-        state = portfolio.data.copy()
+        state = portfolio.copy()
         state['age'] = 20.0
 
         options = sim.get_intervention_options(state, year=2026)
@@ -579,7 +578,7 @@ class TestConditionalProbability:
             'length_m': [50.0] * 10,
             'condition_score': [90.0] * 10,
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         # Run short simulation with record_only to track failures without intervention
         config = SimulationConfig(
@@ -590,7 +589,7 @@ class TestConditionalProbability:
         sim = Simulator(weibull_model, config)
 
         # Test conditional probability directly
-        state = portfolio.data.copy()
+        state = portfolio.copy()
         # Start year 2026, assets installed 2020 = ~6 years old
         state['age'] = 6.0
 
@@ -612,16 +611,16 @@ class TestConditionalProbability:
             'length_m': [50.0, 50.0],
             'condition_score': [80.0, 80.0],
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         config = SimulationConfig(n_years=1, random_seed=42)
         sim = Simulator(weibull_model, config)
 
         # Test two different ages
-        state_young = portfolio.data.copy()
+        state_young = portfolio.copy()
         state_young['age'] = 10.0
 
-        state_old = portfolio.data.copy()
+        state_old = portfolio.copy()
         state_old['age'] = 50.0
 
         probs_young = sim._calculate_conditional_probability(state_young)
@@ -641,13 +640,13 @@ class TestConditionalProbability:
             'length_m': [50.0],
             'condition_score': [80.0],
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         config = SimulationConfig(n_years=1, random_seed=42)
         sim = Simulator(weibull_model, config)
 
         # Extreme age where survival is essentially 0
-        state = portfolio.data.copy()
+        state = portfolio.copy()
         state['age'] = 500.0  # Way beyond any reasonable life
 
         probs = sim._calculate_conditional_probability(state)
@@ -673,10 +672,10 @@ class TestConditionalProbability:
             'length_m': [50.0],
             'condition_score': [80.0],
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         # Test at age 30
-        state = portfolio.data.copy()
+        state = portfolio.copy()
         state['age'] = 30.0
 
         actual_prob = sim._calculate_conditional_probability(state)[0]
@@ -710,7 +709,7 @@ class TestTimestepOrder:
             'length_m': [50.0],
             'condition_score': [80.0],
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         config = SimulationConfig(
             n_years=1,
@@ -737,7 +736,7 @@ class TestTimestepOrder:
             'length_m': [50.0],
             'condition_score': [30.0],
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         config = SimulationConfig(n_years=1, random_seed=42, failure_response='replace')
         sim = Simulator(weibull_model, config)
@@ -762,7 +761,7 @@ class TestTimestepOrder:
             'length_m': [50.0] * 30,
             'condition_score': [40.0] * 30,
         })
-        portfolio = Portfolio.from_dataframe(test_data)
+        portfolio = test_data
 
         config = SimulationConfig(n_years=3, random_seed=42, failure_response='replace')
         sim = Simulator(weibull_model, config)

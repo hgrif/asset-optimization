@@ -2,7 +2,6 @@
 
 import pandas as pd
 
-from asset_optimization import Portfolio
 from asset_optimization.models import WeibullModel
 from asset_optimization.simulation import SimulationConfig, Simulator
 
@@ -81,7 +80,7 @@ EXPECTED_FAILURE_LOG = pd.DataFrame(
 
 def test_end_to_end_simulation_snapshot(end_to_end_dataframe):
     """Snapshot a specific run to guard against refactor regressions."""
-    portfolio = Portfolio.from_dataframe(end_to_end_dataframe)
+    portfolio = end_to_end_dataframe
     model = WeibullModel({
         'PVC': (2.5, 50.0),
         'Cast Iron': (3.0, 40.0),

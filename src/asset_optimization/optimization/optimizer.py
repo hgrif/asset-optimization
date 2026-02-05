@@ -13,9 +13,9 @@ from scipy.stats import weibull_min
 from .result import OptimizationResult
 from ..simulation import DO_NOTHING, INSPECT, REPAIR, REPLACE
 from ..exceptions import OptimizationError
+from ..portfolio import validate_portfolio
 
 if TYPE_CHECKING:
-    from asset_optimization.portfolio import Portfolio
     from asset_optimization.models.weibull import WeibullModel
 
 
@@ -46,8 +46,9 @@ class Optimizer:
 
     Examples
     --------
-    >>> from asset_optimization import Portfolio, WeibullModel, Optimizer
-    >>> portfolio = Portfolio.from_csv('assets.csv')
+    >>> import pandas as pd
+    >>> from asset_optimization import WeibullModel, Optimizer
+    >>> portfolio = pd.read_csv('assets.csv', parse_dates=['install_date'])
     >>> model = WeibullModel({'PVC': (2.5, 50.0)})
     >>> opt = Optimizer(strategy='greedy', min_risk_threshold=0.1)
     >>> opt.fit(portfolio, model, budget=100000.0)
@@ -72,7 +73,7 @@ class Optimizer:
 
     def fit(
         self,
-        portfolio: "Portfolio",
+        portfolio: pd.DataFrame,
         model: "WeibullModel",
         budget: float,
         exclusions: list[str] | None = None
@@ -81,8 +82,8 @@ class Optimizer:
 
         Parameters
         ----------
-        portfolio : Portfolio
-            Asset portfolio with data DataFrame.
+        portfolio : pd.DataFrame
+            Asset portfolio data.
         model : WeibullModel
             Fitted deterioration model (used for risk_after calculation).
         budget : float
@@ -123,15 +124,17 @@ class Optimizer:
         if budget < 0:
             raise ValueError(f"Budget must be non-negative, got {budget}")
 
+        validated = validate_portfolio(portfolio)
+
         # Dispatch to strategy implementation
         if self.strategy == 'greedy':
-            self._fit_greedy(portfolio, model, budget, exclusions)
+            self._fit_greedy(validated, model, budget, exclusions)
 
         return self
 
     def _fit_greedy(
         self,
-        portfolio: "Portfolio",
+        portfolio: pd.DataFrame,
         model: "WeibullModel",
         budget: float,
         exclusions: list[str] | None = None
@@ -143,8 +146,8 @@ class Optimizer:
 
         Parameters
         ----------
-        portfolio : Portfolio
-            Asset portfolio.
+        portfolio : pd.DataFrame
+            Asset portfolio data.
         model : WeibullModel
             Deterioration model for risk calculations.
         budget : float
@@ -169,7 +172,7 @@ class Optimizer:
         # ============================================================
 
         # Copy portfolio data to working DataFrame
-        df = portfolio.data.copy()
+        df = portfolio.copy()
 
         # CRITICAL: Ensure 'age' column exists BEFORE calling model.transform()
         # The transform() method validates 'age' exists

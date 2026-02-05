@@ -12,7 +12,7 @@ import pandas as pd
 from scipy.stats import weibull_min
 
 from asset_optimization.models.base import DeteriorationModel
-from asset_optimization.portfolio import Portfolio
+from asset_optimization.portfolio import validate_portfolio
 from asset_optimization.simulation.config import SimulationConfig
 from asset_optimization.simulation.interventions import (
     DO_NOTHING,
@@ -58,8 +58,9 @@ class Simulator:
 
     Examples
     --------
-    >>> from asset_optimization import Portfolio, WeibullModel, Simulator, SimulationConfig
-    >>> portfolio = Portfolio.from_csv('assets.csv')
+    >>> import pandas as pd
+    >>> from asset_optimization import WeibullModel, Simulator, SimulationConfig
+    >>> portfolio = pd.read_csv('assets.csv', parse_dates=['install_date'])
     >>> model = WeibullModel({'PVC': (2.5, 50), 'Cast Iron': (3.0, 40)})
     >>> config = SimulationConfig(n_years=10, random_seed=42)
     >>> sim = Simulator(model, config)
@@ -119,13 +120,13 @@ class Simulator:
         else:
             self.interventions = interventions
 
-    def run(self, portfolio: Portfolio) -> SimulationResult:
+    def run(self, portfolio: pd.DataFrame) -> SimulationResult:
         """Run multi-timestep simulation on portfolio.
 
         Parameters
         ----------
-        portfolio : Portfolio
-            Asset portfolio to simulate.
+        portfolio : pd.DataFrame
+            Asset portfolio data to simulate.
 
         Returns
         -------
@@ -138,8 +139,8 @@ class Simulator:
         >>> print(f"Total cost: ${result.total_cost():,.0f}")
         >>> print(f"Total failures: {result.total_failures()}")
         """
-        # Initialize state from portfolio
-        state = portfolio.data.copy()
+        validated = validate_portfolio(portfolio)
+        state = validated.copy()
 
         # Calculate initial ages from install_date relative to start_year
         start_date = pd.Timestamp(year=self.config.start_year, month=1, day=1)

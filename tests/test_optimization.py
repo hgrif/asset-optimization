@@ -4,9 +4,8 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from asset_optimization import Portfolio, WeibullModel
+from asset_optimization import WeibullModel
 from asset_optimization.optimization import Optimizer, OptimizationResult
-from asset_optimization.exceptions import OptimizationError
 
 
 class TestOptimizerInit:
@@ -155,8 +154,8 @@ class TestGreedyRanking:
             'diameter_mm': [100, 100],
             'length_m': [100.0, 100.0],
         })
-        portfolio = Portfolio.from_dataframe(df)
-        portfolio._data['age'] = (pd.Timestamp.now() - portfolio.data['install_date']).dt.days / 365.25
+        portfolio = df.copy()
+        portfolio['age'] = (pd.Timestamp.now() - portfolio['install_date']).dt.days / 365.25
 
         opt = Optimizer()
         opt.fit(portfolio, weibull_model, budget=100000.0)
@@ -173,11 +172,10 @@ class TestMinRiskThreshold:
     def test_low_risk_assets_excluded(self, optimization_portfolio, weibull_model):
         """Assets below min_risk_threshold are not selected."""
         portfolio = optimization_portfolio
-        # Transform to get failure_probability
-        portfolio._data = weibull_model.transform(portfolio.data)
+        risk_df = weibull_model.transform(portfolio)
 
         # Get risk of youngest asset (A5, ~5 years old)
-        a5_risk = portfolio.data[portfolio.data['asset_id'] == 'A5']['failure_probability'].iloc[0]
+        a5_risk = risk_df[risk_df['asset_id'] == 'A5']['failure_probability'].iloc[0]
 
         # Set threshold above A5's risk
         opt = Optimizer(min_risk_threshold=a5_risk + 0.01)
@@ -281,20 +279,15 @@ class TestEdgeCases:
 
     def test_empty_portfolio(self, weibull_model):
         """Empty portfolio returns empty selections."""
-        df = pd.DataFrame({
+        portfolio = pd.DataFrame({
             'asset_id': pd.Series([], dtype=str),
+            'asset_type': pd.Series([], dtype=str),
             'material': pd.Series([], dtype=str),
             'install_date': pd.Series([], dtype='datetime64[ns]'),
-            'condition': pd.Series([], dtype=float),
             'diameter_mm': pd.Series([], dtype='Int64'),
             'length_m': pd.Series([], dtype=float),
-            'location': pd.Series([], dtype=str),
+            'condition_score': pd.Series([], dtype=float),
         })
-        # For empty DataFrame, bypass validation by directly setting _data
-        portfolio = Portfolio.__new__(Portfolio)
-        portfolio._data = df.assign(age=pd.Series([], dtype=float), failure_probability=pd.Series([], dtype=float))
-        portfolio._quality_metrics = {}
-        portfolio._n_assets = 0
 
         opt = Optimizer()
         opt.fit(portfolio, weibull_model, budget=100000.0)
@@ -312,8 +305,8 @@ class TestEdgeCases:
             'diameter_mm': [100],
             'length_m': [100.0],
         })
-        portfolio = Portfolio.from_dataframe(df)
-        portfolio._data['age'] = (pd.Timestamp.now() - portfolio.data['install_date']).dt.days / 365.25
+        portfolio = df.copy()
+        portfolio['age'] = (pd.Timestamp.now() - portfolio['install_date']).dt.days / 365.25
 
         opt = Optimizer()
         opt.fit(portfolio, weibull_model, budget=100000.0)

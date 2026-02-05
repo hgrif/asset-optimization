@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pathlib import Path
 
-from asset_optimization import Portfolio
+from asset_optimization.portfolio import validate_portfolio
 from asset_optimization.models import WeibullModel
 from asset_optimization.simulation import SimulationConfig
 
@@ -87,7 +87,7 @@ def end_to_end_dataframe():
 
 @pytest.fixture
 def sample_portfolio():
-    """Create sample portfolio for simulation tests."""
+    """Create sample portfolio DataFrame for simulation tests."""
     n_assets = 100
     test_data = pd.DataFrame({
         'asset_id': [f'PIPE-{i:03d}' for i in range(n_assets)],
@@ -98,7 +98,7 @@ def sample_portfolio():
         'length_m': [50.0] * n_assets,
         'condition_score': [80.0] * n_assets,
     })
-    return Portfolio.from_dataframe(test_data)
+    return validate_portfolio(test_data)
 
 
 @pytest.fixture
@@ -118,11 +118,7 @@ def simulation_config():
 
 @pytest.fixture
 def optimization_portfolio():
-    """Portfolio with known failure probabilities for optimization testing.
-
-    IMPORTANT: Use Portfolio.from_dataframe(), not Portfolio(df).
-    Portfolio constructor accepts no arguments - must use factory method.
-    """
+    """Portfolio DataFrame with known ages for optimization testing."""
     df = pd.DataFrame({
         'asset_id': ['A1', 'A2', 'A3', 'A4', 'A5'],
         'asset_type': ['pipe', 'pipe', 'pipe', 'pipe', 'pipe'],
@@ -137,7 +133,6 @@ def optimization_portfolio():
         'diameter_mm': [100, 100, 100, 100, 100],
         'length_m': [100.0, 100.0, 100.0, 100.0, 100.0],
     })
-    portfolio = Portfolio.from_dataframe(df)
-    # Add age column
-    portfolio._data['age'] = (pd.Timestamp.now() - portfolio.data['install_date']).dt.days / 365.25
-    return portfolio
+    validated = validate_portfolio(df)
+    validated['age'] = (pd.Timestamp.now() - validated['install_date']).dt.days / 365.25
+    return validated
