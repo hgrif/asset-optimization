@@ -39,11 +39,12 @@ See `.planning/milestones/v1-ROADMAP.md` for full details.
   3. ProportionalHazardsModel works with Simulator (produces failure rates, integrates with simulation loop)
   4. Existing portfolios without covariate columns continue to work (baseline hazard only)
   5. Notebook demonstrates proportional hazards with covariates affecting failure rates
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md — ProportionalHazardsModel core implementation with tests
+- [ ] 07-02-PLAN.md — Simulator integration for covariate-aware conditional probabilities
+- [ ] 07-03-PLAN.md — Documentation notebook demonstrating proportional hazards
 
 ### Phase 8: Roads Domain
 **Goal**: Users can configure and simulate road asset portfolios with domain-specific schema and interventions
@@ -100,7 +101,7 @@ Phases execute in numeric order: 7 -> 8 -> 9 -> 10
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 7. Proportional Hazards | v2.0 | 0/TBD | Not started | - |
+| 7. Proportional Hazards | v2.0 | 0/3 | Planned | - |
 | 8. Roads Domain | v2.0 | 0/TBD | Not started | - |
 | 9. Asset Groupings | v2.0 | 0/TBD | Not started | - |
 | 10. Asset Hierarchy | v2.0 | 0/TBD | Not started | - |
