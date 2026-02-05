@@ -2,48 +2,47 @@
 
 import pandas as pd
 import pandera.pandas as pa
-from pandera import Column, DataFrameSchema, Check
 
 
 # Define portfolio schema with required and optional columns
-portfolio_schema = DataFrameSchema(
+portfolio_schema = pa.DataFrameSchema(
     columns={
         # Required columns
-        'asset_id': Column(
+        'asset_id': pa.Column(
             str,
             unique=True,
             nullable=False,
         ),
-        'install_date': Column(
+        'install_date': pa.Column(
             pd.Timestamp,
             nullable=False,
-            checks=Check.less_than_or_equal_to(pd.Timestamp.now()),
+            checks=pa.Check.less_than_or_equal_to(pd.Timestamp.now()),
         ),
-        'asset_type': Column(
+        'asset_type': pa.Column(
             str,
             nullable=False,
         ),
-        'material': Column(
+        'material': pa.Column(
             str,
             nullable=False,
         ),
         # Optional columns
-        'diameter_mm': Column(
+        'diameter_mm': pa.Column(
             'Int64',
             nullable=True,
-            checks=Check.greater_than(0),
+            checks=pa.Check.greater_than(0),
             required=False,
         ),
-        'length_m': Column(
+        'length_m': pa.Column(
             float,
             nullable=True,
-            checks=Check.greater_than(0),
+            checks=pa.Check.greater_than(0),
             required=False,
         ),
-        'condition_score': Column(
+        'condition_score': pa.Column(
             float,
             nullable=True,
-            checks=Check.in_range(0, 100),
+            checks=pa.Check.in_range(0, 100),
             required=False,
         ),
     },
