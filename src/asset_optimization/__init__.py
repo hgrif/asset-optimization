@@ -9,7 +9,8 @@ from .exceptions import (
     DataQualityError,
     OptimizationError,
 )
-from .models import WeibullModel
+from .models import DeteriorationModel, WeibullModel
+from .quality import QualityMetrics
 from .simulation import (
     Simulator,
     SimulationConfig,
@@ -42,7 +43,9 @@ __all__ = [
     "MissingFieldError",
     "DataQualityError",
     "OptimizationError",
+    "DeteriorationModel",
     "WeibullModel",
+    "QualityMetrics",
     "Simulator",
     "SimulationConfig",
     "SimulationResult",

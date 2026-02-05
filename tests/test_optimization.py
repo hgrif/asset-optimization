@@ -238,6 +238,24 @@ class TestOptimizationResult:
         for col in required_cols:
             assert col in opt.result.selections.columns
 
+    def test_selections_include_risk_details(self, optimization_portfolio, weibull_model):
+        """Selections include risk_before, risk_after, and risk_reduction."""
+        portfolio = optimization_portfolio
+
+        opt = Optimizer()
+        opt.fit(portfolio, weibull_model, budget=100000.0)
+
+        selections = opt.result.selections
+        for col in ['risk_before', 'risk_after', 'risk_reduction']:
+            assert col in selections.columns
+
+        if len(selections) > 0:
+            row = selections.iloc[0]
+            assert np.isclose(
+                row['risk_reduction'],
+                row['risk_before'] - row['risk_after'],
+            )
+
     def test_budget_summary_columns(self, optimization_portfolio, weibull_model):
         """Budget summary DataFrame has required columns."""
         portfolio = optimization_portfolio

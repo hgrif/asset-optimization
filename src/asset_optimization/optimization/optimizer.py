@@ -4,6 +4,8 @@ This module provides the Optimizer class that implements budget-constrained
 intervention selection using a two-stage greedy algorithm.
 """
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 import pandas as pd
 from scipy.stats import weibull_min
@@ -11,6 +13,10 @@ from scipy.stats import weibull_min
 from .result import OptimizationResult
 from ..simulation import DO_NOTHING, INSPECT, REPAIR, REPLACE
 from ..exceptions import OptimizationError
+
+if TYPE_CHECKING:
+    from asset_optimization.portfolio import Portfolio
+    from asset_optimization.models.weibull import WeibullModel
 
 
 class Optimizer:
@@ -66,8 +72,8 @@ class Optimizer:
 
     def fit(
         self,
-        portfolio,
-        model,
+        portfolio: "Portfolio",
+        model: "WeibullModel",
         budget: float,
         exclusions: list[str] | None = None
     ) -> 'Optimizer':
@@ -125,8 +131,8 @@ class Optimizer:
 
     def _fit_greedy(
         self,
-        portfolio,
-        model,
+        portfolio: "Portfolio",
+        model: "WeibullModel",
         budget: float,
         exclusions: list[str] | None = None
     ) -> None:
@@ -292,6 +298,9 @@ class Optimizer:
                     'intervention_type': row['intervention_type'],
                     'cost': cost,
                     'risk_score': row['risk_before'],
+                    'risk_before': row['risk_before'],
+                    'risk_after': row['risk_after'],
+                    'risk_reduction': row['risk_before'] - row['risk_after'],
                     'rank': rank,
                 })
                 remaining_budget -= cost
@@ -301,7 +310,14 @@ class Optimizer:
             selections_df = pd.DataFrame(selections)
         else:
             selections_df = pd.DataFrame(columns=[
-                'asset_id', 'intervention_type', 'cost', 'risk_score', 'rank'
+                'asset_id',
+                'intervention_type',
+                'cost',
+                'risk_score',
+                'risk_before',
+                'risk_after',
+                'risk_reduction',
+                'rank',
             ])
 
         spent = budget - remaining_budget
@@ -334,7 +350,14 @@ class Optimizer:
             Result with empty selections.
         """
         selections_df = pd.DataFrame(columns=[
-            'asset_id', 'intervention_type', 'cost', 'risk_score', 'rank'
+            'asset_id',
+            'intervention_type',
+            'cost',
+            'risk_score',
+            'risk_before',
+            'risk_after',
+            'risk_reduction',
+            'rank',
         ])
 
         budget_summary = pd.DataFrame({
