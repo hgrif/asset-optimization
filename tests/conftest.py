@@ -60,6 +60,32 @@ def sample_dataframe():
 
 
 @pytest.fixture
+def end_to_end_dataframe():
+    """Small DataFrame for end-to-end deterministic simulation tests."""
+    return pd.DataFrame({
+        'asset_id': [
+            'PIPE-001', 'PIPE-002', 'PIPE-003', 'PIPE-004',
+            'VALVE-001', 'VALVE-002', 'VALVE-003', 'VALVE-004',
+        ],
+        'install_date': pd.to_datetime([
+            '2000-01-01', '2005-06-15', '2010-03-10', '2012-07-20',
+            '2014-09-01', '2016-11-05', '2018-02-28', '2020-05-12',
+        ]),
+        'asset_type': [
+            'pipe', 'pipe', 'pipe', 'pipe',
+            'valve', 'valve', 'valve', 'valve',
+        ],
+        'material': [
+            'PVC', 'PVC', 'Cast Iron', 'Cast Iron',
+            'PVC', 'Cast Iron', 'PVC', 'Cast Iron',
+        ],
+        'diameter_mm': pd.array([150, 200, 175, 225, 80, 90, 110, 120], dtype='Int64'),
+        'length_m': [120.0, 80.0, 95.0, 110.0, 2.5, 3.0, 2.0, 2.8],
+        'condition_score': [82.0, 75.5, 68.0, 70.0, 90.0, 88.0, 92.0, 85.0],
+    })
+
+
+@pytest.fixture
 def sample_portfolio():
     """Create sample portfolio for simulation tests."""
     n_assets = 100
