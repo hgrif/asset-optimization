@@ -5,9 +5,9 @@ from __future__ import annotations
 import pandas as pd
 import pandera.pandas as pa
 
-from .exceptions import ValidationError
-from .quality import QualityMetrics
-from .schema import portfolio_schema
+from asset_optimization.exceptions import ValidationError
+from asset_optimization.quality import QualityMetrics
+from asset_optimization.schema import portfolio_schema
 
 
 def validate_portfolio(df: pd.DataFrame) -> pd.DataFrame:

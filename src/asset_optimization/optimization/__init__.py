@@ -1,6 +1,6 @@
 """Optimization module for budget-constrained intervention selection."""
 
-from .optimizer import Optimizer
-from .result import OptimizationResult
+from asset_optimization.optimization.optimizer import Optimizer
+from asset_optimization.optimization.result import OptimizationResult
 
 __all__ = ["Optimizer", "OptimizationResult"]

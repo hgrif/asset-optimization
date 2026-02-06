@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import weibull_min
 
-from .base import DeteriorationModel
+from asset_optimization.models.base import DeteriorationModel
 
 
 class WeibullModel(DeteriorationModel):

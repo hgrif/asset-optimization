@@ -10,10 +10,10 @@ import numpy as np
 import pandas as pd
 from scipy.stats import weibull_min
 
-from .result import OptimizationResult
-from ..simulation import DO_NOTHING, INSPECT, REPAIR, REPLACE
-from ..exceptions import OptimizationError
-from ..portfolio import validate_portfolio
+from asset_optimization.optimization.result import OptimizationResult
+from asset_optimization.simulation import DO_NOTHING, INSPECT, REPAIR, REPLACE
+from asset_optimization.exceptions import OptimizationError
+from asset_optimization.portfolio import validate_portfolio
 
 if TYPE_CHECKING:
     from asset_optimization.models.weibull import WeibullModel

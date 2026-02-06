@@ -2,15 +2,15 @@
 
 __version__ = "0.1.0"
 
-from .exceptions import (
+from asset_optimization.exceptions import (
     ValidationError,
     MissingFieldError,
     DataQualityError,
     OptimizationError,
 )
-from .models import DeteriorationModel, WeibullModel
-from .quality import QualityMetrics
-from .simulation import (
+from asset_optimization.models import DeteriorationModel, WeibullModel
+from asset_optimization.quality import QualityMetrics
+from asset_optimization.simulation import (
     Simulator,
     SimulationConfig,
     SimulationResult,
@@ -20,15 +20,19 @@ from .simulation import (
     REPAIR,
     REPLACE,
 )
-from .domains import Domain, PipeDomain
-from .optimization import Optimizer, OptimizationResult
-from .exports import (
+from asset_optimization.domains import Domain, PipeDomain
+from asset_optimization.optimization import Optimizer, OptimizationResult
+from asset_optimization.exports import (
     export_schedule_minimal,
     export_schedule_detailed,
     export_cost_projections,
 )
-from .scenarios import compare_scenarios, create_do_nothing_baseline, compare
-from .visualization import (
+from asset_optimization.scenarios import (
+    compare_scenarios,
+    create_do_nothing_baseline,
+    compare,
+)
+from asset_optimization.visualization import (
     set_sdk_theme,
     plot_cost_over_time,
     plot_failures_by_year,
