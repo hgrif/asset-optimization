@@ -5,7 +5,7 @@ from typing import Optional
 
 
 # Valid failure response options
-FAILURE_RESPONSES = ('replace', 'repair', 'record_only')
+FAILURE_RESPONSES = ("replace", "repair", "record_only")
 
 
 @dataclass(frozen=True)
@@ -37,14 +37,12 @@ class SimulationConfig:
     n_years: int
     start_year: int = 2026
     random_seed: Optional[int] = None
-    failure_response: str = 'replace'
+    failure_response: str = "replace"
 
     def __post_init__(self):
         """Validate configuration parameters."""
         if self.n_years <= 0:
-            raise ValueError(
-                f"n_years must be positive, got {self.n_years}"
-            )
+            raise ValueError(f"n_years must be positive, got {self.n_years}")
 
         if self.failure_response not in FAILURE_RESPONSES:
             raise ValueError(

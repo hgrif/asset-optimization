@@ -9,6 +9,7 @@ from .exceptions import ValidationError
 from .quality import QualityMetrics
 from .schema import portfolio_schema
 
+
 def validate_portfolio(df: pd.DataFrame) -> pd.DataFrame:
     """Validate portfolio data with the Pandera schema.
 
@@ -59,20 +60,20 @@ def compute_quality_metrics(df: pd.DataFrame) -> QualityMetrics:
 
 def _schema_error_to_validation_error(exc: pa.errors.SchemaError) -> ValidationError:
     """Convert a Pandera SchemaError to a ValidationError."""
-    failure_cases = getattr(exc, 'failure_cases', None)
+    failure_cases = getattr(exc, "failure_cases", None)
 
     if isinstance(failure_cases, pd.DataFrame) and not failure_cases.empty:
         first_failure = failure_cases.iloc[0]
-        field = first_failure['column'] if 'column' in first_failure else 'schema'
-        message = first_failure['check'] if 'check' in first_failure else str(exc)
+        field = first_failure["column"] if "column" in first_failure else "schema"
+        message = first_failure["check"] if "check" in first_failure else str(exc)
 
         details = {}
-        if 'failure_case' in failure_cases.columns:
-            details['failing_values'] = failure_cases['failure_case'].tolist()[:5]
-            details['total_failures'] = len(failure_cases)
+        if "failure_case" in failure_cases.columns:
+            details["failing_values"] = failure_cases["failure_case"].tolist()[:5]
+            details["total_failures"] = len(failure_cases)
         else:
-            details['total_failures'] = len(failure_cases)
+            details["total_failures"] = len(failure_cases)
 
         return ValidationError(field=field, message=message, details=details)
 
-    return ValidationError(field='schema', message=str(exc), details={})
+    return ValidationError(field="schema", message=str(exc), details={})

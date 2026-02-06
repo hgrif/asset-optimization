@@ -24,16 +24,20 @@ class QualityMetrics:
 
     def _repr_html_(self):
         """Rich HTML display for Jupyter notebooks."""
-        summary = pd.DataFrame({
-            'Completeness (%)': self.completeness * 100,
-            'Missing Count': self.missing_counts,
-        })
+        summary = pd.DataFrame(
+            {
+                "Completeness (%)": self.completeness * 100,
+                "Missing Count": self.missing_counts,
+            }
+        )
         return summary._repr_html_()
 
     def __repr__(self):
         """Text display for terminal/REPL."""
-        summary = pd.DataFrame({
-            'Completeness (%)': self.completeness * 100,
-            'Missing Count': self.missing_counts,
-        })
+        summary = pd.DataFrame(
+            {
+                "Completeness (%)": self.completeness * 100,
+                "Missing Count": self.missing_counts,
+            }
+        )
         return str(summary)

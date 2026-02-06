@@ -59,8 +59,8 @@ class WeibullModel(DeteriorationModel):
     def __init__(
         self,
         params: dict[str, tuple[float, float]],
-        type_column: str = 'material',
-        age_column: str = 'age',
+        type_column: str = "material",
+        age_column: str = "age",
     ):
         """Initialize WeibullModel with parameters per asset type.
 
@@ -192,7 +192,7 @@ class WeibullModel(DeteriorationModel):
 
         # Direct formula is faster than scipy.stats approach
         # Handle age=0 case: define h(0) = 0 for stability
-        with np.errstate(divide='ignore', invalid='ignore'):
+        with np.errstate(divide="ignore", invalid="ignore"):
             rates = (shape / scale) * np.power(age / scale, shape - 1)
             rates = np.where(age == 0, 0.0, rates)
 
@@ -236,8 +236,8 @@ class WeibullModel(DeteriorationModel):
         result = df.copy(deep=True)
 
         # Initialize output columns
-        result['failure_rate'] = np.nan
-        result['failure_probability'] = np.nan
+        result["failure_rate"] = np.nan
+        result["failure_probability"] = np.nan
 
         # Calculate per asset type (vectorized within each group)
         for asset_type, group_df in df.groupby(self.type_column):
@@ -251,8 +251,8 @@ class WeibullModel(DeteriorationModel):
             probs = weibull_min.cdf(ages, c=shape, scale=scale)
 
             # Assign to result DataFrame
-            result.loc[group_df.index, 'failure_rate'] = rates
-            result.loc[group_df.index, 'failure_probability'] = probs
+            result.loc[group_df.index, "failure_rate"] = rates
+            result.loc[group_df.index, "failure_probability"] = probs
 
         return result
 
@@ -282,7 +282,7 @@ class WeibullModel(DeteriorationModel):
             s_t = weibull_min.sf(ages, c=shape, scale=scale)
             s_t_plus_1 = weibull_min.sf(ages + 1, c=shape, scale=scale)
 
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide="ignore", invalid="ignore"):
                 cond_prob = (s_t - s_t_plus_1) / s_t
                 cond_prob = np.where(s_t == 0, 1.0, cond_prob)
                 cond_prob = np.clip(cond_prob, 0.0, 1.0)

@@ -57,7 +57,7 @@ class SimulationResult:
     summary: pd.DataFrame
     cost_breakdown: pd.DataFrame
     failure_log: pd.DataFrame
-    config: 'SimulationConfig'
+    config: "SimulationConfig"
     asset_history: pd.DataFrame = field(default_factory=pd.DataFrame)
 
     def total_cost(self) -> float:
@@ -69,9 +69,9 @@ class SimulationResult:
             Sum of total_cost column in summary DataFrame.
             Returns 0.0 if summary is empty or column missing.
         """
-        if self.summary.empty or 'total_cost' not in self.summary.columns:
+        if self.summary.empty or "total_cost" not in self.summary.columns:
             return 0.0
-        return float(self.summary['total_cost'].sum())
+        return float(self.summary["total_cost"].sum())
 
     def total_failures(self) -> int:
         """Calculate total failures across all simulation years.
@@ -82,11 +82,11 @@ class SimulationResult:
             Sum of failure_count column in summary DataFrame.
             Returns 0 if summary is empty or column missing.
         """
-        if self.summary.empty or 'failure_count' not in self.summary.columns:
+        if self.summary.empty or "failure_count" not in self.summary.columns:
             return 0
-        return int(self.summary['failure_count'].sum())
+        return int(self.summary["failure_count"].sum())
 
-    def to_parquet(self, path: Union[str, Path], format: str = 'summary') -> None:
+    def to_parquet(self, path: Union[str, Path], format: str = "summary") -> None:
         """Export simulation results to parquet.
 
         Parameters
@@ -113,13 +113,13 @@ class SimulationResult:
         """
         from asset_optimization.exports import export_cost_projections
 
-        if format == 'summary':
+        if format == "summary":
             self.summary.to_parquet(path, index=False)
-        elif format == 'cost_projections':
+        elif format == "cost_projections":
             export_cost_projections(self.summary, path)
-        elif format == 'failure_log':
+        elif format == "failure_log":
             self.failure_log.to_parquet(path, index=False)
-        elif format == 'asset_history':
+        elif format == "asset_history":
             self.asset_history.to_parquet(path, index=False)
         else:
             raise ValueError(
@@ -130,9 +130,9 @@ class SimulationResult:
     def __repr__(self) -> str:
         """Rich representation showing key metrics."""
         n_years = len(self.summary)
-        if n_years > 0 and 'year' in self.summary.columns:
-            start_year = self.summary['year'].min()
-            end_year = self.summary['year'].max()
+        if n_years > 0 and "year" in self.summary.columns:
+            start_year = self.summary["year"].min()
+            end_year = self.summary["year"].max()
             year_range = f"{start_year}-{end_year}"
         else:
             year_range = "no data"

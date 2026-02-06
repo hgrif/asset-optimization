@@ -4,7 +4,6 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from asset_optimization import WeibullModel
 from asset_optimization.optimization import Optimizer, OptimizationResult
 
 
@@ -14,7 +13,7 @@ class TestOptimizerInit:
     def test_default_strategy(self):
         """Default strategy is 'greedy'."""
         opt = Optimizer()
-        assert opt.strategy == 'greedy'
+        assert opt.strategy == "greedy"
 
     def test_default_min_risk_threshold(self):
         """Default min_risk_threshold is 0.0."""
@@ -23,8 +22,8 @@ class TestOptimizerInit:
 
     def test_custom_strategy(self):
         """Can set custom strategy."""
-        opt = Optimizer(strategy='milp')
-        assert opt.strategy == 'milp'
+        opt = Optimizer(strategy="milp")
+        assert opt.strategy == "milp"
 
     def test_custom_threshold(self):
         """Can set custom min_risk_threshold."""
@@ -49,7 +48,7 @@ class TestOptimizerFit:
 
         opt = Optimizer()
         opt.fit(portfolio, weibull_model, budget=100000.0)
-        assert hasattr(opt, 'result_')
+        assert hasattr(opt, "result_")
         assert isinstance(opt.result_, OptimizationResult)
 
     def test_result_property_before_fit_raises(self):
@@ -70,7 +69,7 @@ class TestOptimizerFit:
         """MILP strategy raises NotImplementedError."""
         portfolio = optimization_portfolio
 
-        opt = Optimizer(strategy='milp')
+        opt = Optimizer(strategy="milp")
         with pytest.raises(NotImplementedError, match="MILP"):
             opt.fit(portfolio, weibull_model, budget=100000.0)
 
@@ -78,7 +77,7 @@ class TestOptimizerFit:
         """Unknown strategy raises ValueError."""
         portfolio = optimization_portfolio
 
-        opt = Optimizer(strategy='unknown')
+        opt = Optimizer(strategy="unknown")
         with pytest.raises(ValueError, match="Unknown strategy"):
             opt.fit(portfolio, weibull_model, budget=100000.0)
 
@@ -127,10 +126,10 @@ class TestGreedyRanking:
 
         if len(opt.result.selections) > 0:
             # Oldest asset (A1) should have highest risk, should be rank 1
-            first_selected = opt.result.selections[opt.result.selections['rank'] == 1]
+            first_selected = opt.result.selections[opt.result.selections["rank"] == 1]
             assert len(first_selected) == 1
             # A1 is oldest (1980), should be first
-            assert first_selected.iloc[0]['asset_id'] == 'A1'
+            assert first_selected.iloc[0]["asset_id"] == "A1"
 
     def test_selections_ordered_by_rank(self, optimization_portfolio, weibull_model):
         """Selections have sequential rank values."""
@@ -140,30 +139,34 @@ class TestGreedyRanking:
         opt.fit(portfolio, weibull_model, budget=200000.0)
 
         if len(opt.result.selections) > 1:
-            ranks = opt.result.selections['rank'].tolist()
+            ranks = opt.result.selections["rank"].tolist()
             assert ranks == list(range(1, len(ranks) + 1))
 
     def test_tie_breaking_oldest_first(self, weibull_model):
         """When risk-to-cost ratio is equal, oldest asset selected first."""
         # Create portfolio with same-age assets for tie scenario
-        df = pd.DataFrame({
-            'asset_id': ['A1', 'A2'],
-            'asset_type': ['pipe', 'pipe'],
-            'material': ['PVC', 'PVC'],
-            'install_date': pd.to_datetime(['1990-01-01', '2000-01-01']),
-            'diameter_mm': [100, 100],
-            'length_m': [100.0, 100.0],
-        })
+        df = pd.DataFrame(
+            {
+                "asset_id": ["A1", "A2"],
+                "asset_type": ["pipe", "pipe"],
+                "material": ["PVC", "PVC"],
+                "install_date": pd.to_datetime(["1990-01-01", "2000-01-01"]),
+                "diameter_mm": [100, 100],
+                "length_m": [100.0, 100.0],
+            }
+        )
         portfolio = df.copy()
-        portfolio['age'] = (pd.Timestamp.now() - portfolio['install_date']).dt.days / 365.25
+        portfolio["age"] = (
+            pd.Timestamp.now() - portfolio["install_date"]
+        ).dt.days / 365.25
 
         opt = Optimizer()
         opt.fit(portfolio, weibull_model, budget=100000.0)
 
         # A1 is older (1990 vs 2000), should be first
         if len(opt.result.selections) >= 2:
-            first = opt.result.selections[opt.result.selections['rank'] == 1].iloc[0]
-            assert first['asset_id'] == 'A1'
+            first = opt.result.selections[opt.result.selections["rank"] == 1].iloc[0]
+            assert first["asset_id"] == "A1"
 
 
 class TestMinRiskThreshold:
@@ -175,14 +178,14 @@ class TestMinRiskThreshold:
         risk_df = weibull_model.transform(portfolio)
 
         # Get risk of youngest asset (A5, ~5 years old)
-        a5_risk = risk_df[risk_df['asset_id'] == 'A5']['failure_probability'].iloc[0]
+        a5_risk = risk_df[risk_df["asset_id"] == "A5"]["failure_probability"].iloc[0]
 
         # Set threshold above A5's risk
         opt = Optimizer(min_risk_threshold=a5_risk + 0.01)
         opt.fit(portfolio, weibull_model, budget=500000.0)
 
-        selected_ids = opt.result.selections['asset_id'].tolist()
-        assert 'A5' not in selected_ids
+        selected_ids = opt.result.selections["asset_id"].tolist()
+        assert "A5" not in selected_ids
 
     def test_threshold_zero_includes_all(self, optimization_portfolio, weibull_model):
         """Threshold of 0 includes all assets (if budget allows)."""
@@ -203,11 +206,11 @@ class TestExclusionList:
         portfolio = optimization_portfolio
 
         opt = Optimizer()
-        opt.fit(portfolio, weibull_model, budget=500000.0, exclusions=['A1', 'A2'])
+        opt.fit(portfolio, weibull_model, budget=500000.0, exclusions=["A1", "A2"])
 
-        selected_ids = opt.result.selections['asset_id'].tolist()
-        assert 'A1' not in selected_ids
-        assert 'A2' not in selected_ids
+        selected_ids = opt.result.selections["asset_id"].tolist()
+        assert "A1" not in selected_ids
+        assert "A2" not in selected_ids
 
     def test_empty_exclusion_list(self, optimization_portfolio, weibull_model):
         """Empty exclusion list excludes nothing."""
@@ -232,11 +235,13 @@ class TestOptimizationResult:
         opt = Optimizer()
         opt.fit(portfolio, weibull_model, budget=100000.0)
 
-        required_cols = ['asset_id', 'intervention_type', 'cost', 'risk_score', 'rank']
+        required_cols = ["asset_id", "intervention_type", "cost", "risk_score", "rank"]
         for col in required_cols:
             assert col in opt.result.selections.columns
 
-    def test_selections_include_risk_details(self, optimization_portfolio, weibull_model):
+    def test_selections_include_risk_details(
+        self, optimization_portfolio, weibull_model
+    ):
         """Selections include risk_before, risk_after, and risk_reduction."""
         portfolio = optimization_portfolio
 
@@ -244,14 +249,14 @@ class TestOptimizationResult:
         opt.fit(portfolio, weibull_model, budget=100000.0)
 
         selections = opt.result.selections
-        for col in ['risk_before', 'risk_after', 'risk_reduction']:
+        for col in ["risk_before", "risk_after", "risk_reduction"]:
             assert col in selections.columns
 
         if len(selections) > 0:
             row = selections.iloc[0]
             assert np.isclose(
-                row['risk_reduction'],
-                row['risk_before'] - row['risk_after'],
+                row["risk_reduction"],
+                row["risk_before"] - row["risk_after"],
             )
 
     def test_budget_summary_columns(self, optimization_portfolio, weibull_model):
@@ -261,7 +266,7 @@ class TestOptimizationResult:
         opt = Optimizer()
         opt.fit(portfolio, weibull_model, budget=100000.0)
 
-        required_cols = ['budget', 'spent', 'remaining', 'utilization_pct']
+        required_cols = ["budget", "spent", "remaining", "utilization_pct"]
         for col in required_cols:
             assert col in opt.result.budget_summary.columns
 
@@ -269,9 +274,9 @@ class TestOptimizationResult:
         """Strategy is recorded in result."""
         portfolio = optimization_portfolio
 
-        opt = Optimizer(strategy='greedy')
+        opt = Optimizer(strategy="greedy")
         opt.fit(portfolio, weibull_model, budget=100000.0)
-        assert opt.result.strategy == 'greedy'
+        assert opt.result.strategy == "greedy"
 
 
 class TestEdgeCases:
@@ -279,15 +284,17 @@ class TestEdgeCases:
 
     def test_empty_portfolio(self, weibull_model):
         """Empty portfolio returns empty selections."""
-        portfolio = pd.DataFrame({
-            'asset_id': pd.Series([], dtype=str),
-            'asset_type': pd.Series([], dtype=str),
-            'material': pd.Series([], dtype=str),
-            'install_date': pd.Series([], dtype='datetime64[ns]'),
-            'diameter_mm': pd.Series([], dtype='Int64'),
-            'length_m': pd.Series([], dtype=float),
-            'condition_score': pd.Series([], dtype=float),
-        })
+        portfolio = pd.DataFrame(
+            {
+                "asset_id": pd.Series([], dtype=str),
+                "asset_type": pd.Series([], dtype=str),
+                "material": pd.Series([], dtype=str),
+                "install_date": pd.Series([], dtype="datetime64[ns]"),
+                "diameter_mm": pd.Series([], dtype="Int64"),
+                "length_m": pd.Series([], dtype=float),
+                "condition_score": pd.Series([], dtype=float),
+            }
+        )
 
         opt = Optimizer()
         opt.fit(portfolio, weibull_model, budget=100000.0)
@@ -297,16 +304,20 @@ class TestEdgeCases:
 
     def test_single_asset(self, weibull_model):
         """Single asset portfolio works correctly."""
-        df = pd.DataFrame({
-            'asset_id': ['A1'],
-            'asset_type': ['pipe'],
-            'material': ['PVC'],
-            'install_date': pd.to_datetime(['1990-01-01']),
-            'diameter_mm': [100],
-            'length_m': [100.0],
-        })
+        df = pd.DataFrame(
+            {
+                "asset_id": ["A1"],
+                "asset_type": ["pipe"],
+                "material": ["PVC"],
+                "install_date": pd.to_datetime(["1990-01-01"]),
+                "diameter_mm": [100],
+                "length_m": [100.0],
+            }
+        )
         portfolio = df.copy()
-        portfolio['age'] = (pd.Timestamp.now() - portfolio['install_date']).dt.days / 365.25
+        portfolio["age"] = (
+            pd.Timestamp.now() - portfolio["install_date"]
+        ).dt.days / 365.25
 
         opt = Optimizer()
         opt.fit(portfolio, weibull_model, budget=100000.0)

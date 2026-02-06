@@ -3,4 +3,4 @@
 from .optimizer import Optimizer
 from .result import OptimizationResult
 
-__all__ = ['Optimizer', 'OptimizationResult']
+__all__ = ["Optimizer", "OptimizationResult"]

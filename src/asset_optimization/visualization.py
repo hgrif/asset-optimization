@@ -13,30 +13,30 @@ from asset_optimization.simulation.result import SimulationResult
 
 # SDK Theme Colors - Professional blue palette
 SDK_COLORS = {
-    'primary': '#2563eb',      # Blue 600
-    'secondary': '#64748b',    # Slate 500
-    'success': '#16a34a',      # Green 600
-    'warning': '#ea580c',      # Orange 600
-    'danger': '#dc2626',       # Red 600
-    'background': '#f8fafc',   # Slate 50
-    'grid': '#e2e8f0',         # Slate 200
-    'text': '#1e293b',         # Slate 800
+    "primary": "#2563eb",  # Blue 600
+    "secondary": "#64748b",  # Slate 500
+    "success": "#16a34a",  # Green 600
+    "warning": "#ea580c",  # Orange 600
+    "danger": "#dc2626",  # Red 600
+    "background": "#f8fafc",  # Slate 50
+    "grid": "#e2e8f0",  # Slate 200
+    "text": "#1e293b",  # Slate 800
 }
 
 SDK_PALETTE = [
-    SDK_COLORS['primary'],
-    SDK_COLORS['warning'],
-    SDK_COLORS['success'],
-    SDK_COLORS['danger'],
-    SDK_COLORS['secondary'],
+    SDK_COLORS["primary"],
+    SDK_COLORS["warning"],
+    SDK_COLORS["success"],
+    SDK_COLORS["danger"],
+    SDK_COLORS["secondary"],
 ]
 
-DEFAULT_ACTION_ORDER = ['none', 'record_only', 'repair', 'replace']
+DEFAULT_ACTION_ORDER = ["none", "record_only", "repair", "replace"]
 DEFAULT_ACTION_COLORS = {
-    'none': SDK_COLORS['grid'],
-    'record_only': SDK_COLORS['warning'],
-    'repair': SDK_COLORS['success'],
-    'replace': SDK_COLORS['danger'],
+    "none": SDK_COLORS["grid"],
+    "record_only": SDK_COLORS["warning"],
+    "repair": SDK_COLORS["success"],
+    "replace": SDK_COLORS["danger"],
 }
 
 
@@ -54,27 +54,29 @@ def set_sdk_theme() -> None:
     >>> set_sdk_theme()  # Call once at start of notebook
     """
     # Set seaborn style
-    sns.set_theme(style='whitegrid')
+    sns.set_theme(style="whitegrid")
 
     # Custom matplotlib params
-    plt.rcParams.update({
-        'figure.facecolor': SDK_COLORS['background'],
-        'axes.facecolor': 'white',
-        'axes.edgecolor': SDK_COLORS['grid'],
-        'axes.labelcolor': SDK_COLORS['text'],
-        'axes.grid': True,
-        'grid.color': SDK_COLORS['grid'],
-        'grid.linestyle': '--',
-        'grid.alpha': 0.7,
-        'xtick.color': SDK_COLORS['text'],
-        'ytick.color': SDK_COLORS['text'],
-        'text.color': SDK_COLORS['text'],
-        'font.size': 10,
-        'axes.titlesize': 12,
-        'axes.labelsize': 10,
-        'legend.fontsize': 9,
-        'figure.titlesize': 14,
-    })
+    plt.rcParams.update(
+        {
+            "figure.facecolor": SDK_COLORS["background"],
+            "axes.facecolor": "white",
+            "axes.edgecolor": SDK_COLORS["grid"],
+            "axes.labelcolor": SDK_COLORS["text"],
+            "axes.grid": True,
+            "grid.color": SDK_COLORS["grid"],
+            "grid.linestyle": "--",
+            "grid.alpha": 0.7,
+            "xtick.color": SDK_COLORS["text"],
+            "ytick.color": SDK_COLORS["text"],
+            "text.color": SDK_COLORS["text"],
+            "font.size": 10,
+            "axes.titlesize": 12,
+            "axes.labelsize": 10,
+            "legend.fontsize": 9,
+            "figure.titlesize": 14,
+        }
+    )
 
     # Set default color palette
     sns.set_palette(SDK_PALETTE)
@@ -83,7 +85,7 @@ def set_sdk_theme() -> None:
 def plot_cost_over_time(
     result: SimulationResult,
     ax: Optional[plt.Axes] = None,
-    title: str = 'Total Cost Over Time',
+    title: str = "Total Cost Over Time",
     figsize: tuple = (10, 6),
 ) -> plt.Axes:
     """Plot total cost over time as a line chart.
@@ -117,23 +119,21 @@ def plot_cost_over_time(
 
     sns.lineplot(
         data=data,
-        x='year',
-        y='total_cost',
+        x="year",
+        y="total_cost",
         ax=ax,
-        marker='o',
+        marker="o",
         markersize=8,
         linewidth=2,
-        color=SDK_COLORS['primary'],
+        color=SDK_COLORS["primary"],
     )
 
-    ax.set_title(title, fontweight='bold')
-    ax.set_xlabel('Year')
-    ax.set_ylabel('Total Cost ($)')
+    ax.set_title(title, fontweight="bold")
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Total Cost ($)")
 
     # Format y-axis with thousands separator
-    ax.yaxis.set_major_formatter(
-        plt.FuncFormatter(lambda x, p: f'${x:,.0f}')
-    )
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"${x:,.0f}"))
 
     # Ensure integer years on x-axis
     ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
@@ -145,7 +145,7 @@ def plot_cost_over_time(
 def plot_failures_by_year(
     result: SimulationResult,
     ax: Optional[plt.Axes] = None,
-    title: str = 'Failures by Year',
+    title: str = "Failures by Year",
     figsize: tuple = (10, 6),
 ) -> plt.Axes:
     """Plot failure count by year as a bar chart.
@@ -178,16 +178,16 @@ def plot_failures_by_year(
 
     sns.barplot(
         data=data,
-        x='year',
-        y='failure_count',
+        x="year",
+        y="failure_count",
         ax=ax,
-        color=SDK_COLORS['danger'],
-        edgecolor='white',
+        color=SDK_COLORS["danger"],
+        edgecolor="white",
     )
 
-    ax.set_title(title, fontweight='bold')
-    ax.set_xlabel('Year')
-    ax.set_ylabel('Number of Failures')
+    ax.set_title(title, fontweight="bold")
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Number of Failures")
 
     # Ensure integer y-axis
     ax.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
@@ -198,9 +198,9 @@ def plot_failures_by_year(
 
 def plot_risk_distribution(
     data: pd.DataFrame,
-    risk_column: str = 'risk_score',
+    risk_column: str = "risk_score",
     ax: Optional[plt.Axes] = None,
-    title: str = 'Risk Score Distribution',
+    title: str = "Risk Score Distribution",
     figsize: tuple = (10, 6),
     bins: int = 20,
 ) -> plt.Axes:
@@ -240,25 +240,33 @@ def plot_risk_distribution(
         fig, ax = plt.subplots(figsize=figsize)
 
     if risk_column not in data.columns:
-        raise ValueError(f"Column '{risk_column}' not found. Available: {list(data.columns)}")
+        raise ValueError(
+            f"Column '{risk_column}' not found. Available: {list(data.columns)}"
+        )
 
     sns.histplot(
         data=data,
         x=risk_column,
         ax=ax,
         bins=bins,
-        color=SDK_COLORS['warning'],
-        edgecolor='white',
+        color=SDK_COLORS["warning"],
+        edgecolor="white",
         kde=True,
     )
 
-    ax.set_title(title, fontweight='bold')
-    ax.set_xlabel('Risk Score')
-    ax.set_ylabel('Count')
+    ax.set_title(title, fontweight="bold")
+    ax.set_xlabel("Risk Score")
+    ax.set_ylabel("Count")
 
     # Add vertical line for mean
     mean_risk = data[risk_column].mean()
-    ax.axvline(mean_risk, color=SDK_COLORS['danger'], linestyle='--', linewidth=2, label=f'Mean: {mean_risk:.3f}')
+    ax.axvline(
+        mean_risk,
+        color=SDK_COLORS["danger"],
+        linestyle="--",
+        linewidth=2,
+        label=f"Mean: {mean_risk:.3f}",
+    )
     ax.legend()
 
     plt.tight_layout()
@@ -267,7 +275,7 @@ def plot_risk_distribution(
 
 def plot_scenario_comparison(
     comparison_df: pd.DataFrame,
-    metric: str = 'total_cost',
+    metric: str = "total_cost",
     ax: Optional[plt.Axes] = None,
     title: Optional[str] = None,
     figsize: tuple = (10, 6),
@@ -304,56 +312,54 @@ def plot_scenario_comparison(
         fig, ax = plt.subplots(figsize=figsize)
 
     # Filter to requested metric
-    plot_data = comparison_df[comparison_df['metric'] == metric].copy()
+    plot_data = comparison_df[comparison_df["metric"] == metric].copy()
 
     if plot_data.empty:
-        available = comparison_df['metric'].unique().tolist()
+        available = comparison_df["metric"].unique().tolist()
         raise ValueError(f"Metric '{metric}' not found. Available: {available}")
 
     sns.barplot(
         data=plot_data,
-        x='year',
-        y='value',
-        hue='scenario',
+        x="year",
+        y="value",
+        hue="scenario",
         ax=ax,
-        palette=SDK_PALETTE[:len(plot_data['scenario'].unique())],
-        edgecolor='white',
+        palette=SDK_PALETTE[: len(plot_data["scenario"].unique())],
+        edgecolor="white",
     )
 
     if title is None:
         # Convert metric name to title case
-        title = metric.replace('_', ' ').title() + ' by Scenario'
+        title = metric.replace("_", " ").title() + " by Scenario"
 
-    ax.set_title(title, fontweight='bold')
-    ax.set_xlabel('Year')
+    ax.set_title(title, fontweight="bold")
+    ax.set_xlabel("Year")
 
     # Format y-axis based on metric
-    if 'cost' in metric.lower():
-        ax.set_ylabel('Cost ($)')
-        ax.yaxis.set_major_formatter(
-            plt.FuncFormatter(lambda x, p: f'${x:,.0f}')
-        )
-    elif 'count' in metric.lower():
-        ax.set_ylabel('Count')
+    if "cost" in metric.lower():
+        ax.set_ylabel("Cost ($)")
+        ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"${x:,.0f}"))
+    elif "count" in metric.lower():
+        ax.set_ylabel("Count")
         ax.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
     else:
-        ax.set_ylabel(metric.replace('_', ' ').title())
+        ax.set_ylabel(metric.replace("_", " ").title())
 
-    ax.legend(title='Scenario')
+    ax.legend(title="Scenario")
     plt.tight_layout()
     return ax
 
 
 def plot_asset_action_heatmap(
     asset_history: Union[pd.DataFrame, SimulationResult],
-    action_col: str = 'action',
-    year_col: str = 'year',
-    asset_id_col: str = 'asset_id',
+    action_col: str = "action",
+    year_col: str = "year",
+    asset_id_col: str = "asset_id",
     action_order: Optional[Sequence[str]] = None,
     palette: Optional[Union[Mapping[str, str], Sequence[str]]] = None,
     max_assets: Optional[int] = None,
     ax: Optional[plt.Axes] = None,
-    title: str = 'Asset Actions Over Time',
+    title: str = "Asset Actions Over Time",
     figsize: tuple = (12, 6),
 ) -> plt.Axes:
     """Plot asset-year actions as a categorical heatmap.
@@ -415,16 +421,16 @@ def plot_asset_action_heatmap(
     missing = [col for col in required_columns if col not in history.columns]
     if missing:
         raise MissingFieldError(
-            field='asset_history',
-            message='Missing required columns',
-            details={'missing': missing},
+            field="asset_history",
+            message="Missing required columns",
+            details={"missing": missing},
         )
 
     if max_assets is not None and max_assets <= 0:
         raise ValueError("max_assets must be a positive integer.")
 
     data = history[[asset_id_col, year_col, action_col]].copy()
-    data = data.drop_duplicates(subset=[asset_id_col, year_col], keep='last')
+    data = data.drop_duplicates(subset=[asset_id_col, year_col], keep="last")
 
     if action_order is None:
         action_order = list(DEFAULT_ACTION_ORDER)
@@ -449,13 +455,13 @@ def plot_asset_action_heatmap(
 
     missing_colors = [action for action in action_order if action not in action_colors]
     if missing_colors:
-        extra_colors = sns.color_palette('tab10', n_colors=len(missing_colors))
+        extra_colors = sns.color_palette("tab10", n_colors=len(missing_colors))
         for action, color in zip(missing_colors, extra_colors):
             action_colors[action] = color
 
     asset_ids = pd.Series(data[asset_id_col].unique())
     try:
-        asset_ids = asset_ids.sort_values(kind='stable')
+        asset_ids = asset_ids.sort_values(kind="stable")
     except TypeError:
         pass
     asset_ids_list = asset_ids.tolist()
@@ -474,7 +480,7 @@ def plot_asset_action_heatmap(
 
     action_to_code = {action: idx for idx, action in enumerate(action_order)}
     code_matrix = pivot.replace(action_to_code)
-    code_matrix = code_matrix.apply(pd.to_numeric, errors='coerce')
+    code_matrix = code_matrix.apply(pd.to_numeric, errors="coerce")
 
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
@@ -491,7 +497,7 @@ def plot_asset_action_heatmap(
         norm=norm,
         mask=code_matrix.isna(),
         linewidths=0.5,
-        linecolor='white',
+        linecolor="white",
         cbar=True,
     )
 
@@ -499,9 +505,9 @@ def plot_asset_action_heatmap(
     cbar.set_ticks(range(len(action_order)))
     cbar.set_ticklabels(action_order)
 
-    ax.set_title(title, fontweight='bold')
-    ax.set_xlabel('Year')
-    ax.set_ylabel('Asset')
+    ax.set_title(title, fontweight="bold")
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Asset")
 
     plt.tight_layout()
     return ax

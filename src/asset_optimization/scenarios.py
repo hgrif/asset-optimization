@@ -46,7 +46,7 @@ def compare_scenarios(
     Missing metrics in a scenario will be filled with NaN.
     """
     if metrics is None:
-        metrics = ['total_cost', 'failure_count', 'intervention_count']
+        metrics = ["total_cost", "failure_count", "intervention_count"]
 
     dfs = []
     for name, result in scenarios.items():
@@ -60,21 +60,21 @@ def compare_scenarios(
 
         # Melt to long format
         melted = summary.melt(
-            id_vars=['year'],
+            id_vars=["year"],
             value_vars=available_metrics,
-            var_name='metric',
-            value_name='value',
+            var_name="metric",
+            value_name="value",
         )
-        melted['scenario'] = name
+        melted["scenario"] = name
         dfs.append(melted)
 
     if not dfs:
-        return pd.DataFrame(columns=['scenario', 'year', 'metric', 'value'])
+        return pd.DataFrame(columns=["scenario", "year", "metric", "value"])
 
     result_df = pd.concat(dfs, ignore_index=True)
 
     # Reorder columns
-    return result_df[['scenario', 'year', 'metric', 'value']]
+    return result_df[["scenario", "year", "metric", "value"]]
 
 
 def create_do_nothing_baseline(
@@ -120,44 +120,48 @@ def create_do_nothing_baseline(
 
     # Estimate 'do nothing' by:
     # 1. Zero interventions
-    if 'intervention_count' in summary.columns:
-        summary['intervention_count'] = 0
+    if "intervention_count" in summary.columns:
+        summary["intervention_count"] = 0
 
     # 2. Increase failures (rough heuristic: more failures without interventions)
-    if 'failure_count' in summary.columns:
+    if "failure_count" in summary.columns:
         # Scale up failures progressively over time
         years = range(len(summary))
         multipliers = [1 + 0.1 * y * failure_cost_multiplier for y in years]
-        summary['failure_count'] = (summary['failure_count'] * multipliers).astype(int)
+        summary["failure_count"] = (summary["failure_count"] * multipliers).astype(int)
 
     # 3. Adjust total cost (remove intervention savings, add failure costs)
-    if 'total_cost' in summary.columns and 'failure_count' in summary.columns:
+    if "total_cost" in summary.columns and "failure_count" in summary.columns:
         # Estimate cost per failure from original data
-        original_failures = result.summary['failure_count'].sum()
+        original_failures = result.summary["failure_count"].sum()
         if original_failures > 0:
             avg_failure_cost = result.total_cost() / max(original_failures, 1)
         else:
             avg_failure_cost = 50000  # Default assumption
 
         # Cost = failure_count * avg_failure_cost (no intervention costs)
-        summary['total_cost'] = summary['failure_count'] * avg_failure_cost * failure_cost_multiplier
+        summary["total_cost"] = (
+            summary["failure_count"] * avg_failure_cost * failure_cost_multiplier
+        )
 
     # 4. Age increases faster without replacements
-    if 'avg_age' in summary.columns:
+    if "avg_age" in summary.columns:
         # Age increases by 1 each year plus accumulated effect
-        base_age = summary['avg_age'].iloc[0] if len(summary) > 0 else 25
-        summary['avg_age'] = [base_age + i * 1.2 for i in range(len(summary))]
+        base_age = summary["avg_age"].iloc[0] if len(summary) > 0 else 25
+        summary["avg_age"] = [base_age + i * 1.2 for i in range(len(summary))]
 
-    asset_history = pd.DataFrame(columns=[
-        'year',
-        'asset_id',
-        'age',
-        'action',
-        'failed',
-        'failure_cost',
-        'intervention_cost',
-        'total_cost',
-    ])
+    asset_history = pd.DataFrame(
+        columns=[
+            "year",
+            "asset_id",
+            "age",
+            "action",
+            "failed",
+            "failure_cost",
+            "intervention_cost",
+            "total_cost",
+        ]
+    )
 
     return SimulationResult(
         summary=summary,
@@ -170,7 +174,7 @@ def create_do_nothing_baseline(
 
 def compare(
     result: SimulationResult,
-    baseline: Union[SimulationResult, str] = 'do_nothing',
+    baseline: Union[SimulationResult, str] = "do_nothing",
     metrics: Optional[List[str]] = None,
 ) -> pd.DataFrame:
     """Compare a simulation result against a baseline.
@@ -201,14 +205,16 @@ def compare(
     >>> # Use explicit baseline
     >>> comparison = compare(optimized_result, baseline=manual_baseline)
     """
-    if isinstance(baseline, str) and baseline == 'do_nothing':
+    if isinstance(baseline, str) and baseline == "do_nothing":
         baseline_result = create_do_nothing_baseline(result)
     elif isinstance(baseline, SimulationResult):
         baseline_result = baseline
     else:
-        raise ValueError(f"baseline must be SimulationResult or 'do_nothing', got {type(baseline)}")
+        raise ValueError(
+            f"baseline must be SimulationResult or 'do_nothing', got {type(baseline)}"
+        )
 
     return compare_scenarios(
-        {'optimized': result, 'baseline': baseline_result},
+        {"optimized": result, "baseline": baseline_result},
         metrics=metrics,
     )

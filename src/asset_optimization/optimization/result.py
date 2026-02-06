@@ -71,9 +71,9 @@ class OptimizationResult:
             Total cost of selected interventions.
             Returns 0.0 if budget_summary is empty or column missing.
         """
-        if self.budget_summary.empty or 'spent' not in self.budget_summary.columns:
+        if self.budget_summary.empty or "spent" not in self.budget_summary.columns:
             return 0.0
-        return float(self.budget_summary['spent'].iloc[0])
+        return float(self.budget_summary["spent"].iloc[0])
 
     @property
     def utilization_pct(self) -> float:
@@ -85,14 +85,17 @@ class OptimizationResult:
             Percentage of budget used (spent / budget * 100).
             Returns 0.0 if budget_summary is empty or column missing.
         """
-        if self.budget_summary.empty or 'utilization_pct' not in self.budget_summary.columns:
+        if (
+            self.budget_summary.empty
+            or "utilization_pct" not in self.budget_summary.columns
+        ):
             return 0.0
-        return float(self.budget_summary['utilization_pct'].iloc[0])
+        return float(self.budget_summary["utilization_pct"].iloc[0])
 
     def to_parquet(
         self,
         path: Union[str, Path],
-        format: str = 'minimal',
+        format: str = "minimal",
         year: int = 2024,
         portfolio: Optional[pd.DataFrame] = None,
     ) -> None:
@@ -121,12 +124,17 @@ class OptimizationResult:
         >>> result.to_parquet('schedule.parquet')
         >>> result.to_parquet('schedule_detailed.parquet', format='detailed', portfolio=portfolio.data)
         """
-        from asset_optimization.exports import export_schedule_minimal, export_schedule_detailed
+        from asset_optimization.exports import (
+            export_schedule_minimal,
+            export_schedule_detailed,
+        )
 
-        if format == 'minimal':
+        if format == "minimal":
             export_schedule_minimal(self.selections, path, year=year)
-        elif format == 'detailed':
-            export_schedule_detailed(self.selections, path, year=year, portfolio=portfolio)
+        elif format == "detailed":
+            export_schedule_detailed(
+                self.selections, path, year=year, portfolio=portfolio
+            )
         else:
             raise ValueError(f"Unknown format: {format}. Use 'minimal' or 'detailed'")
 

@@ -111,10 +111,10 @@ class Simulator:
         # Set up interventions
         if interventions is None:
             self.interventions = {
-                'do_nothing': DO_NOTHING,
-                'inspect': INSPECT,
-                'repair': REPAIR,
-                'replace': REPLACE,
+                "do_nothing": DO_NOTHING,
+                "inspect": INSPECT,
+                "repair": REPAIR,
+                "replace": REPLACE,
             }
         else:
             self.interventions = interventions
@@ -143,8 +143,8 @@ class Simulator:
 
         # Calculate initial ages from install_date relative to start_year
         start_date = pd.Timestamp(year=self.config.start_year, month=1, day=1)
-        state['age'] = (start_date - state['install_date']).dt.days / 365.25
-        state['age'] = state['age'].clip(lower=0)  # No negative ages
+        state["age"] = (start_date - state["install_date"]).dt.days / 365.25
+        state["age"] = state["age"].clip(lower=0)  # No negative ages
 
         # Initialize tracking structures
         summary_rows = []
@@ -157,73 +157,100 @@ class Simulator:
             year = self.config.start_year + year_offset
 
             # Simulate one timestep
-            state, failures_mask, costs, asset_events = self._simulate_timestep(state, year)
+            state, failures_mask, costs, asset_events = self._simulate_timestep(
+                state, year
+            )
 
             # Count failures and interventions
             n_failures = failures_mask.sum()
-            n_interventions = n_failures if self.config.failure_response != 'record_only' else 0
+            n_interventions = (
+                n_failures if self.config.failure_response != "record_only" else 0
+            )
 
             # Record summary row
-            summary_rows.append({
-                'year': year,
-                'total_cost': costs['total'],
-                'failure_count': n_failures,
-                'intervention_count': n_interventions,
-                'avg_age': state['age'].mean(),
-            })
+            summary_rows.append(
+                {
+                    "year": year,
+                    "total_cost": costs["total"],
+                    "failure_count": n_failures,
+                    "intervention_count": n_interventions,
+                    "avg_age": state["age"].mean(),
+                }
+            )
 
             # Record cost breakdown
-            cost_breakdown_rows.append({
-                'year': year,
-                'failure_direct_cost': costs['failure_direct'],
-                'failure_consequence_cost': costs['failure_consequence'],
-                'intervention_cost': costs['intervention'],
-            })
+            cost_breakdown_rows.append(
+                {
+                    "year": year,
+                    "failure_direct_cost": costs["failure_direct"],
+                    "failure_consequence_cost": costs["failure_consequence"],
+                    "intervention_cost": costs["intervention"],
+                }
+            )
 
             # Record failure log entries
             if n_failures > 0:
                 failed_assets = state[failures_mask]
                 for _, asset in failed_assets.iterrows():
-                    failure_log_rows.append({
-                        'year': year,
-                        'asset_id': asset['asset_id'],
-                        'age_at_failure': asset.get('age_at_failure', asset['age']),
-                        'material': asset['material'],
-                        'direct_cost': DEFAULT_FAILURE_DIRECT_COST,
-                        'consequence_cost': DEFAULT_FAILURE_CONSEQUENCE_COST,
-                    })
+                    failure_log_rows.append(
+                        {
+                            "year": year,
+                            "asset_id": asset["asset_id"],
+                            "age_at_failure": asset.get("age_at_failure", asset["age"]),
+                            "material": asset["material"],
+                            "direct_cost": DEFAULT_FAILURE_DIRECT_COST,
+                            "consequence_cost": DEFAULT_FAILURE_CONSEQUENCE_COST,
+                        }
+                    )
 
             # Track asset history if enabled
-            asset_history_rows.append(pd.DataFrame({
-                'year': year,
-                'asset_id': state['asset_id'].values,
-                'age': state['age'].values,
-                'action': asset_events['action'].values,
-                'failed': asset_events['failed'].values,
-                'failure_cost': asset_events['failure_cost'].values,
-                'intervention_cost': asset_events['intervention_cost'].values,
-                'total_cost': asset_events['total_cost'].values,
-            }))
+            asset_history_rows.append(
+                pd.DataFrame(
+                    {
+                        "year": year,
+                        "asset_id": state["asset_id"].values,
+                        "age": state["age"].values,
+                        "action": asset_events["action"].values,
+                        "failed": asset_events["failed"].values,
+                        "failure_cost": asset_events["failure_cost"].values,
+                        "intervention_cost": asset_events["intervention_cost"].values,
+                        "total_cost": asset_events["total_cost"].values,
+                    }
+                )
+            )
 
         # Build result DataFrames
         summary = pd.DataFrame(summary_rows)
         cost_breakdown = pd.DataFrame(cost_breakdown_rows)
-        failure_log = pd.DataFrame(failure_log_rows) if failure_log_rows else pd.DataFrame(
-            columns=['year', 'asset_id', 'age_at_failure', 'material', 'direct_cost', 'consequence_cost']
+        failure_log = (
+            pd.DataFrame(failure_log_rows)
+            if failure_log_rows
+            else pd.DataFrame(
+                columns=[
+                    "year",
+                    "asset_id",
+                    "age_at_failure",
+                    "material",
+                    "direct_cost",
+                    "consequence_cost",
+                ]
+            )
         )
         if asset_history_rows:
             asset_history = pd.concat(asset_history_rows, ignore_index=True)
         else:
-            asset_history = pd.DataFrame(columns=[
-                'year',
-                'asset_id',
-                'age',
-                'action',
-                'failed',
-                'failure_cost',
-                'intervention_cost',
-                'total_cost',
-            ])
+            asset_history = pd.DataFrame(
+                columns=[
+                    "year",
+                    "asset_id",
+                    "age",
+                    "action",
+                    "failed",
+                    "failure_cost",
+                    "intervention_cost",
+                    "total_cost",
+                ]
+            )
 
         return SimulationResult(
             summary=summary,
@@ -256,7 +283,7 @@ class Simulator:
         state = state.copy()
 
         # Step 1: Increment age by 1 year
-        state['age'] = state['age'] + 1
+        state["age"] = state["age"] + 1
 
         # Step 2: Calculate conditional failure probability
         probs = self._calculate_conditional_probability(state)
@@ -266,60 +293,62 @@ class Simulator:
         failures_mask = pd.Series(random_draws < probs, index=state.index)
 
         # Record age at failure before interventions modify it
-        state.loc[failures_mask, 'age_at_failure'] = state.loc[failures_mask, 'age']
+        state.loc[failures_mask, "age_at_failure"] = state.loc[failures_mask, "age"]
 
         # Step 4: Apply failure_response intervention to failed assets
         costs = {
-            'failure_direct': 0.0,
-            'failure_consequence': 0.0,
-            'intervention': 0.0,
-            'total': 0.0,
+            "failure_direct": 0.0,
+            "failure_consequence": 0.0,
+            "intervention": 0.0,
+            "total": 0.0,
         }
-        actions = np.full(len(state), 'none', dtype=object)
+        actions = np.full(len(state), "none", dtype=object)
         failure_costs = np.zeros(len(state), dtype=float)
         intervention_costs = np.zeros(len(state), dtype=float)
 
         n_failures = failures_mask.sum()
         if n_failures > 0:
             # Failure costs
-            costs['failure_direct'] = n_failures * DEFAULT_FAILURE_DIRECT_COST
-            costs['failure_consequence'] = n_failures * DEFAULT_FAILURE_CONSEQUENCE_COST
+            costs["failure_direct"] = n_failures * DEFAULT_FAILURE_DIRECT_COST
+            costs["failure_consequence"] = n_failures * DEFAULT_FAILURE_CONSEQUENCE_COST
             failure_costs[failures_mask.to_numpy()] = (
                 DEFAULT_FAILURE_DIRECT_COST + DEFAULT_FAILURE_CONSEQUENCE_COST
             )
             actions[failures_mask.to_numpy()] = self.config.failure_response
 
             # Apply intervention based on failure_response config
-            if self.config.failure_response == 'replace':
-                intervention = self.interventions.get('replace', REPLACE)
-                state.loc[failures_mask, 'age'] = state.loc[failures_mask, 'age'].apply(
+            if self.config.failure_response == "replace":
+                intervention = self.interventions.get("replace", REPLACE)
+                state.loc[failures_mask, "age"] = state.loc[failures_mask, "age"].apply(
                     intervention.apply_age_effect
                 )
-                costs['intervention'] = n_failures * intervention.cost
+                costs["intervention"] = n_failures * intervention.cost
                 intervention_costs[failures_mask.to_numpy()] = intervention.cost
 
-            elif self.config.failure_response == 'repair':
-                intervention = self.interventions.get('repair', REPAIR)
-                state.loc[failures_mask, 'age'] = state.loc[failures_mask, 'age'].apply(
+            elif self.config.failure_response == "repair":
+                intervention = self.interventions.get("repair", REPAIR)
+                state.loc[failures_mask, "age"] = state.loc[failures_mask, "age"].apply(
                     intervention.apply_age_effect
                 )
-                costs['intervention'] = n_failures * intervention.cost
+                costs["intervention"] = n_failures * intervention.cost
                 intervention_costs[failures_mask.to_numpy()] = intervention.cost
 
             # 'record_only' doesn't apply intervention or add intervention cost
 
-        costs['total'] = (
-            costs['failure_direct']
-            + costs['failure_consequence']
-            + costs['intervention']
+        costs["total"] = (
+            costs["failure_direct"]
+            + costs["failure_consequence"]
+            + costs["intervention"]
         )
 
         asset_events = {
-            'action': pd.Series(actions, index=state.index),
-            'failed': pd.Series(failures_mask.to_numpy(), index=state.index),
-            'failure_cost': pd.Series(failure_costs, index=state.index),
-            'intervention_cost': pd.Series(intervention_costs, index=state.index),
-            'total_cost': pd.Series(failure_costs + intervention_costs, index=state.index),
+            "action": pd.Series(actions, index=state.index),
+            "failed": pd.Series(failures_mask.to_numpy(), index=state.index),
+            "failure_cost": pd.Series(failure_costs, index=state.index),
+            "intervention_cost": pd.Series(intervention_costs, index=state.index),
+            "total_cost": pd.Series(
+                failure_costs + intervention_costs, index=state.index
+            ),
         }
 
         return state, failures_mask, costs, asset_events
@@ -341,9 +370,7 @@ class Simulator:
         """
         return self.model.calculate_conditional_probability(state)
 
-    def get_intervention_options(
-        self, state: pd.DataFrame, year: int
-    ) -> pd.DataFrame:
+    def get_intervention_options(self, state: pd.DataFrame, year: int) -> pd.DataFrame:
         """Generate available intervention options for each asset.
 
         This method exposes what interventions *could* be done at the current
@@ -380,8 +407,8 @@ class Simulator:
         rows = []
 
         for _, asset in state.iterrows():
-            asset_id = asset['asset_id']
-            current_age = asset.get('age', 0.0)
+            asset_id = asset["asset_id"]
+            current_age = asset.get("age", 0.0)
 
             for intervention in self.interventions.values():
                 # Describe age effect
@@ -397,12 +424,14 @@ class Simulator:
                     else:
                         age_effect_desc = f"age + {-age_diff:.0f}"
 
-                rows.append({
-                    'asset_id': asset_id,
-                    'intervention_type': intervention.name,
-                    'cost': intervention.cost,
-                    'age_effect': age_effect_desc,
-                })
+                rows.append(
+                    {
+                        "asset_id": asset_id,
+                        "intervention_type": intervention.name,
+                        "cost": intervention.cost,
+                        "age_effect": age_effect_desc,
+                    }
+                )
 
         return pd.DataFrame(rows)
 

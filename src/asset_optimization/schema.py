@@ -8,38 +8,38 @@ import pandera.pandas as pa
 portfolio_schema = pa.DataFrameSchema(
     columns={
         # Required columns
-        'asset_id': pa.Column(
+        "asset_id": pa.Column(
             str,
             unique=True,
             nullable=False,
         ),
-        'install_date': pa.Column(
+        "install_date": pa.Column(
             pd.Timestamp,
             nullable=False,
             checks=pa.Check.less_than_or_equal_to(pd.Timestamp.now()),
         ),
-        'asset_type': pa.Column(
+        "asset_type": pa.Column(
             str,
             nullable=False,
         ),
-        'material': pa.Column(
+        "material": pa.Column(
             str,
             nullable=False,
         ),
         # Optional columns
-        'diameter_mm': pa.Column(
-            'Int64',
+        "diameter_mm": pa.Column(
+            "Int64",
             nullable=True,
             checks=pa.Check.greater_than(0),
             required=False,
         ),
-        'length_m': pa.Column(
+        "length_m": pa.Column(
             float,
             nullable=True,
             checks=pa.Check.greater_than(0),
             required=False,
         ),
-        'condition_score': pa.Column(
+        "condition_score": pa.Column(
             float,
             nullable=True,
             checks=pa.Check.in_range(0, 100),
@@ -47,5 +47,5 @@ portfolio_schema = pa.DataFrameSchema(
         ),
     },
     strict=False,  # Allow extra columns
-    coerce=True,   # Try to coerce types before validation
+    coerce=True,  # Try to coerce types before validation
 )

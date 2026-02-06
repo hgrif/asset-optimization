@@ -58,7 +58,7 @@ class Optimizer:
     # Define available interventions (excluding DoNothing which is not an active choice)
     _INTERVENTIONS = [REPLACE, REPAIR, INSPECT]
 
-    def __init__(self, strategy: str = 'greedy', min_risk_threshold: float = 0.0):
+    def __init__(self, strategy: str = "greedy", min_risk_threshold: float = 0.0):
         """Initialize optimizer with strategy and threshold.
 
         Parameters
@@ -76,8 +76,8 @@ class Optimizer:
         portfolio: pd.DataFrame,
         model: "WeibullModel",
         budget: float,
-        exclusions: list[str] | None = None
-    ) -> 'Optimizer':
+        exclusions: list[str] | None = None,
+    ) -> "Optimizer":
         """Select interventions within budget.
 
         Parameters
@@ -106,7 +106,7 @@ class Optimizer:
             If portfolio data is invalid.
         """
         # Validate strategy
-        valid_strategies = ['greedy', 'milp']
+        valid_strategies = ["greedy", "milp"]
         if self.strategy not in valid_strategies:
             raise ValueError(
                 f"Unknown strategy '{self.strategy}'. "
@@ -114,7 +114,7 @@ class Optimizer:
             )
 
         # Handle MILP strategy
-        if self.strategy == 'milp':
+        if self.strategy == "milp":
             raise NotImplementedError(
                 "MILP strategy is planned but not yet implemented. "
                 "Use 'greedy' strategy for now."
@@ -127,7 +127,7 @@ class Optimizer:
         validated = validate_portfolio(portfolio)
 
         # Dispatch to strategy implementation
-        if self.strategy == 'greedy':
+        if self.strategy == "greedy":
             self._fit_greedy(validated, model, budget, exclusions)
 
         return self
@@ -137,7 +137,7 @@ class Optimizer:
         portfolio: pd.DataFrame,
         model: "WeibullModel",
         budget: float,
-        exclusions: list[str] | None = None
+        exclusions: list[str] | None = None,
     ) -> None:
         """Implement two-stage greedy algorithm.
 
@@ -176,22 +176,22 @@ class Optimizer:
 
         # CRITICAL: Ensure 'age' column exists BEFORE calling model.transform()
         # The transform() method validates 'age' exists
-        if 'age' not in df.columns:
-            df['age'] = (pd.Timestamp.now() - df['install_date']).dt.days / 365.25
+        if "age" not in df.columns:
+            df["age"] = (pd.Timestamp.now() - df["install_date"]).dt.days / 365.25
 
         # Now call model.transform() to add failure_probability
         df = model.transform(df)
 
         # Validate required column exists
-        if 'failure_probability' not in df.columns:
+        if "failure_probability" not in df.columns:
             raise OptimizationError(
                 "Portfolio data must have 'failure_probability' column after transform",
-                details={'columns': df.columns.tolist()}
+                details={"columns": df.columns.tolist()},
             )
 
         # Apply exclusion filter
         if exclusions:
-            df = df[~df['asset_id'].isin(exclusions)].copy()
+            df = df[~df["asset_id"].isin(exclusions)].copy()
 
         # Handle case where all assets are excluded
         if df.empty:
@@ -202,9 +202,9 @@ class Optimizer:
         candidates = []
 
         for idx, row in df.iterrows():
-            asset_id = row['asset_id']
-            current_age = row['age']
-            risk_before = row['failure_probability']
+            asset_id = row["asset_id"]
+            current_age = row["age"]
+            risk_before = row["failure_probability"]
             material = row[model.type_column]
 
             # Get Weibull parameters for this asset type
@@ -230,7 +230,9 @@ class Optimizer:
                     cost_effectiveness = risk_reduction / cost
                 else:
                     # Edge case: free intervention (shouldn't happen with standard interventions)
-                    cost_effectiveness = risk_reduction * 1e10 if risk_reduction > 0 else 0
+                    cost_effectiveness = (
+                        risk_reduction * 1e10 if risk_reduction > 0 else 0
+                    )
 
                 if cost_effectiveness > best_cost_effectiveness:
                     best_cost_effectiveness = cost_effectiveness
@@ -239,15 +241,17 @@ class Optimizer:
 
             # Store candidate with best intervention
             if best_intervention is not None:
-                candidates.append({
-                    'asset_id': asset_id,
-                    'intervention_type': best_intervention.name,
-                    'cost': best_intervention.cost,
-                    'risk_before': risk_before,
-                    'risk_after': best_risk_after,
-                    'cost_effectiveness': best_cost_effectiveness,
-                    'install_date': row['install_date'],
-                })
+                candidates.append(
+                    {
+                        "asset_id": asset_id,
+                        "intervention_type": best_intervention.name,
+                        "cost": best_intervention.cost,
+                        "risk_before": risk_before,
+                        "risk_after": best_risk_after,
+                        "cost_effectiveness": best_cost_effectiveness,
+                        "install_date": row["install_date"],
+                    }
+                )
 
         # Handle case where no candidates found
         if not candidates:
@@ -263,7 +267,7 @@ class Optimizer:
         # Filter: remove assets below min_risk_threshold
         if self.min_risk_threshold > 0:
             candidates_df = candidates_df[
-                candidates_df['risk_before'] >= self.min_risk_threshold
+                candidates_df["risk_before"] >= self.min_risk_threshold
             ].copy()
 
         # Handle case where all assets below threshold
@@ -273,18 +277,17 @@ class Optimizer:
 
         # Filter: remove DoNothing (shouldn't happen, but safety)
         candidates_df = candidates_df[
-            candidates_df['intervention_type'] != DO_NOTHING.name
+            candidates_df["intervention_type"] != DO_NOTHING.name
         ].copy()
 
         # Compute risk-to-cost ratio for ranking
-        candidates_df['risk_to_cost_ratio'] = (
-            candidates_df['risk_before'] / candidates_df['cost']
+        candidates_df["risk_to_cost_ratio"] = (
+            candidates_df["risk_before"] / candidates_df["cost"]
         )
 
         # Sort: risk_to_cost_ratio DESC, then install_date ASC (oldest first tie-breaker)
         candidates_df = candidates_df.sort_values(
-            by=['risk_to_cost_ratio', 'install_date'],
-            ascending=[False, True]
+            by=["risk_to_cost_ratio", "install_date"], ascending=[False, True]
         ).reset_index(drop=True)
 
         # Greedy fill: iterate and add if cost <= remaining budget
@@ -293,50 +296,56 @@ class Optimizer:
         rank = 0
 
         for _, row in candidates_df.iterrows():
-            cost = row['cost']
+            cost = row["cost"]
             if cost <= remaining_budget:
                 rank += 1
-                selections.append({
-                    'asset_id': row['asset_id'],
-                    'intervention_type': row['intervention_type'],
-                    'cost': cost,
-                    'risk_score': row['risk_before'],
-                    'risk_before': row['risk_before'],
-                    'risk_after': row['risk_after'],
-                    'risk_reduction': row['risk_before'] - row['risk_after'],
-                    'rank': rank,
-                })
+                selections.append(
+                    {
+                        "asset_id": row["asset_id"],
+                        "intervention_type": row["intervention_type"],
+                        "cost": cost,
+                        "risk_score": row["risk_before"],
+                        "risk_before": row["risk_before"],
+                        "risk_after": row["risk_after"],
+                        "risk_reduction": row["risk_before"] - row["risk_after"],
+                        "rank": rank,
+                    }
+                )
                 remaining_budget -= cost
 
         # Build result
         if selections:
             selections_df = pd.DataFrame(selections)
         else:
-            selections_df = pd.DataFrame(columns=[
-                'asset_id',
-                'intervention_type',
-                'cost',
-                'risk_score',
-                'risk_before',
-                'risk_after',
-                'risk_reduction',
-                'rank',
-            ])
+            selections_df = pd.DataFrame(
+                columns=[
+                    "asset_id",
+                    "intervention_type",
+                    "cost",
+                    "risk_score",
+                    "risk_before",
+                    "risk_after",
+                    "risk_reduction",
+                    "rank",
+                ]
+            )
 
         spent = budget - remaining_budget
         utilization_pct = (spent / budget * 100) if budget > 0 else 0.0
 
-        budget_summary = pd.DataFrame({
-            'budget': [budget],
-            'spent': [spent],
-            'remaining': [remaining_budget],
-            'utilization_pct': [utilization_pct],
-        })
+        budget_summary = pd.DataFrame(
+            {
+                "budget": [budget],
+                "spent": [spent],
+                "remaining": [remaining_budget],
+                "utilization_pct": [utilization_pct],
+            }
+        )
 
         self.result_ = OptimizationResult(
             selections=selections_df,
             budget_summary=budget_summary,
-            strategy='greedy',
+            strategy="greedy",
         )
 
     def _build_empty_result(self, budget: float) -> OptimizationResult:
@@ -352,23 +361,27 @@ class Optimizer:
         OptimizationResult
             Result with empty selections.
         """
-        selections_df = pd.DataFrame(columns=[
-            'asset_id',
-            'intervention_type',
-            'cost',
-            'risk_score',
-            'risk_before',
-            'risk_after',
-            'risk_reduction',
-            'rank',
-        ])
+        selections_df = pd.DataFrame(
+            columns=[
+                "asset_id",
+                "intervention_type",
+                "cost",
+                "risk_score",
+                "risk_before",
+                "risk_after",
+                "risk_reduction",
+                "rank",
+            ]
+        )
 
-        budget_summary = pd.DataFrame({
-            'budget': [budget],
-            'spent': [0.0],
-            'remaining': [budget],
-            'utilization_pct': [0.0],
-        })
+        budget_summary = pd.DataFrame(
+            {
+                "budget": [budget],
+                "spent": [0.0],
+                "remaining": [budget],
+                "utilization_pct": [0.0],
+            }
+        )
 
         return OptimizationResult(
             selections=selections_df,
@@ -390,15 +403,13 @@ class Optimizer:
         AttributeError
             If optimizer has not been fitted.
         """
-        if not hasattr(self, 'result_'):
-            raise AttributeError(
-                "Optimizer has not been fitted. Call fit() first."
-            )
+        if not hasattr(self, "result_"):
+            raise AttributeError("Optimizer has not been fitted. Call fit() first.")
         return self.result_
 
     def __repr__(self) -> str:
         """Return informative string representation."""
-        fitted = hasattr(self, 'result_')
+        fitted = hasattr(self, "result_")
         return (
             f"Optimizer(strategy='{self.strategy}', "
             f"min_risk_threshold={self.min_risk_threshold}, "

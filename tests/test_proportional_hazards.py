@@ -10,26 +10,30 @@ from asset_optimization.models import ProportionalHazardsModel, WeibullModel
 @pytest.fixture
 def weibull_baseline():
     """Baseline Weibull model for tests."""
-    return WeibullModel({'PVC': (2.5, 50)})
+    return WeibullModel({"PVC": (2.5, 50)})
 
 
 @pytest.fixture
 def df_with_covariates():
     """Sample DataFrame with covariate columns."""
-    return pd.DataFrame({
-        'material': ['PVC', 'PVC', 'PVC'],
-        'age': [10, 20, 30],
-        'diameter_mm': [100.0, 150.0, 200.0],
-    })
+    return pd.DataFrame(
+        {
+            "material": ["PVC", "PVC", "PVC"],
+            "age": [10, 20, 30],
+            "diameter_mm": [100.0, 150.0, 200.0],
+        }
+    )
 
 
 @pytest.fixture
 def df_without_covariates():
     """Sample DataFrame without covariate columns."""
-    return pd.DataFrame({
-        'material': ['PVC', 'PVC'],
-        'age': [10, 20],
-    })
+    return pd.DataFrame(
+        {
+            "material": ["PVC", "PVC"],
+            "age": [10, 20],
+        }
+    )
 
 
 @pytest.fixture
@@ -37,8 +41,8 @@ def ph_model(weibull_baseline):
     """ProportionalHazardsModel with a single covariate."""
     return ProportionalHazardsModel(
         weibull_baseline,
-        covariates=['diameter_mm'],
-        coefficients={'diameter_mm': 0.01},
+        covariates=["diameter_mm"],
+        coefficients={"diameter_mm": 0.01},
     )
 
 
@@ -48,19 +52,19 @@ class TestProportionalHazardsModelInit:
     def test_instantiation_with_valid_params(self, weibull_baseline):
         model = ProportionalHazardsModel(
             weibull_baseline,
-            covariates=['diameter_mm'],
-            coefficients={'diameter_mm': 0.01},
+            covariates=["diameter_mm"],
+            coefficients={"diameter_mm": 0.01},
         )
         assert model.baseline is weibull_baseline
-        assert model.covariates == ['diameter_mm']
-        assert model.coefficients['diameter_mm'] == 0.01
+        assert model.covariates == ["diameter_mm"]
+        assert model.coefficients["diameter_mm"] == 0.01
 
     def test_covariates_must_match_coefficients(self, weibull_baseline):
         with pytest.raises(ValueError, match="covariates must match coefficient keys"):
             ProportionalHazardsModel(
                 weibull_baseline,
-                covariates=['diameter_mm', 'length_m'],
-                coefficients={'diameter_mm': 0.01},
+                covariates=["diameter_mm", "length_m"],
+                coefficients={"diameter_mm": 0.01},
             )
 
     def test_empty_covariates_allowed(self, weibull_baseline):
@@ -74,9 +78,9 @@ class TestProportionalHazardsModelInit:
 
     def test_repr(self, ph_model):
         repr_str = repr(ph_model)
-        assert 'ProportionalHazardsModel' in repr_str
-        assert 'baseline=' in repr_str
-        assert 'covariates=' in repr_str
+        assert "ProportionalHazardsModel" in repr_str
+        assert "baseline=" in repr_str
+        assert "covariates=" in repr_str
 
 
 class TestProportionalHazardsModelDelegation:
@@ -97,8 +101,8 @@ class TestProportionalHazardsModelTransform:
 
     def test_transform_adds_columns(self, ph_model, df_with_covariates):
         result = ph_model.transform(df_with_covariates)
-        assert 'failure_rate' in result.columns
-        assert 'failure_probability' in result.columns
+        assert "failure_rate" in result.columns
+        assert "failure_probability" in result.columns
 
     def test_transform_returns_copy(self, ph_model, df_with_covariates):
         original = df_with_covariates.copy(deep=True)
@@ -116,32 +120,36 @@ class TestProportionalHazardsModelTransform:
     ):
         ph = ProportionalHazardsModel(
             weibull_baseline,
-            covariates=['diameter_mm'],
-            coefficients={'diameter_mm': 0.01},
+            covariates=["diameter_mm"],
+            coefficients={"diameter_mm": 0.01},
         )
-        df = pd.DataFrame({
-            'material': ['PVC', 'PVC'],
-            'age': [20, 20],
-            'diameter_mm': [100.0, 200.0],
-        })
+        df = pd.DataFrame(
+            {
+                "material": ["PVC", "PVC"],
+                "age": [20, 20],
+                "diameter_mm": [100.0, 200.0],
+            }
+        )
         result = ph.transform(df)
-        assert result.loc[1, 'failure_rate'] > result.loc[0, 'failure_rate']
+        assert result.loc[1, "failure_rate"] > result.loc[0, "failure_rate"]
 
     def test_transform_decreases_failure_rate_with_negative_coefficient(
         self, weibull_baseline
     ):
         ph = ProportionalHazardsModel(
             weibull_baseline,
-            covariates=['diameter_mm'],
-            coefficients={'diameter_mm': -0.01},
+            covariates=["diameter_mm"],
+            coefficients={"diameter_mm": -0.01},
         )
-        df = pd.DataFrame({
-            'material': ['PVC', 'PVC'],
-            'age': [20, 20],
-            'diameter_mm': [100.0, 200.0],
-        })
+        df = pd.DataFrame(
+            {
+                "material": ["PVC", "PVC"],
+                "age": [20, 20],
+                "diameter_mm": [100.0, 200.0],
+            }
+        )
         result = ph.transform(df)
-        assert result.loc[1, 'failure_rate'] < result.loc[0, 'failure_rate']
+        assert result.loc[1, "failure_rate"] < result.loc[0, "failure_rate"]
 
 
 class TestProportionalHazardsModelStrictCovariates:
@@ -152,36 +160,42 @@ class TestProportionalHazardsModelStrictCovariates:
     ):
         ph = ProportionalHazardsModel(
             weibull_baseline,
-            covariates=['diameter_mm'],
-            coefficients={'diameter_mm': 0.01},
+            covariates=["diameter_mm"],
+            coefficients={"diameter_mm": 0.01},
         )
         with pytest.raises(ValueError, match="Missing covariate columns"):
             ph.transform(df_without_covariates)
 
     def test_nan_covariate_raises(self, ph_model):
-        df = pd.DataFrame({
-            'material': ['PVC', 'PVC'],
-            'age': [10, 20],
-            'diameter_mm': [np.nan, 150.0],
-        })
+        df = pd.DataFrame(
+            {
+                "material": ["PVC", "PVC"],
+                "age": [10, 20],
+                "diameter_mm": [np.nan, 150.0],
+            }
+        )
         with pytest.raises(ValueError, match="NaN values"):
             ph_model.transform(df)
 
     def test_partial_nan_raises(self, ph_model):
-        df = pd.DataFrame({
-            'material': ['PVC', 'PVC', 'PVC'],
-            'age': [10, 20, 30],
-            'diameter_mm': [100.0, np.nan, 200.0],
-        })
+        df = pd.DataFrame(
+            {
+                "material": ["PVC", "PVC", "PVC"],
+                "age": [10, 20, 30],
+                "diameter_mm": [100.0, np.nan, 200.0],
+            }
+        )
         with pytest.raises(ValueError, match="NaN values"):
             ph_model.transform(df)
 
     def test_non_numeric_covariate_raises(self, ph_model):
-        df = pd.DataFrame({
-            'material': ['PVC', 'PVC'],
-            'age': [10, 20],
-            'diameter_mm': ['wide', 'wider'],
-        })
+        df = pd.DataFrame(
+            {
+                "material": ["PVC", "PVC"],
+                "age": [10, 20],
+                "diameter_mm": ["wide", "wider"],
+            }
+        )
         with pytest.raises(TypeError, match="numeric"):
             ph_model.transform(df)
 
@@ -190,7 +204,7 @@ class TestProportionalHazardsModelMathematical:
     """Mathematical correctness checks."""
 
     def test_risk_score_exp_of_linear_combination(self, ph_model, df_with_covariates):
-        expected = np.exp(0.01 * df_with_covariates['diameter_mm'].values)
+        expected = np.exp(0.01 * df_with_covariates["diameter_mm"].values)
         risk = ph_model._risk_score(df_with_covariates)
         np.testing.assert_allclose(risk, expected)
 
@@ -199,18 +213,20 @@ class TestProportionalHazardsModelMathematical:
     ):
         ph = ProportionalHazardsModel(
             weibull_baseline,
-            covariates=['diameter_mm'],
-            coefficients={'diameter_mm': 0.02},
+            covariates=["diameter_mm"],
+            coefficients={"diameter_mm": 0.02},
         )
         baseline_result = weibull_baseline.transform(df_with_covariates)
         ph_result = ph.transform(df_with_covariates)
         risk = ph._risk_score(df_with_covariates)
 
-        survival_baseline = 1.0 - baseline_result['failure_probability'].values
+        survival_baseline = 1.0 - baseline_result["failure_probability"].values
         expected = 1.0 - np.power(survival_baseline, risk)
-        np.testing.assert_allclose(ph_result['failure_probability'].values, expected)
+        np.testing.assert_allclose(ph_result["failure_probability"].values, expected)
 
-    def test_zero_covariates_equals_baseline(self, weibull_baseline, df_with_covariates):
+    def test_zero_covariates_equals_baseline(
+        self, weibull_baseline, df_with_covariates
+    ):
         ph = ProportionalHazardsModel(
             weibull_baseline,
             covariates=[],
@@ -219,21 +235,21 @@ class TestProportionalHazardsModelMathematical:
         baseline_result = weibull_baseline.transform(df_with_covariates)
         ph_result = ph.transform(df_with_covariates)
         np.testing.assert_allclose(
-            ph_result['failure_rate'].values,
-            baseline_result['failure_rate'].values,
+            ph_result["failure_rate"].values,
+            baseline_result["failure_rate"].values,
         )
         np.testing.assert_allclose(
-            ph_result['failure_probability'].values,
-            baseline_result['failure_probability'].values,
+            ph_result["failure_probability"].values,
+            baseline_result["failure_probability"].values,
         )
 
     def test_overflow_protection(self, weibull_baseline):
         ph = ProportionalHazardsModel(
             weibull_baseline,
-            covariates=['x'],
-            coefficients={'x': 5.0},
+            covariates=["x"],
+            coefficients={"x": 5.0},
         )
-        df = pd.DataFrame({'material': ['PVC'], 'age': [10], 'x': [1000.0]})
+        df = pd.DataFrame({"material": ["PVC"], "age": [10], "x": [1000.0]})
         risk = ph._risk_score(df)
         assert np.isfinite(risk).all()
         assert (risk > 0).all()
@@ -243,29 +259,35 @@ class TestProportionalHazardsConditionalProbability:
     """Conditional probability behavior for PH model."""
 
     def test_returns_array_same_length_as_input(self, ph_model):
-        state = pd.DataFrame({
-            'material': ['PVC', 'PVC', 'PVC'],
-            'age': [10, 20, 30],
-            'diameter_mm': [100.0, 150.0, 200.0],
-        })
+        state = pd.DataFrame(
+            {
+                "material": ["PVC", "PVC", "PVC"],
+                "age": [10, 20, 30],
+                "diameter_mm": [100.0, 150.0, 200.0],
+            }
+        )
         probs = ph_model.calculate_conditional_probability(state)
         assert len(probs) == len(state)
 
     def test_probabilities_in_valid_range(self, ph_model):
-        state = pd.DataFrame({
-            'material': ['PVC'] * 5,
-            'age': [5, 10, 20, 40, 60],
-            'diameter_mm': [100.0, 120.0, 140.0, 160.0, 180.0],
-        })
+        state = pd.DataFrame(
+            {
+                "material": ["PVC"] * 5,
+                "age": [5, 10, 20, 40, 60],
+                "diameter_mm": [100.0, 120.0, 140.0, 160.0, 180.0],
+            }
+        )
         probs = ph_model.calculate_conditional_probability(state)
         assert np.all(probs >= 0.0)
         assert np.all(probs <= 1.0)
 
     def test_higher_covariate_increases_conditional_probability(self, ph_model):
-        state = pd.DataFrame({
-            'material': ['PVC', 'PVC'],
-            'age': [25, 25],
-            'diameter_mm': [100.0, 200.0],
-        })
+        state = pd.DataFrame(
+            {
+                "material": ["PVC", "PVC"],
+                "age": [25, 25],
+                "diameter_mm": [100.0, 200.0],
+            }
+        )
         probs = ph_model.calculate_conditional_probability(state)
         assert probs[1] > probs[0]

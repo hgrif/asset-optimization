@@ -57,9 +57,7 @@ class ProportionalHazardsModel(DeteriorationModel):
     def _validate(self) -> None:
         """Validate baseline and covariate configuration."""
         if not isinstance(self.baseline, DeteriorationModel):
-            raise TypeError(
-                "baseline must be a DeteriorationModel instance"
-            )
+            raise TypeError("baseline must be a DeteriorationModel instance")
 
         if len(self.covariates) != len(set(self.covariates)):
             raise ValueError("covariates must be unique")
@@ -76,7 +74,8 @@ class ProportionalHazardsModel(DeteriorationModel):
                 details.append(f"extra={extra}")
             detail_str = ", ".join(details) if details else ""
             raise ValueError(
-                "covariates must match coefficient keys" + (f" ({detail_str})" if detail_str else "")
+                "covariates must match coefficient keys"
+                + (f" ({detail_str})" if detail_str else "")
             )
 
         for key, value in self.coefficients.items():
@@ -102,24 +101,19 @@ class ProportionalHazardsModel(DeteriorationModel):
             )
 
         non_numeric = [
-            col for col in self.covariates
-            if not pd.api.types.is_numeric_dtype(df[col])
+            col for col in self.covariates if not pd.api.types.is_numeric_dtype(df[col])
         ]
         if non_numeric:
             dtypes = {col: str(df[col].dtype) for col in non_numeric}
             raise TypeError(
-                "Covariate columns must be numeric. "
-                f"Non-numeric columns: {dtypes}"
+                f"Covariate columns must be numeric. Non-numeric columns: {dtypes}"
             )
 
         nan_counts = df[self.covariates].isna().sum()
         if (nan_counts > 0).any():
             missing = nan_counts[nan_counts > 0]
             details = ", ".join(f"{col}={int(count)}" for col, count in missing.items())
-            raise ValueError(
-                "Covariate columns contain NaN values: "
-                f"{details}"
-            )
+            raise ValueError(f"Covariate columns contain NaN values: {details}")
 
         linear_pred = np.zeros(len(df), dtype=float)
         for col in self.covariates:
@@ -154,12 +148,12 @@ class ProportionalHazardsModel(DeteriorationModel):
         result = self.baseline.transform(df)
         risk = self._risk_score(df)
 
-        result['failure_rate'] = result['failure_rate'].to_numpy() * risk
+        result["failure_rate"] = result["failure_rate"].to_numpy() * risk
 
-        survival_baseline = 1.0 - result['failure_probability'].to_numpy()
+        survival_baseline = 1.0 - result["failure_probability"].to_numpy()
         survival_adjusted = np.power(survival_baseline, risk)
-        result['failure_probability'] = 1.0 - survival_adjusted
-        result['failure_probability'] = np.clip(result['failure_probability'], 0.0, 1.0)
+        result["failure_probability"] = 1.0 - survival_adjusted
+        result["failure_probability"] = np.clip(result["failure_probability"], 0.0, 1.0)
 
         return result
 

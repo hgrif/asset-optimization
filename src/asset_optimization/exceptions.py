@@ -3,6 +3,7 @@
 
 class AssetOptimizationError(Exception):
     """Base exception for asset-optimization package."""
+
     pass
 
 
@@ -36,11 +37,13 @@ class ValidationError(AssetOptimizationError):
 
 class MissingFieldError(ValidationError):
     """Raised when required field is missing from data."""
+
     pass
 
 
 class DataQualityError(ValidationError):
     """Raised when data quality is below acceptable threshold."""
+
     pass
 
 

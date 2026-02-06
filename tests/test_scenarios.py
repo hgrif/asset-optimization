@@ -19,12 +19,14 @@ class TestCompareScenarios:
     def sample_result(self) -> SimulationResult:
         """Create sample SimulationResult."""
         config = SimulationConfig(n_years=3)
-        summary = pd.DataFrame({
-            'year': [2024, 2025, 2026],
-            'total_cost': [100000.0, 120000.0, 110000.0],
-            'failure_count': [5, 7, 6],
-            'intervention_count': [10, 12, 11],
-        })
+        summary = pd.DataFrame(
+            {
+                "year": [2024, 2025, 2026],
+                "total_cost": [100000.0, 120000.0, 110000.0],
+                "failure_count": [5, 7, 6],
+                "intervention_count": [10, 12, 11],
+            }
+        )
         return SimulationResult(
             summary=summary,
             cost_breakdown=pd.DataFrame(),
@@ -34,33 +36,35 @@ class TestCompareScenarios:
 
     def test_output_has_correct_columns(self, sample_result: SimulationResult) -> None:
         """Output DataFrame has scenario, year, metric, value columns."""
-        result = compare_scenarios({'test': sample_result})
+        result = compare_scenarios({"test": sample_result})
 
-        assert list(result.columns) == ['scenario', 'year', 'metric', 'value']
+        assert list(result.columns) == ["scenario", "year", "metric", "value"]
 
     def test_multiple_scenarios(self, sample_result: SimulationResult) -> None:
         """Multiple scenarios produce multiple scenario values."""
-        result = compare_scenarios({
-            'scenario_a': sample_result,
-            'scenario_b': sample_result,
-        })
+        result = compare_scenarios(
+            {
+                "scenario_a": sample_result,
+                "scenario_b": sample_result,
+            }
+        )
 
-        assert set(result['scenario'].unique()) == {'scenario_a', 'scenario_b'}
+        assert set(result["scenario"].unique()) == {"scenario_a", "scenario_b"}
 
     def test_custom_metrics(self, sample_result: SimulationResult) -> None:
         """Custom metrics filter to specified columns."""
         result = compare_scenarios(
-            {'test': sample_result},
-            metrics=['total_cost'],
+            {"test": sample_result},
+            metrics=["total_cost"],
         )
 
-        assert set(result['metric'].unique()) == {'total_cost'}
+        assert set(result["metric"].unique()) == {"total_cost"}
 
     def test_empty_scenarios_returns_empty_df(self) -> None:
         """Empty scenarios dict returns empty DataFrame with correct columns."""
         result = compare_scenarios({})
 
-        assert list(result.columns) == ['scenario', 'year', 'metric', 'value']
+        assert list(result.columns) == ["scenario", "year", "metric", "value"]
         assert len(result) == 0
 
 
@@ -71,13 +75,15 @@ class TestCreateDoNothingBaseline:
     def sample_result(self) -> SimulationResult:
         """Create sample SimulationResult."""
         config = SimulationConfig(n_years=3)
-        summary = pd.DataFrame({
-            'year': [2024, 2025, 2026],
-            'total_cost': [100000.0, 120000.0, 110000.0],
-            'failure_count': [5, 7, 6],
-            'intervention_count': [10, 12, 11],
-            'avg_age': [25.0, 26.0, 27.0],
-        })
+        summary = pd.DataFrame(
+            {
+                "year": [2024, 2025, 2026],
+                "total_cost": [100000.0, 120000.0, 110000.0],
+                "failure_count": [5, 7, 6],
+                "intervention_count": [10, 12, 11],
+                "avg_age": [25.0, 26.0, 27.0],
+            }
+        )
         return SimulationResult(
             summary=summary,
             cost_breakdown=pd.DataFrame(),
@@ -95,15 +101,15 @@ class TestCreateDoNothingBaseline:
         """Baseline has zero interventions."""
         baseline = create_do_nothing_baseline(sample_result)
 
-        assert all(baseline.summary['intervention_count'] == 0)
+        assert all(baseline.summary["intervention_count"] == 0)
 
     def test_failures_increase_over_time(self, sample_result: SimulationResult) -> None:
         """Failure count tends to increase over time."""
         baseline = create_do_nothing_baseline(sample_result)
 
         # Later years should have more failures (general trend)
-        first_year = baseline.summary['failure_count'].iloc[0]
-        last_year = baseline.summary['failure_count'].iloc[-1]
+        first_year = baseline.summary["failure_count"].iloc[0]
+        last_year = baseline.summary["failure_count"].iloc[-1]
         assert last_year >= first_year
 
     def test_config_preserved(self, sample_result: SimulationResult) -> None:
@@ -120,12 +126,14 @@ class TestCompare:
     def sample_result(self) -> SimulationResult:
         """Create sample SimulationResult."""
         config = SimulationConfig(n_years=3)
-        summary = pd.DataFrame({
-            'year': [2024, 2025, 2026],
-            'total_cost': [100000.0, 120000.0, 110000.0],
-            'failure_count': [5, 7, 6],
-            'intervention_count': [10, 12, 11],
-        })
+        summary = pd.DataFrame(
+            {
+                "year": [2024, 2025, 2026],
+                "total_cost": [100000.0, 120000.0, 110000.0],
+                "failure_count": [5, 7, 6],
+                "intervention_count": [10, 12, 11],
+            }
+        )
         return SimulationResult(
             summary=summary,
             cost_breakdown=pd.DataFrame(),
@@ -135,18 +143,18 @@ class TestCompare:
 
     def test_auto_baseline_do_nothing(self, sample_result: SimulationResult) -> None:
         """baseline='do_nothing' auto-generates baseline."""
-        result = compare(sample_result, baseline='do_nothing')
+        result = compare(sample_result, baseline="do_nothing")
 
-        assert 'optimized' in result['scenario'].unique()
-        assert 'baseline' in result['scenario'].unique()
+        assert "optimized" in result["scenario"].unique()
+        assert "baseline" in result["scenario"].unique()
 
     def test_explicit_baseline(self, sample_result: SimulationResult) -> None:
         """Explicit SimulationResult baseline works."""
         result = compare(sample_result, baseline=sample_result)
 
-        assert len(result['scenario'].unique()) == 2
+        assert len(result["scenario"].unique()) == 2
 
     def test_invalid_baseline_raises(self, sample_result: SimulationResult) -> None:
         """Invalid baseline string raises ValueError."""
         with pytest.raises(ValueError):
-            compare(sample_result, baseline='invalid_string')
+            compare(sample_result, baseline="invalid_string")
