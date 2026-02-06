@@ -88,15 +88,38 @@ class ProportionalHazardsModel(DeteriorationModel):
     def _risk_score(self, df: pd.DataFrame) -> np.ndarray:
         """Compute exp(sum(beta_i * x_i)) for each row.
 
-        Returns 1.0 for rows where any covariate column is missing (NaN).
-        If covariate columns are absent entirely, returns all ones.
+        Raises if any required covariate columns are missing, contain NaNs,
+        or are non-numeric.
         """
         if not self.covariates:
             return np.ones(len(df))
 
         missing_columns = [col for col in self.covariates if col not in df.columns]
         if missing_columns:
-            return np.ones(len(df))
+            raise ValueError(
+                "Missing covariate columns: "
+                f"{missing_columns}. Available columns: {df.columns.tolist()}"
+            )
+
+        non_numeric = [
+            col for col in self.covariates
+            if not pd.api.types.is_numeric_dtype(df[col])
+        ]
+        if non_numeric:
+            dtypes = {col: str(df[col].dtype) for col in non_numeric}
+            raise TypeError(
+                "Covariate columns must be numeric. "
+                f"Non-numeric columns: {dtypes}"
+            )
+
+        nan_counts = df[self.covariates].isna().sum()
+        if (nan_counts > 0).any():
+            missing = nan_counts[nan_counts > 0]
+            details = ", ".join(f"{col}={int(count)}" for col, count in missing.items())
+            raise ValueError(
+                "Covariate columns contain NaN values: "
+                f"{details}"
+            )
 
         linear_pred = np.zeros(len(df), dtype=float)
         for col in self.covariates:
@@ -105,9 +128,6 @@ class ProportionalHazardsModel(DeteriorationModel):
 
         linear_pred = np.clip(linear_pred, -500.0, 500.0)
         risk = np.exp(linear_pred)
-
-        has_missing = df[self.covariates].isna().any(axis=1).to_numpy()
-        risk[has_missing] = 1.0
 
         return risk
 

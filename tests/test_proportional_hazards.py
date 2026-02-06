@@ -144,10 +144,10 @@ class TestProportionalHazardsModelTransform:
         assert result.loc[1, 'failure_rate'] < result.loc[0, 'failure_rate']
 
 
-class TestProportionalHazardsModelBackwardCompat:
-    """Missing covariates and NaN handling (HAZD-05)."""
+class TestProportionalHazardsModelStrictCovariates:
+    """Strict covariate validation behavior."""
 
-    def test_missing_covariate_column_uses_baseline_only(
+    def test_missing_covariate_column_raises(
         self, weibull_baseline, df_without_covariates
     ):
         ph = ProportionalHazardsModel(
@@ -155,41 +155,35 @@ class TestProportionalHazardsModelBackwardCompat:
             covariates=['diameter_mm'],
             coefficients={'diameter_mm': 0.01},
         )
-        baseline_result = weibull_baseline.transform(df_without_covariates)
-        ph_result = ph.transform(df_without_covariates)
-        np.testing.assert_allclose(
-            ph_result['failure_rate'].values,
-            baseline_result['failure_rate'].values,
-        )
-        np.testing.assert_allclose(
-            ph_result['failure_probability'].values,
-            baseline_result['failure_probability'].values,
-        )
+        with pytest.raises(ValueError, match="Missing covariate columns"):
+            ph.transform(df_without_covariates)
 
-    def test_nan_covariate_uses_baseline_for_that_row(self, ph_model, weibull_baseline):
+    def test_nan_covariate_raises(self, ph_model):
         df = pd.DataFrame({
             'material': ['PVC', 'PVC'],
             'age': [10, 20],
             'diameter_mm': [np.nan, 150.0],
         })
-        baseline_result = weibull_baseline.transform(df)
-        ph_result = ph_model.transform(df)
-        assert ph_result.loc[0, 'failure_rate'] == baseline_result.loc[0, 'failure_rate']
-        assert np.isclose(
-            ph_result.loc[0, 'failure_probability'],
-            baseline_result.loc[0, 'failure_probability'],
-        )
+        with pytest.raises(ValueError, match="NaN values"):
+            ph_model.transform(df)
 
-    def test_partial_nan_handles_correctly(self, ph_model, weibull_baseline):
+    def test_partial_nan_raises(self, ph_model):
         df = pd.DataFrame({
             'material': ['PVC', 'PVC', 'PVC'],
             'age': [10, 20, 30],
             'diameter_mm': [100.0, np.nan, 200.0],
         })
-        baseline_result = weibull_baseline.transform(df)
-        ph_result = ph_model.transform(df)
-        assert ph_result.loc[1, 'failure_rate'] == baseline_result.loc[1, 'failure_rate']
-        assert ph_result.loc[2, 'failure_rate'] != baseline_result.loc[2, 'failure_rate']
+        with pytest.raises(ValueError, match="NaN values"):
+            ph_model.transform(df)
+
+    def test_non_numeric_covariate_raises(self, ph_model):
+        df = pd.DataFrame({
+            'material': ['PVC', 'PVC'],
+            'age': [10, 20],
+            'diameter_mm': ['wide', 'wider'],
+        })
+        with pytest.raises(TypeError, match="numeric"):
+            ph_model.transform(df)
 
 
 class TestProportionalHazardsModelMathematical:
