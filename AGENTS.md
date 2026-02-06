@@ -12,6 +12,11 @@
 
 ## Notebooks
 - Execute all notebooks: `uv run python -m jupyter nbconvert --execute --inplace notebooks/*.ipynb`
+- `make docs` runs the paired `.py` scripts, then syncs `.py`/`.ipynb` files.
+
+## Quality Gates
+- Use the Makefile targets for standard checks: `make lint`, `make test`, `make docs`.
+- After finishing a task, run `make lint`, `make test`, and `make docs`. All must succeed before marking the task complete.
 
 ## Repo Layout
 - Package code lives under `src/asset_optimization/` (src layout).

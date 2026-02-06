@@ -36,4 +36,10 @@ testpaths = ["tests"]
 dev = [
     "notebook>=7.5.3",
     "pytest>=9.0.2",
+    "jupytext==1.16.4",
+    "pre-commit>=3.7.0",
+    "ruff>=0.9.0",
 ]
+
+[tool.jupytext]
+formats = "ipynb,py:percent"
