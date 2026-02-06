@@ -36,3 +36,7 @@
 ## Guardrails
 - Do not edit `.planning/config.json` or planning templates unless explicitly requested.
 - Keep instructions concise and actionable; link to existing docs instead of duplicating them.
+
+## Development Rules
+
+- Backwards compatibility is not a concern. This is a pre-release SDK with no external consumers. Break existing APIs freely when building new features.
