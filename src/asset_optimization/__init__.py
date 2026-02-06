@@ -20,6 +20,7 @@ from .simulation import (
     REPAIR,
     REPLACE,
 )
+from .domains import Domain, PipeDomain
 from .optimization import Optimizer, OptimizationResult
 from .exports import (
     export_schedule_minimal,
@@ -53,6 +54,8 @@ __all__ = [
     "INSPECT",
     "REPAIR",
     "REPLACE",
+    "Domain",
+    "PipeDomain",
     "Optimizer",
     "OptimizationResult",
     "export_schedule_minimal",
