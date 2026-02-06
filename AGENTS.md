@@ -11,8 +11,9 @@
 - If `uv` is unavailable: `pip install -e ".[dev]"` and `pytest`
 
 ## Notebooks
-- Execute all notebooks: `uv run python -m jupyter nbconvert --execute --inplace notebooks/*.ipynb`
-- `make docs` runs the paired `.py` scripts, then syncs `.py`/`.ipynb` files.
+- Fast sync only (no execution): `make docs-sync`
+- Execute notebook sources and sync: `make docs` (runs `docs-py` then `docs-sync`)
+- Execute only notebook sources: `make docs-py`
 
 ## Quality Gates
 - Use the Makefile targets for standard checks: `make lint`, `make test`, `make docs`.
