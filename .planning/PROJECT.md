@@ -47,20 +47,32 @@ Enable data-driven intervention decisions that minimize cost and risk across ass
 
 ### Active
 
-**Current Milestone: v2 Multi-Property Hazard Modeling**
+**Current Milestone: v2 Extended Asset Modeling**
 
-**Goal:** Enable failure rates to depend on multiple asset attributes (diameter, soil conditions, installation quality), not just age and type.
+**Goal:** Expand modeling capabilities with multi-property hazards, additional asset domains, and asset relationships.
 
+**Feature area 1: Multi-property hazard modeling**
 - [ ] ProportionalHazardsModel class implementing DeteriorationModel interface
 - [ ] Configurable covariates (which DataFrame columns affect failure rate)
 - [ ] Configurable coefficients per covariate (β values)
 - [ ] Integration with existing Simulator and Optimizer
-- [ ] Documentation and notebook examples
+
+**Feature area 2: Additional asset domains**
+- [ ] Support for roads (and potentially other asset types)
+- [ ] Domain-specific deterioration parameters
+- [ ] Domain-agnostic core with domain-specific extensions
+
+**Feature area 3: Asset groupings & hierarchy**
+- [ ] Connected assets (e.g., pipes in a network)
+- [ ] Hierarchical relationships (e.g., pipes interacting with pumps)
+- [ ] Group-level failure propagation or dependencies
+
+- [ ] Documentation and notebook examples for all new features
 
 ### Out of Scope
 
 - Monte Carlo simulation (multiple stochastic runs) — future capability, architecture allows it
-- Other asset domains (data centers, rail) — v1 focuses on water pipes only
+- Other asset domains (data centers, rail) — v2 adds roads; other domains future
 - ML-based performance models (survival models, boosted trees) — future, model interface is pluggable
 - Web frontend/backend — SDK first, UI layer comes later
 - Real-time data integration — batch processing for now
@@ -79,6 +91,7 @@ Enable data-driven intervention decisions that minimize cost and risk across ass
 - **Language**: Pure Python with NumPy/Pandas for performance — can refactor to Rust later if needed
 - **Scale**: Must handle thousands of assets efficiently (achieved: <1s for 1000+ assets)
 - **Optimizer**: Heuristic first, but interface allows MILP solvers (OR-Tools, Gurobi) to plug in
+- **Backwards compatibility**: Not a concern — no external consumers. Break existing APIs freely when building new features.
 
 ## Key Decisions
 

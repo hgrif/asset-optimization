@@ -3,7 +3,7 @@
 ## Milestones
 
 - v1.0 MVP - Phases 1-6 (shipped 2026-02-05)
-- **v2.0 Extended Asset Modeling** - Phases 7-11 (in progress)
+- **v2.0 Extended Asset Modeling** - Phases 7-10 + 7.1 (in progress)
 
 ## Overview
 
@@ -23,6 +23,7 @@ See `.planning/milestones/v1-ROADMAP.md` for full details.
 **Milestone Goal:** Expand modeling capabilities with multi-property hazards, additional asset domains, and asset relationships.
 
 - [ ] **Phase 7: Proportional Hazards** - Covariate-based failure rate modeling with notebook
+- [ ] **Phase 7.1: Documentation Workflow** - Jupytext-based .py → .ipynb workflow for agent-friendly docs
 - [ ] **Phase 8: Roads Domain** - Domain-specific configuration and validation with notebook
 - [ ] **Phase 9: Asset Groupings** - Group-level constraints and failure propagation with notebook
 - [ ] **Phase 10: Asset Hierarchy** - Parent-child dependency failures with notebook and API docs
@@ -46,6 +47,21 @@ Plans:
 - [ ] 07-02-PLAN.md — Simulator integration for covariate-aware conditional probabilities
 - [ ] 07-03-PLAN.md — Documentation notebook demonstrating proportional hazards
 
+### Phase 7.1: Documentation Workflow (INSERTED)
+**Goal**: Agents write documentation as .py percent-format files (jupytext) that convert to .ipynb for human consumption, replacing direct notebook editing
+**Depends on**: Phase 7 (proportional hazards notebook exists to migrate)
+**Requirements**: DOCS-WF-01, DOCS-WF-02, DOCS-WF-03, DOCS-WF-04
+**Success Criteria** (what must be TRUE):
+  1. Jupytext is configured and .py percent-format files round-trip to .ipynb
+  2. A conversion script/Makefile target exists to build all notebooks from .py sources
+  3. Existing quickstart.ipynb is migrated to .py source format
+  4. Phase 7 proportional_hazards.ipynb (DOCS-01) is migrated to .py source format
+  5. Future doc phases (8-10) can write .py files instead of .ipynb
+**Plans**: 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 07.1 to break down)
+
 ### Phase 8: Roads Domain
 **Goal**: Users can configure and simulate road asset portfolios with domain-specific schema and interventions
 **Depends on**: Phase 7 (proportional hazards enables road covariates)
@@ -55,7 +71,7 @@ Plans:
   2. User can load a road portfolio with validation of road-specific columns (surface_type, traffic_load, climate_zone)
   3. User can specify road intervention types (do_nothing, inspect, patch, resurface, reconstruct) with costs and effects
   4. User can run simulation with road-specific deterioration parameters
-  5. Notebook demonstrates road domain configuration and simulation
+  5. Documentation .py file demonstrates road domain configuration and simulation (converts to notebook via jupytext)
 **Plans**: TBD
 
 Plans:
@@ -71,7 +87,7 @@ Plans:
   2. User can enable failure propagation where a failed asset increases risk for other group members
   3. User can configure propagation factor controlling how much risk increases
   4. Optimizer respects group constraints (intervening on one asset requires intervening on all in group)
-  5. Notebook demonstrates asset groupings with failure propagation
+  5. Documentation .py file demonstrates asset groupings with failure propagation (converts to notebook via jupytext)
 **Plans**: TBD
 
 Plans:
@@ -86,7 +102,7 @@ Plans:
   1. User can define asset hierarchy via parent_id column in portfolio DataFrame
   2. User can enable dependency failures where parent failure causes child failures
   3. Simulator correctly propagates failures down the hierarchy tree during simulation
-  4. Notebook demonstrates asset hierarchy with dependency failures
+  4. Documentation .py file demonstrates asset hierarchy with dependency failures (converts to notebook via jupytext)
   5. API documentation covers all new v2 classes and functions
 **Plans**: TBD
 
@@ -97,11 +113,12 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 7 -> 8 -> 9 -> 10
+Phases execute in numeric order: 7 -> 7.1 -> 8 -> 9 -> 10
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 7. Proportional Hazards | v2.0 | 0/3 | Planned | - |
+| 7.1. Documentation Workflow | v2.0 | 0/TBD | Not started | - |
 | 8. Roads Domain | v2.0 | 0/TBD | Not started | - |
 | 9. Asset Groupings | v2.0 | 0/TBD | Not started | - |
 | 10. Asset Hierarchy | v2.0 | 0/TBD | Not started | - |

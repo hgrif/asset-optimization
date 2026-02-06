@@ -54,6 +54,10 @@ Recent decisions affecting current work:
 - [v2 Roadmap]: Build order: Proportional Hazards -> Roads -> Groupings -> Hierarchy (docs integrated in each phase)
 - [v2 Roadmap]: Phase numbering continues from v1 (starts at 7, ends at 10)
 
+### Roadmap Evolution
+
+- Phase 07.1 inserted after Phase 7: Documentation Workflow — jupytext-based .py → .ipynb workflow so agents write .py files instead of notebooks (INSERTED)
+
 ### Pending Todos
 
 None.
