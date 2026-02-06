@@ -73,11 +73,12 @@ Plans:
   3. User can specify road intervention types (do_nothing, inspect, patch, resurface, reconstruct) with costs and effects
   4. User can run simulation with road-specific deterioration parameters
   5. Documentation .py file demonstrates road domain configuration and simulation (converts to notebook via jupytext)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md — Domain protocol and PipeDomain refactor (TDD)
+- [ ] 08-02-PLAN.md — RoadDomain implementation with schema, interventions, model (TDD)
+- [ ] 08-03-PLAN.md — Road domain documentation notebook
 
 ### Phase 9: Asset Groupings
 **Goal**: Users can model related assets that share risk and require coordinated interventions
@@ -120,7 +121,7 @@ Phases execute in numeric order: 7 -> 7.1 -> 8 -> 9 -> 10
 |-------|-----------|----------------|--------|-----------|
 | 7. Proportional Hazards | v2.0 | 0/3 | Planned | - |
 | 7.1. Documentation Workflow | v2.0 | 0/2 | Planned | - |
-| 8. Roads Domain | v2.0 | 0/TBD | Not started | - |
+| 8. Roads Domain | v2.0 | 0/3 | Planned | - |
 | 9. Asset Groupings | v2.0 | 0/TBD | Not started | - |
 | 10. Asset Hierarchy | v2.0 | 0/TBD | Not started | - |
 
