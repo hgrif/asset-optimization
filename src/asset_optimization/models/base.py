@@ -11,6 +11,7 @@ class DeteriorationModel(ABC):
     All deterioration models must implement:
     - failure_rate(): Calculate instantaneous hazard function
     - transform(): Add failure metrics to portfolio DataFrame
+    - calculate_conditional_probability(): Conditional one-step failure probability
 
     Models accept full portfolio DataFrames and operate vectorized per asset type.
     The transform() method returns a copy with new columns added (immutable pattern).
@@ -89,5 +90,23 @@ class DeteriorationModel(ABC):
         This method MUST return a copy of the input DataFrame.
         The original DataFrame must not be modified (immutable pattern).
         This aligns with pandas copy-on-write behavior in pandas 2.0+.
+        """
+        pass
+
+    @abstractmethod
+    def calculate_conditional_probability(self, state: pd.DataFrame) -> np.ndarray:
+        """Calculate one-step conditional failure probability.
+
+        Parameters
+        ----------
+        state : pd.DataFrame
+            Current asset state with the columns needed by the model.
+
+        Returns
+        -------
+        np.ndarray
+            Conditional probabilities:
+            P(fail in [t, t+1) | survived to t)
+            for each row in ``state``.
         """
         pass

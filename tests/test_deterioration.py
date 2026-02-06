@@ -28,6 +28,15 @@ class TestDeteriorationModelInterface:
         assert hasattr(DeteriorationModel, 'transform')
         assert getattr(DeteriorationModel.transform, '__isabstractmethod__', False)
 
+    def test_interface_defines_calculate_conditional_probability(self):
+        """Verify conditional probability is an abstract method."""
+        assert hasattr(DeteriorationModel, 'calculate_conditional_probability')
+        assert getattr(
+            DeteriorationModel.calculate_conditional_probability,
+            '__isabstractmethod__',
+            False,
+        )
+
     def test_weibull_is_subclass(self):
         """Verify WeibullModel inherits from DeteriorationModel."""
         assert issubclass(WeibullModel, DeteriorationModel)
@@ -343,6 +352,38 @@ class TestWeibullModelPerformance:
         # Should still be fast for 10K assets
         assert elapsed < 5.0, f"Transform took {elapsed:.2f}s for 10K assets"
         assert len(result) == n_assets
+
+
+class TestWeibullModelConditionalProbability:
+    """Test conditional one-step failure probabilities."""
+
+    def test_returns_array_same_length(self):
+        model = WeibullModel({'PVC': (2.5, 50), 'Cast Iron': (3.0, 40)})
+        state = pd.DataFrame({
+            'material': ['PVC', 'Cast Iron', 'PVC'],
+            'age': [10, 20, 30],
+        })
+        probs = model.calculate_conditional_probability(state)
+        assert len(probs) == len(state)
+
+    def test_values_are_within_probability_bounds(self):
+        model = WeibullModel({'PVC': (2.5, 50)})
+        state = pd.DataFrame({
+            'material': ['PVC'] * 5,
+            'age': [0, 10, 20, 40, 80],
+        })
+        probs = model.calculate_conditional_probability(state)
+        assert np.all(probs >= 0.0)
+        assert np.all(probs <= 1.0)
+
+    def test_conditional_probability_increases_with_age_for_shape_gt_1(self):
+        model = WeibullModel({'PVC': (2.5, 50)})
+        state = pd.DataFrame({
+            'material': ['PVC', 'PVC'],
+            'age': [10, 40],
+        })
+        probs = model.calculate_conditional_probability(state)
+        assert probs[1] > probs[0]
 
 
 class TestWeibullModelMultipleTypes:

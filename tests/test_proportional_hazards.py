@@ -243,3 +243,35 @@ class TestProportionalHazardsModelMathematical:
         risk = ph._risk_score(df)
         assert np.isfinite(risk).all()
         assert (risk > 0).all()
+
+
+class TestProportionalHazardsConditionalProbability:
+    """Conditional probability behavior for PH model."""
+
+    def test_returns_array_same_length_as_input(self, ph_model):
+        state = pd.DataFrame({
+            'material': ['PVC', 'PVC', 'PVC'],
+            'age': [10, 20, 30],
+            'diameter_mm': [100.0, 150.0, 200.0],
+        })
+        probs = ph_model.calculate_conditional_probability(state)
+        assert len(probs) == len(state)
+
+    def test_probabilities_in_valid_range(self, ph_model):
+        state = pd.DataFrame({
+            'material': ['PVC'] * 5,
+            'age': [5, 10, 20, 40, 60],
+            'diameter_mm': [100.0, 120.0, 140.0, 160.0, 180.0],
+        })
+        probs = ph_model.calculate_conditional_probability(state)
+        assert np.all(probs >= 0.0)
+        assert np.all(probs <= 1.0)
+
+    def test_higher_covariate_increases_conditional_probability(self, ph_model):
+        state = pd.DataFrame({
+            'material': ['PVC', 'PVC'],
+            'age': [25, 25],
+            'diameter_mm': [100.0, 200.0],
+        })
+        probs = ph_model.calculate_conditional_probability(state)
+        assert probs[1] > probs[0]

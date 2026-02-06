@@ -20,6 +20,12 @@ class ProportionalHazardsModel(DeteriorationModel):
     coefficients : dict[str, float]
         Maps covariate column name to beta coefficient value.
         Must have exactly one entry per covariate in the covariates list.
+
+    Notes
+    -----
+    Optimizer support currently relies on delegated baseline attributes
+    (``params`` and ``type_column``). Optimizer's risk-after calculation
+    remains baseline-only in this phase.
     """
 
     def __init__(
@@ -136,6 +142,36 @@ class ProportionalHazardsModel(DeteriorationModel):
         result['failure_probability'] = np.clip(result['failure_probability'], 0.0, 1.0)
 
         return result
+
+    def calculate_conditional_probability(self, state: pd.DataFrame) -> np.ndarray:
+        """Calculate conditional one-step failure probabilities.
+
+        For Weibull baselines this is exact:
+        ``P = 1 - (S0(t+1)/S0(t)) ** risk``.
+
+        For non-Weibull baselines this applies the same survival-ratio power
+        form using baseline conditional probabilities as an approximation.
+
+        Parameters
+        ----------
+        state : pd.DataFrame
+            Current asset state with baseline-required columns and covariates.
+
+        Returns
+        -------
+        np.ndarray
+            Conditional failure probabilities for each asset.
+        """
+        risk = self._risk_score(state)
+        baseline_probs = np.asarray(
+            self.baseline.calculate_conditional_probability(state),
+            dtype=float,
+        )
+        baseline_probs = np.clip(baseline_probs, 0.0, 1.0)
+
+        survival_ratio = 1.0 - baseline_probs
+        probs = 1.0 - np.power(survival_ratio, risk)
+        return np.clip(probs, 0.0, 1.0)
 
     def __repr__(self) -> str:
         """Return informative string representation."""

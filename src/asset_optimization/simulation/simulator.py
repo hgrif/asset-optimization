@@ -9,7 +9,6 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-from scipy.stats import weibull_min
 
 from asset_optimization.models.base import DeteriorationModel
 from asset_optimization.portfolio import validate_portfolio
@@ -328,55 +327,19 @@ class Simulator:
     def _calculate_conditional_probability(self, state: pd.DataFrame) -> np.ndarray:
         """Calculate conditional failure probability for each asset.
 
-        P(fail in [t, t+1) | survived to t) = (S(t) - S(t+1)) / S(t)
-
-        where S(t) is the Weibull survival function.
+        Delegates to the configured deterioration model interface.
 
         Parameters
         ----------
         state : pd.DataFrame
-            Current asset state with 'age' and material columns.
+            Current asset state.
 
         Returns
         -------
         np.ndarray
             Conditional failure probabilities for each asset.
-
-        Notes
-        -----
-        We access model.params directly rather than model.transform() because
-        transform() returns cumulative probability F(t), not conditional
-        probability. For simulation we need P(fail this year | survived to now).
         """
-        probs = np.zeros(len(state))
-
-        # Process each asset type separately to get correct parameters
-        type_column = self.model.type_column
-
-        for asset_type, group in state.groupby(type_column):
-            if asset_type not in self.model.params:
-                # Skip unknown types (should not happen with validated data)
-                continue
-
-            shape, scale = self.model.params[asset_type]
-            ages = group['age'].values
-
-            # Calculate survival function at t and t+1
-            # S(t) = 1 - F(t) = weibull_min.sf(t, c=shape, scale=scale)
-            s_t = weibull_min.sf(ages, c=shape, scale=scale)
-            s_t_plus_1 = weibull_min.sf(ages + 1, c=shape, scale=scale)
-
-            # Conditional probability: P(fail in [t, t+1) | survived to t)
-            # = (S(t) - S(t+1)) / S(t)
-            # Handle S(t) == 0 case (return 1.0 - certain failure if already past expected life)
-            with np.errstate(divide='ignore', invalid='ignore'):
-                cond_prob = (s_t - s_t_plus_1) / s_t
-                cond_prob = np.where(s_t == 0, 1.0, cond_prob)
-                cond_prob = np.clip(cond_prob, 0.0, 1.0)  # Ensure valid probability
-
-            probs[group.index] = cond_prob
-
-        return probs
+        return self.model.calculate_conditional_probability(state)
 
     def get_intervention_options(
         self, state: pd.DataFrame, year: int

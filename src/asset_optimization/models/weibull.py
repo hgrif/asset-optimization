@@ -256,6 +256,41 @@ class WeibullModel(DeteriorationModel):
 
         return result
 
+    def calculate_conditional_probability(self, state: pd.DataFrame) -> np.ndarray:
+        """Calculate conditional one-step failure probabilities.
+
+        P(fail in [t, t+1) | survived to t) = (S(t) - S(t+1)) / S(t)
+        where S(t) is the Weibull survival function.
+
+        Parameters
+        ----------
+        state : pd.DataFrame
+            Current asset state with age and type columns.
+
+        Returns
+        -------
+        np.ndarray
+            Conditional failure probabilities for each asset.
+        """
+        self._validate_dataframe(state)
+        probs = np.zeros(len(state))
+
+        for asset_type, group_df in state.groupby(self.type_column):
+            shape, scale = self.params[asset_type]
+            ages = group_df[self.age_column].values
+
+            s_t = weibull_min.sf(ages, c=shape, scale=scale)
+            s_t_plus_1 = weibull_min.sf(ages + 1, c=shape, scale=scale)
+
+            with np.errstate(divide='ignore', invalid='ignore'):
+                cond_prob = (s_t - s_t_plus_1) / s_t
+                cond_prob = np.where(s_t == 0, 1.0, cond_prob)
+                cond_prob = np.clip(cond_prob, 0.0, 1.0)
+
+            probs[group_df.index] = cond_prob
+
+        return probs
+
     def __repr__(self) -> str:
         """Return informative string representation."""
         types = list(self.params.keys())
