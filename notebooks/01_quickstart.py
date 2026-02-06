@@ -7,58 +7,69 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.16.4
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
+#     display_name: Python 3
 #     language: python
 #     name: python3
 # ---
 
 # %% [markdown]
-# # Asset Optimization Quickstart
-#
-# This notebook demonstrates the basic workflow for asset portfolio optimization.
-#
-# You'll learn how to:
-# 1. Create and load a portfolio
-# 2. Configure a deterioration model
-# 3. Run a multi-year simulation
-# 4. Examine and export results
+"""
+# Asset Optimization Quickstart
+
+This notebook is a guided walkthrough of the core SDK workflow. We'll go from a
+synthetic portfolio to a multi-year simulation and export the results.
+
+**You will learn how to:**
+- Build a portfolio DataFrame with realistic asset attributes
+- Validate the portfolio and inspect data quality
+- Configure a Weibull deterioration model
+- Run a multi-year simulation and read the results
+- Export outputs for downstream analysis
+"""
 
 # %% [markdown]
-# ## Setup
-#
-# Install the package if needed:
-#
-# ```bash
-# pip install asset-optimization
-# ```
+"""
+## Setup
+
+If you have not installed the SDK yet, install it first:
+
+```bash
+pip install asset-optimization
+```
+"""
+
 
 # %%
 # Core imports
-import os
-from datetime import date, timedelta
+import os  # noqa: E402
+from datetime import date, timedelta  # noqa: E402
 
-import numpy as np
-import pandas as pd
-from IPython.display import display
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+from IPython.display import display  # noqa: E402
 
 # SDK imports
-from asset_optimization import (
-    WeibullModel,
-    Simulator,
-    SimulationConfig,
+from asset_optimization import SimulationConfig, Simulator, WeibullModel  # noqa: E402
+from asset_optimization.portfolio import (  # noqa: E402
+    compute_quality_metrics,
+    validate_portfolio,
 )
-from asset_optimization.portfolio import validate_portfolio, compute_quality_metrics
+
 
 # %% [markdown]
-# ## 1. Generate Synthetic Portfolio
-#
-# We'll create a sample water pipe portfolio with realistic characteristics.
-#
-# The portfolio includes:
-# - **500 pipes** of different materials
-# - **Three materials**: Cast Iron (oldest), PVC (modern), Ductile Iron
-# - **Install dates**: Ranging from 20-80 years ago
-# - **Various diameters and lengths**: Typical for water distribution
+"""
+## 1. Generate Synthetic Portfolio
+
+We will create a sample water pipe portfolio with realistic characteristics.
+This gives us a consistent, reproducible dataset to explore the workflow.
+
+The portfolio includes:
+- **500 pipes** of different materials
+- **Three materials**: Cast Iron (oldest), PVC (modern), Ductile Iron
+- **Install dates**: Ranging from 20-80 years ago
+- **Diameters and lengths**: Typical for water distribution systems
+"""
+
 
 # %%
 # Set seed for reproducibility
@@ -89,10 +100,16 @@ data = pd.DataFrame(
 print(f"Generated {len(data)} assets")
 data.head(10)
 
+
 # %% [markdown]
-# ## 2. Validate Portfolio Data
-#
-# Validation is handled via a DataFrame-first helper (and enforced when running simulations/optimizations).
+"""
+## 2. Validate Portfolio Data
+
+Validation is handled via a DataFrame-first helper. The simulator will validate
+inputs automatically, but running validation early gives you fast feedback and
+makes it easier to troubleshoot data issues.
+"""
+
 
 # %%
 # Validate portfolio DataFrame (optional helper)
@@ -105,11 +122,13 @@ print(f"\nAsset types: {sorted(portfolio['asset_type'].unique())}")
 age_years = (pd.Timestamp.now() - portfolio["install_date"]).dt.days / 365.25
 print(f"Mean age: {age_years.mean():.1f} years")
 
+
 # %%
 # Check data quality metrics
 quality = compute_quality_metrics(portfolio)
 print("Data Quality Metrics:")
 print(quality)
+
 
 # %%
 # Access individual assets
@@ -119,19 +138,23 @@ print(f"Oldest asset: {oldest['asset_id']}")
 print(f"  Material: {oldest['material']}")
 print(f"  Installed: {oldest['install_date'].date()}")
 
+
 # %% [markdown]
-# ## 3. Configure Deterioration Model
-#
-# We use a **Weibull model** where each material type has different parameters:
-#
-# - **shape (k)**: Controls failure rate behavior
-#   - k > 1 means increasing failure rate (typical for aging infrastructure)
-# - **scale (lambda)**: Characteristic life in years
-#
-# Typical values for water pipes:
-# - Cast Iron: Older technology, shorter expected life
-# - PVC: Modern material, longer expected life
-# - Ductile Iron: Good durability, moderate expected life
+"""
+## 3. Configure Deterioration Model
+
+We use a **Weibull model** where each material type has different parameters:
+
+- **shape (k)**: Controls failure rate behavior
+  - k > 1 means increasing failure rate (typical for aging infrastructure)
+- **scale (lambda)**: Characteristic life in years
+
+Typical values for water pipes:
+- Cast Iron: Older technology, shorter expected life
+- PVC: Modern material, longer expected life
+- Ductile Iron: Good durability, moderate expected life
+"""
+
 
 # %%
 # Define Weibull parameters for each material type
@@ -144,6 +167,7 @@ params = {
 
 model = WeibullModel(params)
 print(model)
+
 
 # %%
 # The model can transform portfolio data to add failure probabilities
@@ -159,17 +183,21 @@ enriched[["asset_id", "material", "age", "failure_rate", "failure_probability"]]
     10
 )
 
+
 # %% [markdown]
-# ## 4. Run Simulation
-#
-# Run a **10-year simulation** that tracks:
-# - Costs (failure costs + intervention costs)
-# - Failures (sampled based on deterioration model)
-# - Asset aging
-#
-# The simulation uses **conditional probability** to sample failures:
-# - P(fail in year t | survived to t) = (S(t) - S(t+1)) / S(t)
-# - Failed assets are automatically replaced (default behavior)
+"""
+## 4. Run Simulation
+
+Run a **10-year simulation** that tracks:
+- Costs (failure costs + intervention costs)
+- Failures (sampled based on deterioration model)
+- Asset aging
+
+The simulation uses **conditional probability** to sample failures:
+- P(fail in year t | survived to t) = (S(t) - S(t+1)) / S(t)
+- Failed assets are automatically replaced (default behavior)
+"""
+
 
 # %%
 # Configure simulation
@@ -182,6 +210,7 @@ config = SimulationConfig(
 
 print(config)
 
+
 # %%
 # Create simulator and run
 sim = Simulator(model, config)
@@ -189,13 +218,17 @@ result = sim.run(portfolio)
 
 print(result)
 
+
 # %% [markdown]
-# ## 5. Examine Results
-#
-# The `SimulationResult` contains:
-# - **summary**: Year-by-year metrics
-# - **cost_breakdown**: Detailed cost allocation
-# - **failure_log**: Individual failure events
+"""
+## 5. Examine Results
+
+The `SimulationResult` contains:
+- **summary**: Year-by-year metrics
+- **cost_breakdown**: Detailed cost allocation
+- **failure_log**: Individual failure events
+"""
+
 
 # %%
 # Summary statistics
@@ -203,13 +236,16 @@ print(f"Total cost over {config.n_years} years: ${result.total_cost():,.0f}")
 print(f"Total failures: {result.total_failures()}")
 print(f"Average failures per year: {result.total_failures() / config.n_years:.1f}")
 
+
 # %%
 # Year-by-year summary
 result.summary
 
+
 # %%
 # Cost breakdown by year
 result.cost_breakdown
+
 
 # %%
 # Individual failure events
@@ -219,15 +255,19 @@ if not result.failure_log.empty:
 else:
     print("No failures recorded (lucky run!)")
 
+
 # %% [markdown]
-# ## 6. Export Results
-#
-# Results can be exported to **Parquet format** for further analysis or reporting.
-#
-# Supported formats:
-# - `summary`: Year-by-year metrics (default)
-# - `cost_projections`: Long format for plotting
-# - `failure_log`: Detailed failure events
+"""
+## 6. Export Results
+
+Results can be exported to **Parquet format** for further analysis or reporting.
+
+Supported formats:
+- `summary`: Year-by-year metrics (default)
+- `cost_projections`: Long format for plotting
+- `failure_log`: Detailed failure events
+"""
+
 
 # %%
 # Export summary (default format)
@@ -238,17 +278,22 @@ print("Exported: simulation_summary.parquet")
 result.to_parquet("cost_projections.parquet", format="cost_projections")
 print("Exported: cost_projections.parquet")
 
+
 # %%
 # Read back and verify
 df = pd.read_parquet("simulation_summary.parquet")
 print("Read back simulation_summary.parquet:")
 df.head()
 
+
 # %% [markdown]
-# ## Next Steps
-#
-# - See **`optimization.ipynb`** for budget-constrained intervention selection
-# - See **`visualization.ipynb`** for charts and scenario comparisons
+"""
+## Next Steps
+
+- See **`optimization.ipynb`** for budget-constrained intervention selection
+- See **`visualization.ipynb`** for charts and scenario comparisons
+"""
+
 
 # %%
 # Clean up temporary files

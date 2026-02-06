@@ -7,57 +7,72 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.16.4
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
+#     display_name: Python 3
 #     language: python
 #     name: python3
 # ---
 
 # %% [markdown]
-# # Proportional Hazards Modeling
-#
-# This notebook demonstrates how to use `ProportionalHazardsModel` to model failure rates
-# that depend on asset properties (covariates) beyond just age and type.
-#
-# ## What is Proportional Hazards?
-#
-# The proportional hazards model scales the baseline hazard rate by a risk score:
-#
-# h(t|x) = h_baseline(t) * exp(beta_1 * x_1 + beta_2 * x_2 + ...)
-#
-# Where:
-# - h_baseline(t) is the baseline hazard (e.g., from WeibullModel)
-# - x_i are covariate values (asset properties like diameter, length, etc.)
-# - beta_i are coefficients that control how each covariate affects risk
-#
-# **Use cases:**
-# - Larger diameter pipes may have different failure characteristics
-# - Longer pipe segments may have higher failure risk
-# - Environmental factors (soil type, traffic load) affecting failure
-#
+"""
+# Proportional Hazards Modeling
+
+This notebook demonstrates how to use `ProportionalHazardsModel` to model
+failure rates that depend on asset properties (covariates) beyond just age and
+material.
+
+**You will learn how to:**
+- Build a portfolio that includes covariates
+- Wrap a baseline Weibull model with proportional hazards
+- Compare baseline vs. covariate-adjusted failure rates
+- Run simulations and interpret the results
+"""
+
+# %% [markdown]
+"""
+## What Is PH (Proportional Hazards)?
+
+The proportional hazards model scales the baseline hazard rate by a risk score:
+
+h(t|x) = h_baseline(t) * exp(beta_1 * x_1 + beta_2 * x_2 + ...)
+
+Where:
+- h_baseline(t) is the baseline hazard (e.g., from WeibullModel)
+- x_i are covariate values (asset properties like diameter, length, etc.)
+- beta_i are coefficients that control how each covariate affects risk
+
+**Use cases:**
+- Larger diameter pipes may have different failure characteristics
+- Longer pipe segments may have higher failure risk
+- Environmental factors (soil type, traffic load) affecting failure
+"""
+
 
 # %%
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
 
-from asset_optimization import (
-    WeibullModel,
-    Simulator,
+from asset_optimization import (  # noqa: E402
     SimulationConfig,
+    Simulator,
+    WeibullModel,
     set_sdk_theme,
 )
-from asset_optimization.models import ProportionalHazardsModel
-from asset_optimization.portfolio import validate_portfolio
+from asset_optimization.models import ProportionalHazardsModel  # noqa: E402
+from asset_optimization.portfolio import validate_portfolio  # noqa: E402
 
 set_sdk_theme()
 
+
 # %% [markdown]
-# ## Creating a Portfolio with Covariates
-#
-# Our portfolio includes pipe diameter as a covariate. We'll model the hypothesis
-# that larger diameter pipes have slightly higher failure rates due to increased
-# stress and maintenance complexity.
-#
+"""
+## Portfolio with Covariates
+
+Our portfolio includes pipe diameter as a covariate. We'll model the hypothesis
+that larger diameter pipes have slightly higher failure rates due to increased
+stress and maintenance complexity.
+"""
+
 
 # %%
 # Create portfolio with varying diameters
@@ -80,40 +95,52 @@ portfolio = validate_portfolio(portfolio_data)
 print(f"Portfolio: {len(portfolio)} assets")
 print(f"Diameter distribution:{portfolio['diameter_mm'].value_counts().sort_index()}")
 
+
 # %% [markdown]
-# ## Baseline Weibull Model
-#
-# First, let's create a baseline Weibull model without covariate effects.
-#
+"""
+## Baseline Model
+
+First, create a baseline Weibull model without covariate effects.
+"""
+
 
 # %%
 baseline = WeibullModel({"PVC": (2.5, 50.0)})
 print(baseline)
 
+
 # %% [markdown]
-# ## Proportional Hazards Model
-#
-# Now we wrap the baseline with a ProportionalHazardsModel. We'll use pipe diameter
-# as a covariate with a positive coefficient, meaning larger pipes have higher risk.
-#
-# The coefficient 0.005 means that each additional mm of diameter multiplies the
-# hazard rate by exp(0.005) ≈ 1.005 (0.5% increase per mm).
-#
+"""
+## PH Model
+
+Now we wrap the baseline with a ProportionalHazardsModel. We'll use pipe
+diameter as a covariate with a positive coefficient, meaning larger pipes have
+higher risk.
+
+The coefficient 0.005 means that each additional mm of diameter multiplies the
+hazard rate by exp(0.005) ≈ 1.005 (0.5% increase per mm).
+"""
+
 
 # %%
 ph_model = ProportionalHazardsModel(
-    baseline=baseline, covariates=["diameter_mm"], coefficients={"diameter_mm": 0.005}
+    baseline=baseline,
+    covariates=["diameter_mm"],
+    coefficients={"diameter_mm": 0.005},
 )
 
 print(ph_model)
 print(f"Risk multiplier for 100mm pipe: {np.exp(0.005 * 100):.2f}x baseline")
 print(f"Risk multiplier for 300mm pipe: {np.exp(0.005 * 300):.2f}x baseline")
 
+
 # %% [markdown]
-# ## Comparing Failure Rates
-#
-# Let's see how the covariate affects failure rates for different pipe sizes.
-#
+"""
+## Comparing Rates
+
+Let's see how the covariate affects failure rates for different pipe sizes.
+"""
+
 
 # %%
 # Create test DataFrame with same age, different diameters
@@ -137,6 +164,7 @@ comparison = pd.DataFrame(
     }
 )
 print(comparison.to_string(index=False))
+
 
 # %%
 fig, axes = plt.subplots(1, 2, figsize=(12, 5))
@@ -178,11 +206,14 @@ ax2.legend()
 plt.tight_layout()
 plt.show()
 
+
 # %% [markdown]
-# ## Running Simulation with Covariates
-#
-# Now let's run a simulation to see how covariates affect long-term outcomes.
-#
+"""
+## Simulation
+
+Now run a simulation to see how covariates affect long-term outcomes.
+"""
+
 
 # %%
 config = SimulationConfig(n_years=20, random_seed=42)
@@ -203,6 +234,7 @@ print(f"  Total cost: ${result_baseline.total_cost():,.0f}")
 print("Proportional Hazards Model Results:")
 print(f"  Total failures: {result_ph.total_failures()}")
 print(f"  Total cost: ${result_ph.total_cost():,.0f}")
+
 
 # %%
 fig, axes = plt.subplots(1, 2, figsize=(12, 5))
@@ -236,12 +268,15 @@ ax2.legend()
 plt.tight_layout()
 plt.show()
 
+
 # %% [markdown]
-# ## Using Multiple Covariates
-#
-# ProportionalHazardsModel supports multiple covariates. Here we add pipe length
-# as a second covariate - longer pipes have more potential failure points.
-#
+"""
+## Multiple Covariates
+
+ProportionalHazardsModel supports multiple covariates. Here we add pipe length
+as a second covariate - longer pipes have more potential failure points.
+"""
+
 
 # %%
 ph_multi = ProportionalHazardsModel(
@@ -271,13 +306,17 @@ examples["risk_score"] = (
 print("Risk scores for different pipe configurations:")
 print(examples[["diameter_mm", "length_m", "risk_score"]].to_string(index=False))
 
+
 # %% [markdown]
-# ## Covariate Requirements
-#
-# ProportionalHazardsModel requires all covariate columns to be present and non-null.
-# If a covariate column is missing or contains NaNs, the model raises a ValueError.
-# Check covariate completeness before running transforms or simulations.
-#
+"""
+## Covariate Requirements
+
+ProportionalHazardsModel requires all covariate columns to be present and
+non-null. If a covariate column is missing or contains NaNs, the model raises a
+ValueError. Check covariate completeness before running transforms or
+simulations.
+"""
+
 
 # %%
 # Check covariate completeness before modeling
@@ -292,21 +331,23 @@ if (nan_counts > 0).any():
 
 print("Covariates look complete for modeling.")
 
+
 # %% [markdown]
-# ## Summary
-#
-# The `ProportionalHazardsModel` enables sophisticated failure rate modeling:
-#
-# 1. **Wrap any baseline model** - Works with WeibullModel or any DeteriorationModel
-# 2. **Flexible covariates** - Use any numeric DataFrame columns as risk factors
-# 3. **Interpretable coefficients** - exp(beta) gives the risk multiplier per unit
-# 4. **Simulation-ready** - Works seamlessly with Simulator for long-term projections
-# 5. **Strict covariates** - Missing or NaN covariates raise errors
-#
-# ### When to use Proportional Hazards
-#
-# - When asset properties beyond age/type affect failure risk
-# - When you have domain knowledge about risk factors (e.g., "larger pipes fail more")
-# - When you want to model heterogeneous risk across your portfolio
-# - When comparing scenarios with different asset characteristics
-#
+"""
+## Summary
+
+The `ProportionalHazardsModel` enables sophisticated failure rate modeling:
+
+1. **Wrap any baseline model** - Works with WeibullModel or any DeteriorationModel
+2. **Flexible covariates** - Use any numeric DataFrame columns as risk factors
+3. **Interpretable coefficients** - exp(beta) gives the risk multiplier per unit
+4. **Simulation-ready** - Works seamlessly with Simulator for long-term projections
+5. **Strict covariates** - Missing or NaN covariates raise errors
+
+### When to use Proportional Hazards
+
+- When asset properties beyond age/type affect failure risk
+- When you have domain knowledge about risk factors (e.g., "larger pipes fail more")
+- When you want to model heterogeneous risk across your portfolio
+- When comparing scenarios with different asset characteristics
+"""
