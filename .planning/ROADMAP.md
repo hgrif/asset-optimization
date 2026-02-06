@@ -53,14 +53,15 @@ Plans:
 **Requirements**: DOCS-WF-01, DOCS-WF-02, DOCS-WF-03, DOCS-WF-04
 **Success Criteria** (what must be TRUE):
   1. Jupytext is configured and .py percent-format files round-trip to .ipynb
-  2. A conversion script/Makefile target exists to build all notebooks from .py sources
+  2. Pre-commit hook runs jupytext sync on commit (sole conversion mechanism)
   3. Existing quickstart.ipynb is migrated to .py source format
   4. Phase 7 proportional_hazards.ipynb (DOCS-01) is migrated to .py source format
   5. Future doc phases (8-10) can write .py files instead of .ipynb
-**Plans**: 0 plans
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 07.1 to break down)
+- [ ] 07.1-01-PLAN.md — Jupytext + pre-commit tooling setup and notebook template
+- [ ] 07.1-02-PLAN.md — Migrate quickstart and proportional_hazards notebooks to .py format
 
 ### Phase 8: Roads Domain
 **Goal**: Users can configure and simulate road asset portfolios with domain-specific schema and interventions
@@ -118,7 +119,7 @@ Phases execute in numeric order: 7 -> 7.1 -> 8 -> 9 -> 10
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 7. Proportional Hazards | v2.0 | 0/3 | Planned | - |
-| 7.1. Documentation Workflow | v2.0 | 0/TBD | Not started | - |
+| 7.1. Documentation Workflow | v2.0 | 0/2 | Planned | - |
 | 8. Roads Domain | v2.0 | 0/TBD | Not started | - |
 | 9. Asset Groupings | v2.0 | 0/TBD | Not started | - |
 | 10. Asset Hierarchy | v2.0 | 0/TBD | Not started | - |
