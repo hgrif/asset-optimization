@@ -58,6 +58,13 @@ Add road asset portfolios as a use case for the SDK. Roads is not a new system â
 - "I only want to add more use cases â€” a new system is not required"
 - Domains and performance models are two separate concepts: domains are use cases, models (Weibull, ProportionalHazards) can apply to any domain
 - Research should drive the road-specific requirements (surface types, intervention costs, deterioration parameters)
+- **Road modeling with ages/treatment data (no condition history):**
+  - **Default model:** Proportional Hazards with a Weibull baseline (age is time scale; traffic/climate/surface are covariates).
+  - **Event definition:** treatment event (patch/resurface/reconstruct) marks failure; do_nothing/inspect are not failures.
+  - **Time origin:** time since last treatment (or install date if never treated).
+  - **Censoring:** assets with no treatment are right-censored at observation date.
+  - **Repeated treatments:** create one row per treatment cycle (start_date, end_date, event_observed) and fit a recurrent-event PH (Andersen-Gill) or renewal Weibull per cycle.
+  - **Minimum data layout:** `asset_id`, `install_date`, `observation_date`, `treatment_date` (optional), `treatment_type`, plus covariates (`surface_type`, `traffic_load`, `climate_zone`).
 
 </specifics>
 

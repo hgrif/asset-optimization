@@ -20,7 +20,7 @@ from asset_optimization.simulation import (
     REPAIR,
     REPLACE,
 )
-from asset_optimization.domains import Domain, PipeDomain
+from asset_optimization.domains import Domain, PipeDomain, RoadDomain
 from asset_optimization.optimization import Optimizer, OptimizationResult
 from asset_optimization.exports import (
     export_schedule_minimal,
@@ -60,6 +60,7 @@ __all__ = [
     "REPLACE",
     "Domain",
     "PipeDomain",
+    "RoadDomain",
     "Optimizer",
     "OptimizationResult",
     "export_schedule_minimal",
