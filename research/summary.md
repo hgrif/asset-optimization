@@ -64,4 +64,6 @@ Borrow finance architecture patterns:
 - `research/3_implementation_approaches.md`
 - `research/4_python_r_packages.md`
 - `research/5_financial_modeling_lessons.md`
+- `research/6_api_design_proposals.md`
+- `research/7_proposal_a_spec.md`
 - `research/summary.md`
