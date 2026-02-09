@@ -33,3 +33,23 @@
 - `make lint` ✅
 - `make test` ✅
 - `make docs` ✅
+
+## Step 5 Update
+
+- Plan step completed: **Step 5 - New implementations**
+- Completion date: `2026-02-09`
+
+### Files Added
+
+- `src/asset_optimization/repositories/__init__.py`
+- `src/asset_optimization/repositories/dataframe.py`
+- `src/asset_optimization/effects/__init__.py`
+- `src/asset_optimization/effects/rule_based.py`
+- `tests/test_repositories.py`
+- `tests/test_effects.py`
+
+### Notes
+
+- Implemented `DataFrameRepository` with defensive copies and optional `event_type` filtering.
+- Implemented `RuleBasedEffectModel` with no-op `fit()`, rule-based `estimate_effect()`, and `describe()` metadata.
+- Marked Step 5 complete in `.planning/phases/11-refactoring/PLAN.md`.
