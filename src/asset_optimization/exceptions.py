@@ -70,3 +70,28 @@ class OptimizationError(AssetOptimizationError):
             detail_str = ", ".join(f"{k}={v}" for k, v in self.details.items())
             msg += f" ({detail_str})"
         return msg
+
+
+class ModelError(AssetOptimizationError):
+    """Raised when model fitting or inference fails.
+
+    Attributes
+    ----------
+    message : str
+        Human-readable error description.
+    details : dict
+        Additional error context (model type, phase, parameters, etc.).
+    """
+
+    def __init__(self, message, details=None):
+        self.message = message
+        self.details = details or {}
+        super().__init__(self._format_message())
+
+    def _format_message(self):
+        """Format model error message with details."""
+        msg = f"Model error: {self.message}"
+        if self.details:
+            detail_str = ", ".join(f"{k}={v}" for k, v in self.details.items())
+            msg += f" ({detail_str})"
+        return msg
