@@ -8,7 +8,7 @@ from asset_optimization.effects.rule_based import RuleBasedEffectModel
 from asset_optimization.models.proportional_hazards import ProportionalHazardsModel
 from asset_optimization.models.weibull import WeibullModel
 from asset_optimization.optimization.optimizer import Optimizer
-from asset_optimization.simulation.simulator import Simulator
+from asset_optimization.simulators.basic import BasicNetworkSimulator
 
 RISK_MODELS: dict[str, type[Any]] = {}
 EFFECT_MODELS: dict[str, type[Any]] = {}
@@ -89,7 +89,7 @@ def _register_builtins() -> None:
     register("risk_models", "weibull", WeibullModel)
     register("risk_models", "proportional_hazards", ProportionalHazardsModel)
     register("effect_models", "rule_based", RuleBasedEffectModel)
-    register("simulators", "basic", Simulator)
+    register("simulators", "basic", BasicNetworkSimulator)
     register("optimizers", "greedy", Optimizer)
 
 

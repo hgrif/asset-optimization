@@ -6,7 +6,7 @@ from asset_optimization import registry as plugin_registry
 from asset_optimization.effects import RuleBasedEffectModel
 from asset_optimization.models import ProportionalHazardsModel, WeibullModel
 from asset_optimization.optimization import Optimizer
-from asset_optimization.simulation import Simulator
+from asset_optimization.simulators import BasicNetworkSimulator
 
 
 @pytest.fixture(autouse=True)
@@ -35,7 +35,7 @@ def test_builtins_are_registered_at_import() -> None:
         is ProportionalHazardsModel
     )
     assert plugin_registry.get("effect_models", "rule_based") is RuleBasedEffectModel
-    assert plugin_registry.get("simulators", "basic") is Simulator
+    assert plugin_registry.get("simulators", "basic") is BasicNetworkSimulator
     assert plugin_registry.get("optimizers", "greedy") is Optimizer
 
 
