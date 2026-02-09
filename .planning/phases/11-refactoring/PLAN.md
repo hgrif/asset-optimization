@@ -110,7 +110,7 @@ This plan implements the **core API skeleton**: Planner orchestrator, service pr
 - `propose_actions(horizon, scenarios=None)`: calls `predict_distribution()`, builds candidate actions, calls `estimate_effect()`, optionally runs simulator
 - `optimize_plan(horizon, scenarios, objective, constraints, risk_measure)`: calls `propose_actions()` then `optimizer.solve()`
 
-### Step 7: Plugin registry (depends on Steps 4-5)
+### Step 7: Plugin registry (depends on Steps 4-5) ✅ Completed 2026-02-09
 
 **`registry.py`**:
 - Module-level dicts: `RISK_MODELS`, `EFFECT_MODELS`, `SIMULATORS`, `OPTIMIZERS`
