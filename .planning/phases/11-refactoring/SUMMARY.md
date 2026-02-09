@@ -3,18 +3,18 @@
 ## Scope Executed
 
 - Plan file: `PLAN.md`
-- Step completed: **Step 1 - Foundation types and exceptions**
+- Step completed: **Step 2 - Service protocols**
 - Completion date: `2026-02-09`
 
 ## Files Added
 
-- `src/asset_optimization/types.py`
-- `tests/test_types.py`
+- `src/asset_optimization/protocols.py`
+- `tests/test_protocols.py`
 
 ## Files Modified
 
-- `src/asset_optimization/exceptions.py` (added `ModelError`)
-- `.planning/phases/11-refactoring/PLAN.md` (marked Step 1 complete)
+- `.planning/phases/11-refactoring/PLAN.md` (marked Step 2 complete)
+- `.planning/phases/11-refactoring/SUMMARY.md` (updated execution record)
 
 ## Validation
 

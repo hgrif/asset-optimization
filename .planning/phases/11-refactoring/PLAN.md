@@ -57,7 +57,7 @@ This plan implements the **core API skeleton**: Planner orchestrator, service pr
 
 **`exceptions.py`** — Add `ModelError(AssetOptimizationError)` with message + details dict.
 
-### Step 2: Service protocols (depends on Step 1)
+### Step 2: Service protocols (depends on Step 1) ✅ Completed 2026-02-09
 
 **`protocols.py`** — Five `@runtime_checkable` Protocol classes matching the spec signatures. Make `ScenarioSet` optional (`| None = None`) in all signatures since the skeleton doesn't implement scenario logic yet.
 
