@@ -91,7 +91,7 @@ This plan implements the **core API skeleton**: Planner orchestrator, service pr
 - Select within budget
 - Return `PlanResult` with selected_actions (Proposal A schema), objective_breakdown, constraint_shadow_prices, metadata
 
-### Step 5: New implementations (depends on Steps 1-2)
+### Step 5: New implementations (depends on Steps 1-2) ✅ Completed 2026-02-09
 
 **`repositories/dataframe.py`** — `DataFrameRepository`: constructor accepts DataFrames for assets/events/interventions/outcomes/covariates/topology (all optional except assets). Each `load_*()` returns a copy.
 
