@@ -297,6 +297,10 @@ SIMULATORS = {
     "water": WaterWntrSimulator,
     "power": PowerPandapowerSimulator,
     "roads": RoadTrafficAssignmentSimulator,
+    "rail": RailTransitScheduleSimulator,
+    "ports": PortThroughputImpactSimulator,
+    "buildings": BuildingSystemsDependencySimulator,
+    "industrial": ProductionFlowImpactSimulator,
     "datacenter": DataCenterRedundancySimulator,
 }
 
@@ -307,6 +311,156 @@ OPTIMIZERS = {
     "robust": RobustMinMaxOptimizer,
 }
 ```
+
+## Multi-Domain and Use-Case Support
+This section extends Proposal A with explicit multi-domain support, aligned with:
+- `research/1_domains_and_use_cases.md` (domain catalog and decision archetypes)
+- `research/3_implementation_approaches.md` (maturity ladder and model-family selection)
+- `research/5_financial_modeling_lessons.md` (separation of risk, optimization, execution, and backtesting)
+
+### DomainProfile Contract
+Each domain is configured through a `DomainProfile` that binds data, plugins, objectives, and constraints without changing core planner code.
+
+```python
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class DomainProfile:
+    domain_id: str  # roads, water, power, datacenter, rail, ports, buildings, industrial
+    topology_kind: str  # graph, hydraulic, powerflow, facility, none
+    asset_types: tuple[str, ...]
+    risk_model_key: str
+    effect_model_key: str
+    simulator_key: str
+    optimizer_key: str
+    default_risk_measure: str  # expected_value, cvar, robust
+    objective_preset: str  # lifecycle_cost, reliability_first, resilience_first, mixed
+    constraint_preset: str  # annual_capex, outage_windowed, crew_limited, regulatory
+```
+
+### UseCaseTemplate Contract
+Use cases are explicit templates that map a decision archetype to required inputs and planning cadence.
+
+```python
+@dataclass(frozen=True)
+class UseCaseTemplate:
+    use_case_id: str
+    decision_archetype: str
+    planning_cadence: str  # weekly, monthly, quarterly, annual, multi_year
+    horizon_step: str  # monthly, quarterly, yearly
+    required_tables: tuple[str, ...]  # assets, events, interventions, outcomes, topology, covariates
+    objective_overrides: dict
+    constraint_overrides: dict
+```
+
+### Domain and Use-Case Registration API
+```python
+class DomainCatalog:
+    def register_domain(self, profile: DomainProfile) -> None: ...
+    def register_use_case(self, domain_id: str, template: UseCaseTemplate) -> None: ...
+    def get_domain(self, domain_id: str) -> DomainProfile: ...
+    def get_use_case(self, domain_id: str, use_case_id: str) -> UseCaseTemplate: ...
+```
+
+### Domain-Aware Planner Construction
+```python
+def build_planner_for(domain: DomainProfile, repository: AssetRepository) -> Planner:
+    return Planner(
+        repository=repository,
+        risk_model=RISK_MODELS[domain.risk_model_key](),
+        effect_model=EFFECT_MODELS[domain.effect_model_key](),
+        simulator=SIMULATORS[domain.simulator_key](),
+        optimizer=OPTIMIZERS[domain.optimizer_key](),
+    )
+```
+
+### Multi-Domain Architecture Pattern
+```mermaid
+classDiagram
+    class DomainCatalog
+    class DomainProfile
+    class UseCaseTemplate
+    class PlannerFactory
+    class Planner
+
+    DomainCatalog --> DomainProfile : stores
+    DomainCatalog --> UseCaseTemplate : stores
+    PlannerFactory --> DomainCatalog : resolves config
+    PlannerFactory --> Planner : instantiates with plugins
+```
+
+### Canonical Decision Archetypes (Cross-Domain)
+| Archetype | Description | Typical cadence |
+|---|---|---|
+| `risk_based_renewal_ranking` | Select which assets to renew within a budget cycle | annual |
+| `intervention_timing` | Decide when to intervene on each asset | quarterly/annual |
+| `network_aware_scheduling` | Sequence actions with topology/access effects | weekly/monthly |
+| `resilience_investment` | Allocate budget to reduce tail risk under stress scenarios | annual/multi-year |
+| `inspection_planning` | Allocate inspection budget to reduce uncertainty before capex | monthly/quarterly |
+
+### Domain Mapping Examples
+| Domain | Representative use cases | Recommended baseline plugins |
+|---|---|---|
+| Roads/bridges | treatment timing, corridor bundling, bridge rehab prioritization | `CoxPHRiskModel` + `RuleBasedEffectModel` + `RoadTrafficAssignmentSimulator` + `MilpPlanOptimizer` |
+| Water/stormwater/wastewater | pump replacement for flood risk, pipe replacement under break/leak risk | `HierarchicalBayesianRiskModel` + `BayesianTreatmentEffectModel` + `WaterWntrSimulator` + `CvarScenarioOptimizer` |
+| Power T&D | transformer renewal, hardening portfolio, reliability-constrained planning | `HierarchicalBayesianRiskModel` + `RuleBasedEffectModel` + `PowerPandapowerSimulator` + `RobustMinMaxOptimizer` |
+| Data centers | weekly preventive replacement and redundancy-aware maintenance planning | `GradientBoostingRiskModel` + `CausalForestEffectModel` + `DataCenterRedundancySimulator` + `GreedyBudgetOptimizer` |
+| Rail/transit | possession-window renewal scheduling and switch prioritization | `CoxPHRiskModel` + `RuleBasedEffectModel` + `RailTransitScheduleSimulator` + `MilpPlanOptimizer` |
+| Ports/airports/logistics | staged runway/berth/crane renewal with throughput constraints | `CoxPHRiskModel` + `RuleBasedEffectModel` + `PortThroughputImpactSimulator` + `MilpPlanOptimizer` |
+| Buildings/campuses | backlog reduction, retrofit timing, critical system reliability | `WeibullRiskModel` + `RuleBasedEffectModel` + `BuildingSystemsDependencySimulator` + `MilpPlanOptimizer` |
+| Industrial/process facilities | condition-based replacement under production-loss risk | `GradientBoostingRiskModel` + `CausalForestEffectModel` + `ProductionFlowImpactSimulator` + `RobustMinMaxOptimizer` |
+
+### Maturity Ladder Support (Per Use Case)
+Proposal A supports all implementation levels from `research/3_implementation_approaches.md` by swapping adapters, not framework internals.
+
+| Maturity level | Risk model family | Effect model family | Optimizer/risk measure |
+|---|---|---|---|
+| Level A: baseline statistical | Weibull/Markov/GLM | rule-based | deterministic MILP or greedy with `expected_value` |
+| Level B: predictive ML | GBM/RF/survival ML | causal forest or calibrated heuristic | constrained optimizer with scenario averages |
+| Level C: probabilistic decision | hierarchical Bayesian + posterior predictive | Bayesian treatment effect | stochastic/CVaR/robust optimizer with stress scenarios |
+
+### Domain-Specific Objective and Constraint Presets
+```python
+OBJECTIVE_PRESETS = {
+    "lifecycle_cost": lambda b: b.add_expected_risk_reduction(1.0).add_total_cost(0.5),
+    "reliability_first": lambda b: b.add_expected_risk_reduction(1.0).add_resilience_gain(0.6),
+    "resilience_first": lambda b: b.add_resilience_gain(1.0).add_expected_risk_reduction(0.7),
+    "mixed": lambda b: b.add_expected_risk_reduction(1.0).add_total_cost(0.3).add_equity_term(0.2),
+}
+
+def apply_constraint_preset(c: ConstraintSet, name: str) -> ConstraintSet:
+    if name == "annual_capex":
+        return c.add_budget_limit(annual_capex=5_000_000)
+    if name == "crew_limited":
+        return c.add_crew_hours_limit(hours=80_000)
+    if name == "outage_windowed":
+        return c.add_policy_rule("outage_hours <= allowed_window_hours")
+    if name == "regulatory":
+        return c.add_minimum_service_level(metric="reliability_index", threshold=0.995)
+    return c
+```
+
+### Multi-Domain Portfolio Modes
+Proposal A should support two planning modes:
+1. `domain_isolated`: each domain gets a dedicated budget and optimized plan.
+2. `cross_domain_budgeted`: domains compete for a shared budget; optimizer includes domain-level allocation constraints and optional risk-budget terms.
+
+```python
+class MultiDomainPlanner:
+    def optimize_isolated(self, plans: dict[str, Planner], constraints: dict[str, ConstraintSet]) -> dict[str, PlanResult]: ...
+    def optimize_shared_budget(
+        self,
+        plans: dict[str, Planner],
+        shared_budget: float,
+        risk_budget_weights: dict[str, float],
+    ) -> dict[str, PlanResult]: ...
+```
+
+### Execution and Backtesting Across Domains
+Following `research/5_financial_modeling_lessons.md`, keep strategy separate from execution:
+- `Planner.optimize_plan(...)` returns recommended actions.
+- Domain execution adapters handle procurement/permitting/scheduling/dispatch externally.
+- `Backtester.walk_forward(...)` evaluates planning policy quality per domain and for shared-budget portfolios.
 
 ## Governance and Model Registry
 
