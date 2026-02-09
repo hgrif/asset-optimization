@@ -4,7 +4,12 @@ import pytest
 import pandas as pd
 import numpy as np
 
+from asset_optimization.constraints import ConstraintSet
+from asset_optimization.exceptions import OptimizationError
+from asset_optimization.objective import ObjectiveBuilder
 from asset_optimization.optimization import Optimizer, OptimizationResult
+from asset_optimization.protocols import PlanOptimizer
+from asset_optimization.types import PlanResult
 
 
 class TestOptimizerInit:
@@ -334,3 +339,67 @@ class TestEdgeCases:
         opt.fit(portfolio, weibull_model, budget=100.0)  # Less than Inspect cost
 
         assert len(opt.result.selections) == 0
+
+
+class TestPlannerOptimizationCompatibility:
+    """Planner-oriented PlanOptimizer compatibility checks."""
+
+    def test_optimizer_matches_plan_optimizer_protocol(self):
+        opt = Optimizer()
+        assert isinstance(opt, PlanOptimizer)
+
+    def test_solve_selects_within_budget_and_returns_plan_result(self):
+        opt = Optimizer()
+        candidates = pd.DataFrame(
+            {
+                "asset_id": ["A1", "A2", "A3"],
+                "action_type": ["replace", "repair", "inspect"],
+                "direct_cost": [50000.0, 5000.0, 500.0],
+                "expected_benefit": [12000.0, 4000.0, 200.0],
+                "expected_risk_reduction": [0.25, 0.15, 0.01],
+            }
+        )
+        objective = (
+            ObjectiveBuilder()
+            .add_expected_risk_reduction()
+            .add_total_cost(weight=-1.0)
+            .build()
+        )
+        constraints = ConstraintSet().add_budget_limit(5500.0)
+
+        result = opt.solve(objective, constraints, candidates)
+
+        assert isinstance(result, PlanResult)
+        assert result.selected_actions["asset_id"].tolist() == ["A2", "A3"]
+        assert result.selected_actions["direct_cost"].sum() <= 5500.0
+        assert result.metadata["budget_limit"] == 5500.0
+        assert result.metadata["selected_count"] == 2
+        assert "expected_risk_reduction" in result.objective_breakdown
+        assert "total_cost" in result.objective_breakdown
+
+    def test_solve_uses_unbounded_budget_when_constraint_absent(self):
+        opt = Optimizer()
+        candidates = pd.DataFrame(
+            {
+                "asset_id": ["A1", "A2"],
+                "action_type": ["replace", "repair"],
+                "direct_cost": [50000.0, 5000.0],
+                "expected_benefit": [12000.0, 4000.0],
+            }
+        )
+        objective = ObjectiveBuilder().add_expected_risk_reduction().build()
+        constraints = ConstraintSet()
+
+        result = opt.solve(objective, constraints, candidates)
+
+        assert result.metadata["budget_limit"] is None
+        assert result.metadata["selected_count"] == 2
+
+    def test_solve_requires_required_candidate_columns(self):
+        opt = Optimizer()
+        objective = ObjectiveBuilder().add_expected_risk_reduction().build()
+        constraints = ConstraintSet().add_budget_limit(1000.0)
+        missing_cost = pd.DataFrame({"asset_id": ["A1"], "expected_benefit": [1.0]})
+
+        with pytest.raises(OptimizationError, match="required columns"):
+            opt.solve(objective, constraints, missing_cost)

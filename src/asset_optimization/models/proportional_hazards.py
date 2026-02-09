@@ -187,6 +187,15 @@ class ProportionalHazardsModel(DeteriorationModel):
         probs = 1.0 - np.power(survival_ratio, risk)
         return np.clip(probs, 0.0, 1.0)
 
+    def describe(self) -> dict[str, object]:
+        """Return planner-facing model metadata."""
+        return {
+            "model_type": self.__class__.__name__,
+            "baseline": self.baseline.describe(),
+            "covariates": list(self.covariates),
+            "coefficients": dict(self.coefficients),
+        }
+
     def __repr__(self) -> str:
         """Return informative string representation."""
         return (

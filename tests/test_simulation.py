@@ -15,6 +15,7 @@ from dataclasses import FrozenInstanceError
 from scipy.stats import weibull_min
 
 from asset_optimization.models import WeibullModel
+from asset_optimization.protocols import NetworkSimulator
 from asset_optimization.simulation import (
     DO_NOTHING,
     INSPECT,
@@ -854,3 +855,47 @@ class TestTimestepOrder:
         # If any failures occurred, avg_age should be less than this
         if result.total_failures() > 0:
             assert final_avg_age < expected_no_intervention
+
+
+class TestPlannerSimulationCompatibility:
+    """Planner-oriented NetworkSimulator compatibility checks."""
+
+    def test_simulator_matches_network_simulator_protocol(
+        self, weibull_model, simulation_config
+    ):
+        sim = Simulator(weibull_model, simulation_config)
+        assert isinstance(sim, NetworkSimulator)
+
+    def test_simulate_adds_consequence_cost_column(self, weibull_model):
+        sim = Simulator(weibull_model, SimulationConfig(n_years=1, random_seed=42))
+        topology = pd.DataFrame({"from_asset_id": ["A1"], "to_asset_id": ["A2"]})
+        failures = pd.DataFrame(
+            {
+                "asset_id": ["A1", "A1", "A3"],
+                "consequence_cost": [1000.0, 250.0, 500.0],
+            }
+        )
+        actions = pd.DataFrame(
+            {
+                "asset_id": ["A1", "A2"],
+                "action_type": ["replace", "inspect"],
+                "direct_cost": [50000.0, 500.0],
+            }
+        )
+
+        result = sim.simulate(topology, failures, actions)
+
+        assert "consequence_cost" in result.columns
+        a1_cost = result[result["asset_id"] == "A1"]["consequence_cost"].iloc[0]
+        a2_cost = result[result["asset_id"] == "A2"]["consequence_cost"].iloc[0]
+        assert a1_cost == pytest.approx(1250.0)
+        assert a2_cost == pytest.approx(0.0)
+
+    def test_simulate_returns_copy_not_mutating_actions(self, weibull_model):
+        sim = Simulator(weibull_model, SimulationConfig(n_years=1))
+        actions = pd.DataFrame({"asset_id": ["A1"], "action_type": ["repair"]})
+        original_columns = actions.columns.tolist()
+
+        _ = sim.simulate(pd.DataFrame(), pd.DataFrame(), actions)
+
+        assert actions.columns.tolist() == original_columns

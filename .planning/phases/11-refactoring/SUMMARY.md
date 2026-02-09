@@ -3,7 +3,7 @@
 ## Scope Executed
 
 - Plan file: `PLAN.md`
-- Step completed: **Step 3 - DSL classes**
+- Steps completed: **Step 3 - DSL classes**, **Step 4 - Refactor existing classes**
 - Completion date: `2026-02-09`
 
 ## Files Added
@@ -15,8 +15,17 @@
 
 ## Files Modified
 
-- `src/asset_optimization/protocols.py` (replace temporary ConstraintSet alias with concrete DSL imports)
-- `.planning/phases/11-refactoring/PLAN.md` (marked Step 3 complete)
+- `src/asset_optimization/models/base.py` (added planner-compatible `fit`, `predict_distribution`, `describe`)
+- `src/asset_optimization/models/weibull.py` (added `describe` override with Weibull metadata)
+- `src/asset_optimization/models/proportional_hazards.py` (added `describe` override with baseline/covariates metadata)
+- `src/asset_optimization/simulation/simulator.py` (added `simulate` method for `NetworkSimulator` protocol)
+- `src/asset_optimization/optimization/optimizer.py` (added `solve` method for `PlanOptimizer` protocol)
+- `tests/test_deterioration.py` (added risk-model protocol tests for Weibull)
+- `tests/test_proportional_hazards.py` (added risk-model protocol/describe tests)
+- `tests/test_simulation.py` (added network-simulator protocol tests)
+- `tests/test_optimization.py` (added plan-optimizer protocol/solve tests)
+- `src/asset_optimization/protocols.py` (replaced temporary ConstraintSet alias with concrete DSL imports)
+- `.planning/phases/11-refactoring/PLAN.md` (marked Step 3/4 completion)
 - `.planning/phases/11-refactoring/SUMMARY.md` (updated execution record)
 
 ## Validation

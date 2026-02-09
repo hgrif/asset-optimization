@@ -21,6 +21,7 @@ from asset_optimization.simulation.interventions import (
     InterventionType,
 )
 from asset_optimization.simulation.result import SimulationResult
+from asset_optimization.types import ScenarioSet
 
 
 # Default costs for failures
@@ -259,6 +260,51 @@ class Simulator:
             config=self.config,
             asset_history=asset_history,
         )
+
+    def simulate(
+        self,
+        topology: pd.DataFrame,
+        failures: pd.DataFrame,
+        actions: pd.DataFrame,
+        scenarios: ScenarioSet | None = None,
+    ) -> pd.DataFrame:
+        """Simulate network consequences for candidate actions.
+
+        Skeleton implementation is a pass-through for non-network domains.
+        It returns a copy of ``actions`` with a ``consequence_cost`` column.
+        When failure-level consequence costs are provided, they are aggregated
+        by ``asset_id`` and added to matching actions.
+        """
+        del topology, scenarios
+        result = actions.copy(deep=True)
+
+        base_consequence = (
+            pd.to_numeric(result["consequence_cost"], errors="coerce")
+            if "consequence_cost" in result.columns
+            else pd.Series(0.0, index=result.index, dtype=float)
+        )
+        result["consequence_cost"] = base_consequence.fillna(0.0).astype(float)
+
+        if failures.empty:
+            return result
+
+        required_cols = {"asset_id", "consequence_cost"}
+        if required_cols.issubset(failures.columns) and "asset_id" in result.columns:
+            failure_costs = (
+                failures[["asset_id", "consequence_cost"]]
+                .assign(
+                    consequence_cost=lambda frame: pd.to_numeric(
+                        frame["consequence_cost"], errors="coerce"
+                    ).fillna(0.0)
+                )
+                .groupby("asset_id", sort=False)["consequence_cost"]
+                .sum()
+            )
+            result["consequence_cost"] += (
+                result["asset_id"].map(failure_costs).fillna(0.0).astype(float)
+            )
+
+        return result
 
     def _simulate_timestep(
         self, state: pd.DataFrame, year: int

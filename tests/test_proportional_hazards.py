@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 from asset_optimization.models import ProportionalHazardsModel, WeibullModel
+from asset_optimization.protocols import RiskModel
 
 
 @pytest.fixture
@@ -94,6 +95,16 @@ class TestProportionalHazardsModelDelegation:
 
     def test_age_column_delegates_to_baseline(self, ph_model, weibull_baseline):
         assert ph_model.age_column == weibull_baseline.age_column
+
+    def test_describe_includes_baseline_covariates_and_coefficients(self, ph_model):
+        description = ph_model.describe()
+        assert description["model_type"] == "ProportionalHazardsModel"
+        assert description["baseline"]["model_type"] == "WeibullModel"
+        assert description["covariates"] == ["diameter_mm"]
+        assert description["coefficients"] == {"diameter_mm": 0.01}
+
+    def test_matches_risk_model_protocol(self, ph_model):
+        assert isinstance(ph_model, RiskModel)
 
 
 class TestProportionalHazardsModelTransform:

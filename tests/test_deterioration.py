@@ -8,6 +8,8 @@ from scipy.stats import weibull_min
 
 from asset_optimization import WeibullModel
 from asset_optimization.models import DeteriorationModel
+from asset_optimization.protocols import RiskModel
+from asset_optimization.types import PlanningHorizon
 
 
 class TestDeteriorationModelInterface:
@@ -461,3 +463,57 @@ class TestWeibullModelMultipleTypes:
         # All rows should have valid values
         assert not result["failure_rate"].isna().any()
         assert not result["failure_probability"].isna().any()
+
+
+class TestPlannerRiskModelCompatibility:
+    """Planner-oriented RiskModel compatibility checks."""
+
+    def test_weibull_matches_risk_model_protocol(self):
+        """WeibullModel structurally satisfies the RiskModel protocol."""
+        model = WeibullModel({"PVC": (2.5, 50.0)})
+        assert isinstance(model, RiskModel)
+
+    def test_fit_returns_self_noop(self):
+        """Default fit implementation is a no-op that returns self."""
+        model = WeibullModel({"PVC": (2.5, 50.0)})
+        assets = pd.DataFrame({"asset_id": ["A1"], "material": ["PVC"], "age": [20]})
+        events = pd.DataFrame({"asset_id": ["A1"], "event_type": ["break"]})
+        result = model.fit(assets, events)
+        assert result is model
+
+    def test_predict_distribution_returns_proposal_a_schema(self):
+        """predict_distribution returns planner-compatible output columns."""
+        model = WeibullModel({"PVC": (2.5, 50.0)})
+        assets = pd.DataFrame(
+            {"asset_id": ["A1", "A2"], "material": ["PVC", "PVC"], "age": [10, 25]}
+        )
+        horizon = PlanningHorizon("2026-01-01", "2026-12-31", "yearly")
+
+        result = model.predict_distribution(assets, horizon)
+
+        assert {
+            "asset_id",
+            "scenario_id",
+            "horizon_step",
+            "failure_prob",
+            "loss_mean",
+        }.issubset(result.columns)
+        assert len(result) == len(assets)
+        assert (result["scenario_id"] == "baseline").all()
+        assert (result["horizon_step"] == 0).all()
+        assert (result["failure_prob"] >= 0.0).all()
+        assert (result["failure_prob"] <= 1.0).all()
+
+    def test_weibull_describe_includes_parameters(self):
+        """Weibull describe() reports model metadata used by planner."""
+        model = WeibullModel(
+            {"PVC": (2.5, 50.0)},
+            type_column="material",
+            age_column="age",
+        )
+        description = model.describe()
+
+        assert description["model_type"] == "WeibullModel"
+        assert description["params"] == {"PVC": (2.5, 50.0)}
+        assert description["type_column"] == "material"
+        assert description["age_column"] == "age"

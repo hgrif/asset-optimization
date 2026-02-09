@@ -72,7 +72,7 @@ This plan implements the **core API skeleton**: Planner orchestrator, service pr
 - `Constraint(frozen=True)`: kind, params
 - `ConstraintSet`: fluent accumulator with `add_budget_limit()`, `add_crew_hours_limit()`, `add_outage_windows()`, `add_policy_rule()`, `add_minimum_service_level()`
 
-### Step 4: Refactor existing classes (depends on Steps 1-2)
+### Step 4: Refactor existing classes (depends on Steps 1-2) ✅ Completed 2026-02-09
 
 **`models/base.py`** — Add three concrete methods to `DeteriorationModel`:
 - `fit(assets, events, covariates=None)` — no-op default (params set at init), returns self

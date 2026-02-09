@@ -291,6 +291,15 @@ class WeibullModel(DeteriorationModel):
 
         return probs
 
+    def describe(self) -> dict[str, object]:
+        """Return planner-facing model metadata."""
+        return {
+            "model_type": self.__class__.__name__,
+            "params": dict(self.params),
+            "type_column": self.type_column,
+            "age_column": self.age_column,
+        }
+
     def __repr__(self) -> str:
         """Return informative string representation."""
         types = list(self.params.keys())
