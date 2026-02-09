@@ -14,6 +14,7 @@
 - Fast sync only (no execution): `make docs-sync`
 - Execute notebook sources and sync: `make docs` (runs `docs-py` then `docs-sync`)
 - Execute only notebook sources: `make docs-py`
+- Commit notebooks with their executed outputs (run `make docs` before committing).
 
 ## Quality Gates
 - Use the Makefile targets for standard checks: `make lint`, `make test`, `make docs`.
