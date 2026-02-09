@@ -91,11 +91,12 @@ Plans:
   3. User can configure propagation factor controlling how much risk increases
   4. Optimizer respects group constraints (intervening on one asset requires intervening on all in group)
   5. Documentation .py file demonstrates asset groupings with failure propagation (converts to notebook via jupytext)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md — Failure propagation in Simulator (SimulationConfig + _propagate_failures)
+- [ ] 09-02-PLAN.md — Group coherence constraint in Optimizer (ConstraintSet + all-or-nothing selection)
+- [ ] 09-03-PLAN.md — Asset groupings documentation notebook
 
 ### Phase 10: Asset Hierarchy
 **Goal**: Users can model parent-child asset relationships where parent failures cascade to children
@@ -124,7 +125,7 @@ Phases execute in numeric order: 7 -> 7.1 -> 8 -> 9 -> 10
 | 7.1. Documentation Workflow | v2.0 | 2/2 | Complete | 2026-02-06 |
 | 8. Roads Domain | v2.0 | 3/3 | Complete | 2026-02-09 |
 | 11. Refactoring (Proposal A) | v2.0 | 8/8 | Complete | 2026-02-09 |
-| 9. Asset Groupings | v2.0 | 0/TBD | Not started | - |
+| 9. Asset Groupings | v2.0 | 0/3 | In progress | - |
 | 10. Asset Hierarchy | v2.0 | 0/TBD | Not started | - |
 
 ---
