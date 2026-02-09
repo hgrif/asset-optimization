@@ -97,3 +97,23 @@
 - Added category alias support (`risk_model`, `effect_model`, `simulator`, `optimizer`) for ergonomic lookup/registration.
 - Auto-registered builtins on import: `weibull`, `proportional_hazards`, `rule_based`, `basic`, and `greedy`.
 - Added registry tests for builtins, CRUD behavior, category validation, and state isolation.
+
+## Step 8 Update
+
+- Plan step completed: **Step 8 - Public API and tests**
+- Completion date: `2026-02-09`
+
+### Files Added
+
+- `tests/test_public_api.py`
+
+### Files Modified
+
+- `src/asset_optimization/__init__.py` (exported Proposal A planner/types/protocol/registry symbols at package root)
+- `.planning/phases/11-refactoring/PLAN.md` (marked Step 8 complete)
+- `.planning/phases/11-refactoring/SUMMARY.md` (recorded Step 8 execution details)
+
+### Notes
+
+- Expanded top-level exports to include planner contracts (`PlanningHorizon`, `PlanResult`, `Planner`, `ObjectiveBuilder`, `ConstraintSet`, `DataFrameRepository`, `RuleBasedEffectModel`, service protocols, and registry helpers).
+- Added a root API regression test to assert Step 8 symbols remain available from `asset_optimization`.

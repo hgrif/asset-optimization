@@ -117,7 +117,7 @@ This plan implements the **core API skeleton**: Planner orchestrator, service pr
 - `register(category, key, cls)`, `get(category, key)`, `list_registered(category)`, `clear(category=None)`
 - Auto-register builtins at import: weibull, proportional_hazards, rule_based, basic simulator, greedy optimizer
 
-### Step 8: Public API and tests (depends on all above)
+### Step 8: Public API and tests (depends on all above) ✅ Completed 2026-02-09
 
 **`__init__.py`** — Add exports for all new public names.
 
