@@ -61,7 +61,7 @@ This plan implements the **core API skeleton**: Planner orchestrator, service pr
 
 **`protocols.py`** — Five `@runtime_checkable` Protocol classes matching the spec signatures. Make `ScenarioSet` optional (`| None = None`) in all signatures since the skeleton doesn't implement scenario logic yet.
 
-### Step 3: DSL classes (no dependencies)
+### Step 3: DSL classes (no dependencies) ✅ Completed 2026-02-09
 
 **`objective.py`**:
 - `ObjectiveTerm(frozen=True)`: kind, weight, params

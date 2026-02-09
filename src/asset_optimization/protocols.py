@@ -4,15 +4,14 @@ from __future__ import annotations
 
 from typing import Any, Protocol, runtime_checkable
 
+from asset_optimization.constraints import ConstraintSet
+from asset_optimization.objective import Objective
 from asset_optimization.types import (
     DataFrameLike,
     PlanResult,
     PlanningHorizon,
     ScenarioSet,
 )
-
-# Temporary forward alias until the concrete DSL class is added in Step 3.
-ConstraintSet = Any
 
 
 @runtime_checkable
@@ -92,8 +91,8 @@ class PlanOptimizer(Protocol):
 
     def solve(
         self,
-        objective: object,
-        constraints: "ConstraintSet",
+        objective: Objective,
+        constraints: ConstraintSet,
         candidates: DataFrameLike,
         risk_measure: str = "expected_value",
     ) -> PlanResult: ...
