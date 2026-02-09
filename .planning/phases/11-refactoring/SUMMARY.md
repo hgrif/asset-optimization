@@ -53,3 +53,25 @@
 - Implemented `DataFrameRepository` with defensive copies and optional `event_type` filtering.
 - Implemented `RuleBasedEffectModel` with no-op `fit()`, rule-based `estimate_effect()`, and `describe()` metadata.
 - Marked Step 5 complete in `.planning/phases/11-refactoring/PLAN.md`.
+
+## Step 6 Update
+
+- Plan step completed: **Step 6 - Planner orchestrator**
+- Completion date: `2026-02-09`
+
+### Files Added
+
+- `src/asset_optimization/planner.py`
+- `tests/test_planner.py`
+
+### Files Modified
+
+- `.planning/phases/11-refactoring/PLAN.md` (marked Step 6 complete)
+- `.planning/phases/11-refactoring/SUMMARY.md` (recorded Step 6 execution details)
+
+### Notes
+
+- Implemented `Planner` with `validate_inputs()`, `fit()`, `propose_actions()`, and `optimize_plan()`.
+- Added candidate-action construction logic that combines risk predictions, intervention tables, and optional simulator consequence adjustments.
+- Wrapped service failures (`risk_model`, `effect_model`, `simulator`) in `ModelError` with phase/model metadata.
+- Added planner lifecycle tests covering validation, model fitting, action proposal, and optimizer delegation.

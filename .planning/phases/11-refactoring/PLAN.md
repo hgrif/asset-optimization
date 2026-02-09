@@ -101,7 +101,7 @@ This plan implements the **core API skeleton**: Planner orchestrator, service pr
 - `estimate_effect(candidates, horizon, scenarios=None)` adds `expected_risk_reduction` and `expected_benefit` columns
 - `describe()` returns rules dict
 
-### Step 6: Planner orchestrator (depends on Steps 1-5)
+### Step 6: Planner orchestrator (depends on Steps 1-5) ✅ Completed 2026-02-09
 
 **`planner.py`** — `Planner` class:
 - Constructor takes repository, risk_model, effect_model, simulator, optimizer, registry(optional)
