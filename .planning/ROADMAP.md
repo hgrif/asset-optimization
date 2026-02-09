@@ -22,11 +22,12 @@ See `.planning/milestones/v1-ROADMAP.md` for full details.
 
 **Milestone Goal:** Expand modeling capabilities with multi-property hazards, additional asset domains, and asset relationships.
 
-- [ ] **Phase 7: Proportional Hazards** - Covariate-based failure rate modeling with notebook
-- [ ] **Phase 7.1: Documentation Workflow** - Jupytext-based .py → .ipynb workflow for agent-friendly docs
-- [ ] **Phase 8: Roads Domain** - Domain-specific configuration and validation with notebook
+- [x] **Phase 7: Proportional Hazards** - Covariate-based failure rate modeling with notebook
+- [x] **Phase 7.1: Documentation Workflow** - Jupytext-based .py → .ipynb workflow for agent-friendly docs
+- [x] **Phase 8: Roads Domain** - Domain-specific configuration and validation with notebook
 - [ ] **Phase 9: Asset Groupings** - Group-level constraints and failure propagation with notebook
 - [ ] **Phase 10: Asset Hierarchy** - Parent-child dependency failures with notebook and API docs
+- [x] **Phase 11: Refactoring** - Proposal A core API skeleton (service protocols, planner, registry, DSL)
 
 ## Phase Details
 
@@ -43,9 +44,9 @@ See `.planning/milestones/v1-ROADMAP.md` for full details.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — ProportionalHazardsModel core implementation with tests
-- [ ] 07-02-PLAN.md — Simulator integration for covariate-aware conditional probabilities
-- [ ] 07-03-PLAN.md — Documentation notebook demonstrating proportional hazards
+- [x] 07-01-PLAN.md — ProportionalHazardsModel core implementation with tests
+- [x] 07-02-PLAN.md — Simulator integration for covariate-aware conditional probabilities
+- [x] 07-03-PLAN.md — Documentation notebook demonstrating proportional hazards
 
 ### Phase 7.1: Documentation Workflow (INSERTED)
 **Goal**: Agents write documentation as .py percent-format files (jupytext) that convert to .ipynb for human consumption, replacing direct notebook editing
@@ -60,8 +61,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07.1-01-PLAN.md — Jupytext + pre-commit tooling setup and notebook template
-- [ ] 07.1-02-PLAN.md — Migrate quickstart and proportional_hazards notebooks to .py format
+- [x] 07.1-01-PLAN.md — Jupytext + pre-commit tooling setup and notebook template
+- [x] 07.1-02-PLAN.md — Migrate quickstart and proportional_hazards notebooks to .py format
 
 ### Phase 8: Roads Domain
 **Goal**: Users can configure and simulate road asset portfolios with domain-specific schema and interventions
@@ -76,9 +77,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Domain protocol and PipeDomain refactor (TDD)
-- [ ] 08-02-PLAN.md — RoadDomain implementation with schema, interventions, model (TDD)
-- [ ] 08-03-PLAN.md — Road domain documentation notebook
+- [x] 08-01-PLAN.md — Domain protocol and PipeDomain refactor (TDD)
+- [x] 08-02-PLAN.md — RoadDomain implementation with schema, interventions, model (TDD)
+- [x] 08-03-PLAN.md — Road domain documentation notebook
 
 ### Phase 9: Asset Groupings
 **Goal**: Users can model related assets that share risk and require coordinated interventions
@@ -119,9 +120,10 @@ Phases execute in numeric order: 7 -> 7.1 -> 8 -> 9 -> 10
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 7. Proportional Hazards | v2.0 | 0/3 | Planned | - |
-| 7.1. Documentation Workflow | v2.0 | 0/2 | Planned | - |
-| 8. Roads Domain | v2.0 | 0/3 | Planned | - |
+| 7. Proportional Hazards | v2.0 | 3/3 | Complete | 2026-02-06 |
+| 7.1. Documentation Workflow | v2.0 | 2/2 | Complete | 2026-02-06 |
+| 8. Roads Domain | v2.0 | 3/3 | Complete | 2026-02-09 |
+| 11. Refactoring (Proposal A) | v2.0 | 8/8 | Complete | 2026-02-09 |
 | 9. Asset Groupings | v2.0 | 0/TBD | Not started | - |
 | 10. Asset Hierarchy | v2.0 | 0/TBD | Not started | - |
 
