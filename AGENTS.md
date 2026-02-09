@@ -46,3 +46,5 @@
 ## Development Rules
 
 - Backwards compatibility is not a concern. This is a pre-release SDK with no external consumers. Break existing APIs freely when building new features.
+- Agents must commit their changes after finishing work and push the commit to the remote repository.
+- Agents must include a link to the specific GitHub commit in their final response.
