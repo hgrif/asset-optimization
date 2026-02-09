@@ -41,7 +41,7 @@ class WeibullModel(DeteriorationModel):
     --------
     >>> params = {'PVC': (2.5, 50), 'Cast Iron': (3.0, 40)}
     >>> model = WeibullModel(params)
-    >>> enriched = model.transform(portfolio.data)
+    >>> enriched = model._enrich_portfolio(portfolio.data)
     >>> enriched[['asset_id', 'age', 'failure_rate', 'failure_probability']]
 
     Notes
@@ -152,7 +152,7 @@ class WeibullModel(DeteriorationModel):
                 f"Provide Weibull parameters for all asset types or filter data."
             )
 
-    def failure_rate(
+    def _failure_rate(
         self,
         age: np.ndarray,
         shape: float | None = None,
@@ -168,37 +168,25 @@ class WeibullModel(DeteriorationModel):
         age : np.ndarray
             Asset ages in years.
         shape : float, optional
-            Weibull shape parameter (k). Required if not using transform().
+            Weibull shape parameter (k).
         scale : float, optional
-            Weibull scale parameter (λ). Required if not using transform().
+            Weibull scale parameter (λ).
 
         Returns
         -------
         rates : np.ndarray
             Failure rates (instantaneous hazard).
-
-        Raises
-        ------
-        ValueError
-            If shape or scale not provided.
-
-        Notes
-        -----
-        Uses direct formula (3-5x faster than scipy pdf/sf approach).
-        Defines h(0) = 0 for numerical stability.
         """
         if shape is None or scale is None:
-            raise ValueError("shape and scale parameters required for failure_rate()")
+            raise ValueError("shape and scale parameters required for _failure_rate()")
 
-        # Direct formula is faster than scipy.stats approach
-        # Handle age=0 case: define h(0) = 0 for stability
         with np.errstate(divide="ignore", invalid="ignore"):
             rates = (shape / scale) * np.power(age / scale, shape - 1)
             rates = np.where(age == 0, 0.0, rates)
 
         return rates
 
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _enrich_portfolio(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add failure_rate and failure_probability columns to DataFrame.
 
         Parameters
@@ -212,22 +200,6 @@ class WeibullModel(DeteriorationModel):
             Copy of input with two new columns:
             - failure_rate: instantaneous hazard h(t)
             - failure_probability: cumulative probability F(t) = CDF
-
-        Raises
-        ------
-        ValueError
-            If required columns missing or asset types not in params.
-        TypeError
-            If age column is not numeric.
-
-        Examples
-        --------
-        >>> params = {'PVC': (2.5, 50)}
-        >>> model = WeibullModel(params)
-        >>> df = pd.DataFrame({'material': ['PVC'], 'age': [10]})
-        >>> result = model.transform(df)
-        >>> result['failure_probability'].iloc[0]
-        0.0055...
         """
         # Validate input
         self._validate_dataframe(df)
@@ -245,7 +217,7 @@ class WeibullModel(DeteriorationModel):
             ages = group_df[self.age_column].values
 
             # Vectorized failure rate calculation
-            rates = self.failure_rate(ages, shape=shape, scale=scale)
+            rates = self._failure_rate(ages, shape=shape, scale=scale)
 
             # Vectorized failure probability (CDF)
             probs = weibull_min.cdf(ages, c=shape, scale=scale)

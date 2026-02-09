@@ -5,8 +5,8 @@ Covers:
 - SimulationResult convenience methods
 - InterventionType effects and immutability
 - Simulator behavior, reproducibility, and correctness
-- get_intervention_options for Phase 4 optimization
 - Conditional probability calculations
+- Planner.simulate_horizon() integration
 """
 
 import pandas as pd
@@ -15,7 +15,9 @@ from dataclasses import FrozenInstanceError
 from scipy.stats import weibull_min
 
 from asset_optimization.models import WeibullModel
+from asset_optimization.planner import Planner
 from asset_optimization.protocols import NetworkSimulator
+from asset_optimization.repositories import DataFrameRepository
 from asset_optimization.simulation import (
     DO_NOTHING,
     INSPECT,
@@ -285,7 +287,6 @@ class TestSimulator:
         sim2 = Simulator(weibull_model, config)
         result2 = sim2.run(sample_portfolio)
 
-        # Summaries should be identical
         pd.testing.assert_frame_equal(result1.summary, result2.summary)
         assert result1.total_cost() == result2.total_cost()
         assert result1.total_failures() == result2.total_failures()
@@ -303,27 +304,22 @@ class TestSimulator:
         result1 = sim1.run(sample_portfolio)
         result2 = sim2.run(sample_portfolio)
 
-        # Very unlikely to have identical failure counts across 10 years
-        # with different seeds (probability ~0)
         assert result1.total_failures() != result2.total_failures()
 
     def test_simulator_ages_increment_each_year(self, weibull_model):
         """Asset ages should increment by 1 each simulation year."""
-        # Create a portfolio with known ages (all installed same date)
         test_data = pd.DataFrame(
             {
                 "asset_id": ["PIPE-001"],
                 "asset_type": ["pipe"],
                 "material": ["PVC"],
-                "install_date": pd.to_datetime(["2010-01-01"]),  # ~16 years old in 2026
+                "install_date": pd.to_datetime(["2010-01-01"]),
                 "diameter_mm": [100],
                 "length_m": [50.0],
                 "condition_score": [80.0],
             }
         )
-        portfolio = test_data
 
-        # Use record_only to prevent age resets from interventions
         config = SimulationConfig(
             n_years=3,
             start_year=2026,
@@ -331,35 +327,29 @@ class TestSimulator:
             failure_response="record_only",
         )
         sim = Simulator(weibull_model, config)
-        result = sim.run(portfolio)
+        result = sim.run(test_data)
 
-        # Check average ages increase (roughly)
-        # Note: Ages are recorded at end of timestep after incrementing
         avg_ages = result.summary["avg_age"].values
-        # Year 1: Age after increment (~17), Year 2: (~18), Year 3: (~19)
         assert avg_ages[0] < avg_ages[1] < avg_ages[2]
 
     def test_simulator_failures_trigger_intervention(self, weibull_model):
         """Failures should be recorded in failure_log."""
-        # Create old assets likely to fail
         test_data = pd.DataFrame(
             {
                 "asset_id": [f"PIPE-{i:03d}" for i in range(50)],
                 "asset_type": ["pipe"] * 50,
-                "material": ["Cast Iron"] * 50,  # Shorter life
-                "install_date": pd.to_datetime(["1970-01-01"] * 50),  # Very old
+                "material": ["Cast Iron"] * 50,
+                "install_date": pd.to_datetime(["1970-01-01"] * 50),
                 "diameter_mm": [100] * 50,
                 "length_m": [50.0] * 50,
                 "condition_score": [50.0] * 50,
             }
         )
-        portfolio = test_data
 
         config = SimulationConfig(n_years=5, random_seed=42)
         sim = Simulator(weibull_model, config)
-        result = sim.run(portfolio)
+        result = sim.run(test_data)
 
-        # With very old cast iron assets, expect failures
         assert result.total_failures() > 0
         assert len(result.failure_log) > 0
         assert "asset_id" in result.failure_log.columns
@@ -367,19 +357,17 @@ class TestSimulator:
 
     def test_simulator_replace_resets_age(self, weibull_model):
         """Replace intervention should reset age to 0."""
-        # Create very old asset that will definitely fail
         test_data = pd.DataFrame(
             {
                 "asset_id": ["PIPE-001"],
                 "asset_type": ["pipe"],
                 "material": ["Cast Iron"],
-                "install_date": pd.to_datetime(["1950-01-01"]),  # 76+ years old
+                "install_date": pd.to_datetime(["1950-01-01"]),
                 "diameter_mm": [100],
                 "length_m": [50.0],
                 "condition_score": [30.0],
             }
         )
-        portfolio = test_data
 
         config = SimulationConfig(
             n_years=10,
@@ -387,10 +375,8 @@ class TestSimulator:
             failure_response="replace",
         )
         sim = Simulator(weibull_model, config)
-        result = sim.run(portfolio)
+        result = sim.run(test_data)
 
-        # Asset should have failed and been replaced.
-        # We verify replacement happened by checking failures occurred.
         assert result.total_failures() > 0
 
     def test_simulator_cumulative_costs(
@@ -400,12 +386,10 @@ class TestSimulator:
         sim = Simulator(weibull_model, simulation_config)
         result = sim.run(sample_portfolio)
 
-        # total_cost should equal sum of summary['total_cost']
         assert result.total_cost() == result.summary["total_cost"].sum()
 
     def test_simulator_failure_log_populated(self, weibull_model):
         """Failure log should contain details for each failure."""
-        # Create assets likely to fail
         test_data = pd.DataFrame(
             {
                 "asset_id": [f"PIPE-{i:03d}" for i in range(20)],
@@ -417,13 +401,11 @@ class TestSimulator:
                 "condition_score": [50.0] * 20,
             }
         )
-        portfolio = test_data
 
         config = SimulationConfig(n_years=10, random_seed=42)
         sim = Simulator(weibull_model, config)
-        result = sim.run(portfolio)
+        result = sim.run(test_data)
 
-        # Check failure_log structure
         if len(result.failure_log) > 0:
             assert "year" in result.failure_log.columns
             assert "asset_id" in result.failure_log.columns
@@ -439,7 +421,6 @@ class TestSimulator:
         result = sim.run(sample_portfolio)
 
         assert result.asset_history is not None
-        # 100 assets x 3 years = 300 rows
         assert len(result.asset_history) == 300
         required_cols = {
             "year",
@@ -466,161 +447,6 @@ class TestSimulator:
 
 
 # ============================================================================
-# TestInterventionOptions (INTV-04)
-# ============================================================================
-
-
-class TestInterventionOptions:
-    """Tests for get_intervention_options method (INTV-04 requirement)."""
-
-    def test_get_intervention_options_returns_dataframe(
-        self, sample_portfolio, weibull_model, simulation_config
-    ):
-        """get_intervention_options should return a DataFrame."""
-        sim = Simulator(weibull_model, simulation_config)
-        state = sample_portfolio.copy()
-        state["age"] = 20.0
-
-        options = sim.get_intervention_options(state, year=2026)
-        assert isinstance(options, pd.DataFrame)
-
-    def test_get_intervention_options_includes_all_assets(
-        self, sample_portfolio, weibull_model, simulation_config
-    ):
-        """All assets should have intervention options."""
-        sim = Simulator(weibull_model, simulation_config)
-        state = sample_portfolio.copy()
-        state["age"] = 20.0
-
-        options = sim.get_intervention_options(state, year=2026)
-
-        # Each asset should have 4 options (do_nothing, inspect, repair, replace)
-        n_assets = len(state)
-        n_intervention_types = 4
-        assert len(options) == n_assets * n_intervention_types
-
-    def test_get_intervention_options_includes_all_intervention_types(
-        self, weibull_model, simulation_config
-    ):
-        """Each asset should have all intervention type options."""
-        test_data = pd.DataFrame(
-            {
-                "asset_id": ["PIPE-001"],
-                "asset_type": ["pipe"],
-                "material": ["PVC"],
-                "install_date": pd.to_datetime(["2010-01-01"]),
-                "diameter_mm": [100],
-                "length_m": [50.0],
-                "condition_score": [80.0],
-            }
-        )
-        portfolio = test_data
-
-        sim = Simulator(weibull_model, simulation_config)
-        state = portfolio.copy()
-        state["age"] = 20.0
-
-        options = sim.get_intervention_options(state, year=2026)
-
-        # Check all intervention types present
-        intervention_types = options["intervention_type"].unique()
-        assert "DoNothing" in intervention_types
-        assert "Inspect" in intervention_types
-        assert "Repair" in intervention_types
-        assert "Replace" in intervention_types
-
-    def test_get_intervention_options_has_required_columns(
-        self, sample_portfolio, weibull_model, simulation_config
-    ):
-        """Options DataFrame should have required columns."""
-        sim = Simulator(weibull_model, simulation_config)
-        state = sample_portfolio.copy()
-        state["age"] = 20.0
-
-        options = sim.get_intervention_options(state, year=2026)
-
-        required_cols = ["asset_id", "intervention_type", "cost", "age_effect"]
-        for col in required_cols:
-            assert col in options.columns, f"Missing column: {col}"
-
-    def test_get_intervention_options_age_effect_descriptions(
-        self, weibull_model, simulation_config
-    ):
-        """age_effect column should describe the effect correctly."""
-        test_data = pd.DataFrame(
-            {
-                "asset_id": ["PIPE-001"],
-                "asset_type": ["pipe"],
-                "material": ["PVC"],
-                "install_date": pd.to_datetime(["2010-01-01"]),
-                "diameter_mm": [100],
-                "length_m": [50.0],
-                "condition_score": [80.0],
-            }
-        )
-        portfolio = test_data
-
-        sim = Simulator(weibull_model, simulation_config)
-        state = portfolio.copy()
-        state["age"] = 20.0
-
-        options = sim.get_intervention_options(state, year=2026)
-
-        # Check age effect descriptions
-        do_nothing_effect = options[options["intervention_type"] == "DoNothing"][
-            "age_effect"
-        ].iloc[0]
-        assert do_nothing_effect == "no change"
-
-        replace_effect = options[options["intervention_type"] == "Replace"][
-            "age_effect"
-        ].iloc[0]
-        assert replace_effect == "age = 0"
-
-        repair_effect = options[options["intervention_type"] == "Repair"][
-            "age_effect"
-        ].iloc[0]
-        assert "age - " in repair_effect
-
-    def test_get_intervention_options_costs_match_interventions(
-        self, weibull_model, simulation_config
-    ):
-        """Costs in options should match intervention definitions."""
-        test_data = pd.DataFrame(
-            {
-                "asset_id": ["PIPE-001"],
-                "asset_type": ["pipe"],
-                "material": ["PVC"],
-                "install_date": pd.to_datetime(["2010-01-01"]),
-                "diameter_mm": [100],
-                "length_m": [50.0],
-                "condition_score": [80.0],
-            }
-        )
-        portfolio = test_data
-
-        sim = Simulator(weibull_model, simulation_config)
-        state = portfolio.copy()
-        state["age"] = 20.0
-
-        options = sim.get_intervention_options(state, year=2026)
-
-        # Verify costs match predefined interventions
-        do_nothing_cost = options[options["intervention_type"] == "DoNothing"][
-            "cost"
-        ].iloc[0]
-        assert do_nothing_cost == DO_NOTHING.cost
-
-        replace_cost = options[options["intervention_type"] == "Replace"]["cost"].iloc[
-            0
-        ]
-        assert replace_cost == REPLACE.cost
-
-        repair_cost = options[options["intervention_type"] == "Repair"]["cost"].iloc[0]
-        assert repair_cost == REPAIR.cost
-
-
-# ============================================================================
 # TestConditionalProbability
 # ============================================================================
 
@@ -630,7 +456,6 @@ class TestConditionalProbability:
 
     def test_conditional_prob_young_assets_low(self, weibull_model, simulation_config):
         """Young assets should have low conditional failure probability."""
-        # Create young assets
         test_data = pd.DataFrame(
             {
                 "asset_id": [f"PIPE-{i:03d}" for i in range(10)],
@@ -642,9 +467,7 @@ class TestConditionalProbability:
                 "condition_score": [90.0] * 10,
             }
         )
-        portfolio = test_data
 
-        # Run short simulation with record_only to track failures without intervention
         config = SimulationConfig(
             n_years=1,
             random_seed=42,
@@ -652,20 +475,15 @@ class TestConditionalProbability:
         )
         sim = Simulator(weibull_model, config)
 
-        # Test conditional probability directly
-        state = portfolio.copy()
-        # Start year 2026, assets installed 2020 = ~6 years old
+        state = test_data.copy()
         state["age"] = 6.0
 
         probs = sim._calculate_conditional_probability(state)
 
-        # PVC with shape=2.5, scale=50, at age 6: very low probability
-        # P(fail in [6,7) | survived to 6) should be < 1%
-        assert probs.max() < 0.05  # All probabilities < 5%
+        assert probs.max() < 0.05
 
     def test_conditional_prob_old_assets_higher(self, weibull_model, simulation_config):
         """Old assets should have higher conditional failure probability."""
-        # Create state with varying ages
         test_data = pd.DataFrame(
             {
                 "asset_id": ["PIPE-001", "PIPE-002"],
@@ -677,22 +495,19 @@ class TestConditionalProbability:
                 "condition_score": [80.0, 80.0],
             }
         )
-        portfolio = test_data
 
         config = SimulationConfig(n_years=1, random_seed=42)
         sim = Simulator(weibull_model, config)
 
-        # Test two different ages
-        state_young = portfolio.copy()
+        state_young = test_data.copy()
         state_young["age"] = 10.0
 
-        state_old = portfolio.copy()
+        state_old = test_data.copy()
         state_old["age"] = 50.0
 
         probs_young = sim._calculate_conditional_probability(state_young)
         probs_old = sim._calculate_conditional_probability(state_old)
 
-        # Old assets should have higher probability
         assert probs_old.mean() > probs_young.mean()
 
     def test_conditional_prob_handles_zero_survival(
@@ -703,31 +518,27 @@ class TestConditionalProbability:
             {
                 "asset_id": ["PIPE-001"],
                 "asset_type": ["pipe"],
-                "material": ["Cast Iron"],  # shape=3.0, scale=40
+                "material": ["Cast Iron"],
                 "install_date": pd.to_datetime(["2000-01-01"]),
                 "diameter_mm": [100],
                 "length_m": [50.0],
                 "condition_score": [80.0],
             }
         )
-        portfolio = test_data
 
         config = SimulationConfig(n_years=1, random_seed=42)
         sim = Simulator(weibull_model, config)
 
-        # Extreme age where survival is essentially 0
-        state = portfolio.copy()
-        state["age"] = 500.0  # Way beyond any reasonable life
+        state = test_data.copy()
+        state["age"] = 500.0
 
         probs = sim._calculate_conditional_probability(state)
 
-        # Should return 1.0 when survival is 0 (certain failure)
         assert probs[0] == 1.0
 
     def test_conditional_prob_formula_verification(self, weibull_model):
         """Verify conditional probability matches expected formula."""
-        # P(fail in [t, t+1) | survived to t) = (S(t) - S(t+1)) / S(t)
-        shape, scale = 3.0, 40.0  # Cast Iron params
+        shape, scale = 3.0, 40.0
 
         config = SimulationConfig(n_years=1, random_seed=42)
         model = WeibullModel({"Cast Iron": (shape, scale)})
@@ -744,15 +555,12 @@ class TestConditionalProbability:
                 "condition_score": [80.0],
             }
         )
-        portfolio = test_data
 
-        # Test at age 30
-        state = portfolio.copy()
+        state = test_data.copy()
         state["age"] = 30.0
 
         actual_prob = sim._calculate_conditional_probability(state)[0]
 
-        # Calculate expected using scipy
         s_t = weibull_min.sf(30.0, c=shape, scale=scale)
         s_t_plus_1 = weibull_min.sf(31.0, c=shape, scale=scale)
         expected_prob = (s_t - s_t_plus_1) / s_t
@@ -770,20 +578,17 @@ class TestTimestepOrder:
 
     def test_age_increments_before_failure_sampling(self, weibull_model):
         """Age should increment before failure probability calculation."""
-        # This is implicitly tested by the fact that simulation works correctly
-        # The _simulate_timestep method increments age first
         test_data = pd.DataFrame(
             {
                 "asset_id": ["PIPE-001"],
                 "asset_type": ["pipe"],
                 "material": ["PVC"],
-                "install_date": pd.to_datetime(["2025-01-01"]),  # ~1 year old at start
+                "install_date": pd.to_datetime(["2025-01-01"]),
                 "diameter_mm": [100],
                 "length_m": [50.0],
                 "condition_score": [80.0],
             }
         )
-        portfolio = test_data
 
         config = SimulationConfig(
             n_years=1,
@@ -792,42 +597,34 @@ class TestTimestepOrder:
             failure_response="record_only",
         )
         sim = Simulator(weibull_model, config)
-        result = sim.run(portfolio)
+        result = sim.run(test_data)
 
-        # After 1 timestep: age was 1, incremented to 2
-        # avg_age should be ~2 (not ~1)
         assert result.summary["avg_age"].iloc[0] > 1.5
 
     def test_failures_before_interventions(self, weibull_model):
         """Failures should be sampled before interventions are applied."""
-        # Create asset that will definitely fail
         test_data = pd.DataFrame(
             {
                 "asset_id": ["PIPE-001"],
                 "asset_type": ["pipe"],
                 "material": ["Cast Iron"],
-                "install_date": pd.to_datetime(["1950-01-01"]),  # 76+ years old
+                "install_date": pd.to_datetime(["1950-01-01"]),
                 "diameter_mm": [100],
                 "length_m": [50.0],
                 "condition_score": [30.0],
             }
         )
-        portfolio = test_data
 
         config = SimulationConfig(n_years=1, random_seed=42, failure_response="replace")
         sim = Simulator(weibull_model, config)
-        result = sim.run(portfolio)
+        result = sim.run(test_data)
 
-        # If failures occurred and replace was applied, failure_log should have
-        # the age_at_failure recorded BEFORE the reset
         if len(result.failure_log) > 0:
             age_at_failure = result.failure_log["age_at_failure"].iloc[0]
-            # Age should be old (77+), not 0
             assert age_at_failure > 70
 
     def test_intervention_applied_after_failure(self, weibull_model):
         """Intervention effects should be applied after failure is recorded."""
-        # Create multiple old assets
         test_data = pd.DataFrame(
             {
                 "asset_id": [f"PIPE-{i:03d}" for i in range(30)],
@@ -839,20 +636,14 @@ class TestTimestepOrder:
                 "condition_score": [40.0] * 30,
             }
         )
-        portfolio = test_data
 
         config = SimulationConfig(n_years=3, random_seed=42, failure_response="replace")
         sim = Simulator(weibull_model, config)
-        result = sim.run(portfolio)
+        result = sim.run(test_data)
 
-        # With replace, failed assets get age=0
-        # avg_age should be lower than if no interventions
-        # (66 + 3 years = 69 if no failures/replacements)
-        # With some replacements, avg_age should be lower
         final_avg_age = result.summary["avg_age"].iloc[-1]
-        expected_no_intervention = 66 + 3  # ~69
+        expected_no_intervention = 66 + 3
 
-        # If any failures occurred, avg_age should be less than this
         if result.total_failures() > 0:
             assert final_avg_age < expected_no_intervention
 
@@ -899,3 +690,88 @@ class TestPlannerSimulationCompatibility:
         _ = sim.simulate(pd.DataFrame(), pd.DataFrame(), actions)
 
         assert actions.columns.tolist() == original_columns
+
+
+# ============================================================================
+# TestPlannerSimulateHorizon
+# ============================================================================
+
+
+class TestPlannerSimulateHorizon:
+    """Tests for Planner.simulate_horizon() integration."""
+
+    def _build_planner(self, portfolio_df, weibull_model):
+        """Build a Planner with a DataFrameRepository."""
+        from asset_optimization.effects import RuleBasedEffectModel
+
+        repository = DataFrameRepository(assets=portfolio_df)
+        return Planner(
+            repository=repository,
+            risk_model=weibull_model,
+            effect_model=RuleBasedEffectModel(),
+            simulator=Simulator(weibull_model, SimulationConfig(n_years=1)),
+            optimizer=_StubOptimizer(),
+        )
+
+    def test_simulate_horizon_returns_result(self, sample_portfolio, weibull_model):
+        """simulate_horizon() returns a SimulationResult."""
+        planner = self._build_planner(sample_portfolio, weibull_model)
+        config = SimulationConfig(n_years=5, random_seed=42)
+
+        result = planner.simulate_horizon(config)
+
+        assert isinstance(result, SimulationResult)
+        assert len(result.summary) == 5
+
+    def test_simulate_horizon_reproducible(self, sample_portfolio, weibull_model):
+        """Same config produces identical results."""
+        planner = self._build_planner(sample_portfolio, weibull_model)
+        config = SimulationConfig(n_years=3, random_seed=42)
+
+        r1 = planner.simulate_horizon(config)
+        r2 = planner.simulate_horizon(config)
+
+        pd.testing.assert_frame_equal(r1.summary, r2.summary)
+
+    def test_simulate_horizon_requires_deterioration_model(self, sample_portfolio):
+        """simulate_horizon() raises TypeError if risk_model is not a DeteriorationModel."""
+        from asset_optimization.effects import RuleBasedEffectModel
+
+        class FakeRiskModel:
+            def fit(self, **kw):
+                return self
+
+            def predict_distribution(self, **kw):
+                return pd.DataFrame()
+
+            def describe(self):
+                return {}
+
+        repository = DataFrameRepository(assets=sample_portfolio)
+        planner = Planner(
+            repository=repository,
+            risk_model=FakeRiskModel(),
+            effect_model=RuleBasedEffectModel(),
+            simulator=_StubSimulator(),
+            optimizer=_StubOptimizer(),
+        )
+
+        with pytest.raises(TypeError, match="DeteriorationModel"):
+            planner.simulate_horizon(SimulationConfig(n_years=1))
+
+
+class _StubOptimizer:
+    def solve(self, objective, constraints, candidates, risk_measure="expected_value"):
+        from asset_optimization.types import PlanResult
+
+        return PlanResult(
+            selected_actions=pd.DataFrame(),
+            objective_breakdown={},
+            constraint_shadow_prices={},
+            metadata={},
+        )
+
+
+class _StubSimulator:
+    def simulate(self, topology, failures, actions, scenarios=None):
+        return actions.copy()

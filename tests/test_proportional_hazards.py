@@ -107,26 +107,26 @@ class TestProportionalHazardsModelDelegation:
         assert isinstance(ph_model, RiskModel)
 
 
-class TestProportionalHazardsModelTransform:
-    """Transform behavior and covariate effects."""
+class TestProportionalHazardsModelEnrich:
+    """Enrich portfolio behavior and covariate effects."""
 
-    def test_transform_adds_columns(self, ph_model, df_with_covariates):
-        result = ph_model.transform(df_with_covariates)
+    def test_enrich_adds_columns(self, ph_model, df_with_covariates):
+        result = ph_model._enrich_portfolio(df_with_covariates)
         assert "failure_rate" in result.columns
         assert "failure_probability" in result.columns
 
-    def test_transform_returns_copy(self, ph_model, df_with_covariates):
+    def test_enrich_returns_copy(self, ph_model, df_with_covariates):
         original = df_with_covariates.copy(deep=True)
-        result = ph_model.transform(df_with_covariates)
+        result = ph_model._enrich_portfolio(df_with_covariates)
         assert result is not df_with_covariates
         pd.testing.assert_frame_equal(df_with_covariates, original)
 
-    def test_transform_preserves_original_columns(self, ph_model, df_with_covariates):
-        result = ph_model.transform(df_with_covariates)
+    def test_enrich_preserves_original_columns(self, ph_model, df_with_covariates):
+        result = ph_model._enrich_portfolio(df_with_covariates)
         for col in df_with_covariates.columns:
             assert col in result.columns
 
-    def test_transform_increases_failure_rate_with_positive_covariate(
+    def test_enrich_increases_failure_rate_with_positive_covariate(
         self, weibull_baseline
     ):
         ph = ProportionalHazardsModel(
@@ -141,10 +141,10 @@ class TestProportionalHazardsModelTransform:
                 "diameter_mm": [100.0, 200.0],
             }
         )
-        result = ph.transform(df)
+        result = ph._enrich_portfolio(df)
         assert result.loc[1, "failure_rate"] > result.loc[0, "failure_rate"]
 
-    def test_transform_decreases_failure_rate_with_negative_coefficient(
+    def test_enrich_decreases_failure_rate_with_negative_coefficient(
         self, weibull_baseline
     ):
         ph = ProportionalHazardsModel(
@@ -159,7 +159,7 @@ class TestProportionalHazardsModelTransform:
                 "diameter_mm": [100.0, 200.0],
             }
         )
-        result = ph.transform(df)
+        result = ph._enrich_portfolio(df)
         assert result.loc[1, "failure_rate"] < result.loc[0, "failure_rate"]
 
 
@@ -175,7 +175,7 @@ class TestProportionalHazardsModelStrictCovariates:
             coefficients={"diameter_mm": 0.01},
         )
         with pytest.raises(ValueError, match="Missing covariate columns"):
-            ph.transform(df_without_covariates)
+            ph._enrich_portfolio(df_without_covariates)
 
     def test_nan_covariate_raises(self, ph_model):
         df = pd.DataFrame(
@@ -186,7 +186,7 @@ class TestProportionalHazardsModelStrictCovariates:
             }
         )
         with pytest.raises(ValueError, match="NaN values"):
-            ph_model.transform(df)
+            ph_model._enrich_portfolio(df)
 
     def test_partial_nan_raises(self, ph_model):
         df = pd.DataFrame(
@@ -197,7 +197,7 @@ class TestProportionalHazardsModelStrictCovariates:
             }
         )
         with pytest.raises(ValueError, match="NaN values"):
-            ph_model.transform(df)
+            ph_model._enrich_portfolio(df)
 
     def test_non_numeric_covariate_raises(self, ph_model):
         df = pd.DataFrame(
@@ -208,7 +208,7 @@ class TestProportionalHazardsModelStrictCovariates:
             }
         )
         with pytest.raises(TypeError, match="numeric"):
-            ph_model.transform(df)
+            ph_model._enrich_portfolio(df)
 
 
 class TestProportionalHazardsModelMathematical:
@@ -227,8 +227,8 @@ class TestProportionalHazardsModelMathematical:
             covariates=["diameter_mm"],
             coefficients={"diameter_mm": 0.02},
         )
-        baseline_result = weibull_baseline.transform(df_with_covariates)
-        ph_result = ph.transform(df_with_covariates)
+        baseline_result = weibull_baseline._enrich_portfolio(df_with_covariates)
+        ph_result = ph._enrich_portfolio(df_with_covariates)
         risk = ph._risk_score(df_with_covariates)
 
         survival_baseline = 1.0 - baseline_result["failure_probability"].values
@@ -243,8 +243,8 @@ class TestProportionalHazardsModelMathematical:
             covariates=[],
             coefficients={},
         )
-        baseline_result = weibull_baseline.transform(df_with_covariates)
-        ph_result = ph.transform(df_with_covariates)
+        baseline_result = weibull_baseline._enrich_portfolio(df_with_covariates)
+        ph_result = ph._enrich_portfolio(df_with_covariates)
         np.testing.assert_allclose(
             ph_result["failure_rate"].values,
             baseline_result["failure_rate"].values,

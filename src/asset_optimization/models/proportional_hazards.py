@@ -125,14 +125,14 @@ class ProportionalHazardsModel(DeteriorationModel):
 
         return risk
 
-    def failure_rate(self, age: np.ndarray, **kwargs) -> np.ndarray:
+    def _failure_rate(self, age: np.ndarray, **kwargs) -> np.ndarray:
         """Delegate failure rate to baseline model.
 
-        Scaling by covariates occurs in transform().
+        Scaling by covariates occurs in _enrich_portfolio().
         """
-        return self.baseline.failure_rate(age, **kwargs)
+        return self.baseline._failure_rate(age, **kwargs)
 
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _enrich_portfolio(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add covariate-scaled failure rate and probability columns.
 
         Parameters
@@ -145,7 +145,7 @@ class ProportionalHazardsModel(DeteriorationModel):
         pd.DataFrame
             Copy of input with updated failure_rate and failure_probability.
         """
-        result = self.baseline.transform(df)
+        result = self.baseline._enrich_portfolio(df)
         risk = self._risk_score(df)
 
         result["failure_rate"] = result["failure_rate"].to_numpy() * risk

@@ -149,10 +149,10 @@ test_df = pd.DataFrame(
 )
 
 # Get baseline failure rates
-baseline_result = baseline.transform(test_df)
+baseline_result = baseline._enrich_portfolio(test_df)
 
 # Get PH failure rates
-ph_result = ph_model.transform(test_df)
+ph_result = ph_model._enrich_portfolio(test_df)
 
 # Compare
 comparison = pd.DataFrame(
@@ -298,9 +298,9 @@ examples = pd.DataFrame(
     }
 )
 
-result_multi = ph_multi.transform(examples)
+result_multi = ph_multi._enrich_portfolio(examples)
 examples["risk_score"] = (
-    result_multi["failure_rate"] / baseline.transform(examples)["failure_rate"]
+    result_multi["failure_rate"] / baseline._enrich_portfolio(examples)["failure_rate"]
 )
 
 print("Risk scores for different pipe configurations:")

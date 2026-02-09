@@ -150,29 +150,3 @@ def weibull_model():
 def simulation_config():
     """Create default simulation config."""
     return SimulationConfig(n_years=5, random_seed=42)
-
-
-@pytest.fixture
-def optimization_portfolio():
-    """Portfolio DataFrame with known ages for optimization testing."""
-    df = pd.DataFrame(
-        {
-            "asset_id": ["A1", "A2", "A3", "A4", "A5"],
-            "asset_type": ["pipe", "pipe", "pipe", "pipe", "pipe"],
-            "material": ["PVC", "PVC", "PVC", "PVC", "PVC"],
-            "install_date": pd.to_datetime(
-                [
-                    "1980-01-01",  # ~45 years old, high risk
-                    "1990-01-01",  # ~35 years old, medium-high risk
-                    "2000-01-01",  # ~25 years old, medium risk
-                    "2010-01-01",  # ~15 years old, low risk
-                    "2020-01-01",  # ~5 years old, very low risk
-                ]
-            ),
-            "diameter_mm": [100, 100, 100, 100, 100],
-            "length_m": [100.0, 100.0, 100.0, 100.0, 100.0],
-        }
-    )
-    validated = validate_portfolio(df)
-    validated["age"] = (pd.Timestamp.now() - validated["install_date"]).dt.days / 365.25
-    return validated

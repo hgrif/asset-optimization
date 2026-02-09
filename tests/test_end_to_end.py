@@ -1,8 +1,12 @@
-"""End-to-end tests for simulation snapshot stability."""
+"""End-to-end tests for simulation snapshot stability via Planner."""
 
 import pandas as pd
 
+from asset_optimization.effects import RuleBasedEffectModel
 from asset_optimization.models import WeibullModel
+from asset_optimization.optimization import Optimizer
+from asset_optimization.planner import Planner
+from asset_optimization.repositories import DataFrameRepository
 from asset_optimization.simulation import SimulationConfig, Simulator
 
 
@@ -79,7 +83,10 @@ EXPECTED_FAILURE_LOG = pd.DataFrame(
 
 
 def test_end_to_end_simulation_snapshot(end_to_end_dataframe):
-    """Snapshot a specific run to guard against refactor regressions."""
+    """Snapshot a specific run to guard against refactor regressions.
+
+    Uses Planner.simulate_horizon() as the entry point.
+    """
     portfolio = end_to_end_dataframe
     model = WeibullModel(
         {
@@ -89,7 +96,16 @@ def test_end_to_end_simulation_snapshot(end_to_end_dataframe):
     )
     config = SimulationConfig(n_years=6, random_seed=123)
 
-    result = Simulator(model, config).run(portfolio)
+    repository = DataFrameRepository(assets=portfolio)
+    planner = Planner(
+        repository=repository,
+        risk_model=model,
+        effect_model=RuleBasedEffectModel(),
+        simulator=Simulator(model, SimulationConfig(n_years=1)),
+        optimizer=Optimizer(),
+    )
+
+    result = planner.simulate_horizon(config)
 
     pd.testing.assert_frame_equal(result.summary, EXPECTED_SUMMARY)
     pd.testing.assert_frame_equal(result.failure_log, EXPECTED_FAILURE_LOG)

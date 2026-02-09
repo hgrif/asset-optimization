@@ -170,15 +170,15 @@ print(model)
 
 
 # %%
-# The model can transform portfolio data to add failure probabilities
+# The model can enrich portfolio data with failure probabilities
 # First, we need to add an 'age' column
 portfolio_with_age = portfolio.copy()
 portfolio_with_age["age"] = (
     pd.Timestamp.now() - portfolio_with_age["install_date"]
 ).dt.days / 365.25
 
-# Transform adds failure_rate and failure_probability columns
-enriched = model.transform(portfolio_with_age)
+# Enrich adds failure_rate and failure_probability columns
+enriched = model._enrich_portfolio(portfolio_with_age)
 enriched[["asset_id", "material", "age", "failure_rate", "failure_probability"]].head(
     10
 )

@@ -8,7 +8,6 @@ import pytest
 from asset_optimization import (
     SimulationResult,
     SimulationConfig,
-    OptimizationResult,
     export_schedule_minimal,
     export_schedule_detailed,
     export_cost_projections,
@@ -19,13 +18,13 @@ class TestExportScheduleMinimal:
     """Tests for export_schedule_minimal function."""
 
     def test_exports_correct_columns(self, tmp_path: Path) -> None:
-        """Minimal export has exactly asset_id, year, intervention_type, cost."""
+        """Minimal export has exactly asset_id, year, action_type, direct_cost."""
         selections = pd.DataFrame(
             {
                 "asset_id": ["A1", "A2"],
-                "intervention_type": ["Replace", "Repair"],
-                "cost": [5000.0, 1000.0],
-                "risk_score": [0.8, 0.3],
+                "action_type": ["replace", "repair"],
+                "direct_cost": [5000.0, 1000.0],
+                "expected_benefit": [3000.0, 800.0],
                 "rank": [1, 2],
             }
         )
@@ -34,16 +33,20 @@ class TestExportScheduleMinimal:
         export_schedule_minimal(selections, output_path, year=2024)
 
         result = pd.read_parquet(output_path)
-        assert list(result.columns) == ["asset_id", "year", "intervention_type", "cost"]
+        assert list(result.columns) == [
+            "asset_id",
+            "year",
+            "action_type",
+            "direct_cost",
+        ]
 
     def test_year_column_added(self, tmp_path: Path) -> None:
         """Year column is added with specified value."""
         selections = pd.DataFrame(
             {
                 "asset_id": ["A1"],
-                "intervention_type": ["Replace"],
-                "cost": [5000.0],
-                "risk_score": [0.8],
+                "action_type": ["replace"],
+                "direct_cost": [5000.0],
                 "rank": [1],
             }
         )
@@ -59,9 +62,8 @@ class TestExportScheduleMinimal:
         selections = pd.DataFrame(
             {
                 "asset_id": [],
-                "intervention_type": [],
-                "cost": [],
-                "risk_score": [],
+                "action_type": [],
+                "direct_cost": [],
                 "rank": [],
             }
         )
@@ -71,23 +73,26 @@ class TestExportScheduleMinimal:
 
         result = pd.read_parquet(output_path)
         assert len(result) == 0
-        assert list(result.columns) == ["asset_id", "year", "intervention_type", "cost"]
+        assert list(result.columns) == [
+            "asset_id",
+            "year",
+            "action_type",
+            "direct_cost",
+        ]
 
 
 class TestExportScheduleDetailed:
     """Tests for export_schedule_detailed function."""
 
-    def test_includes_risk_columns(self, tmp_path: Path) -> None:
-        """Detailed export includes risk_before, risk_after, risk_reduction."""
+    def test_includes_expected_benefit(self, tmp_path: Path) -> None:
+        """Detailed export includes expected_benefit when present."""
         selections = pd.DataFrame(
             {
                 "asset_id": ["A1"],
-                "intervention_type": ["Replace"],
-                "cost": [5000.0],
-                "risk_score": [0.8],
+                "action_type": ["replace"],
+                "direct_cost": [5000.0],
+                "expected_benefit": [3000.0],
                 "rank": [1],
-                "risk_before": [0.8],
-                "risk_after": [0.0],
             }
         )
         output_path = tmp_path / "schedule.parquet"
@@ -95,19 +100,16 @@ class TestExportScheduleDetailed:
         export_schedule_detailed(selections, output_path, year=2024)
 
         result = pd.read_parquet(output_path)
-        assert "risk_before" in result.columns
-        assert "risk_after" in result.columns
-        assert "risk_reduction" in result.columns
-        assert result["risk_reduction"].iloc[0] == 0.8
+        assert "expected_benefit" in result.columns
+        assert result["expected_benefit"].iloc[0] == 3000.0
 
     def test_portfolio_join_adds_material(self, tmp_path: Path) -> None:
         """Portfolio join adds material column."""
         selections = pd.DataFrame(
             {
                 "asset_id": ["A1", "A2"],
-                "intervention_type": ["Replace", "Repair"],
-                "cost": [5000.0, 1000.0],
-                "risk_score": [0.8, 0.3],
+                "action_type": ["replace", "repair"],
+                "direct_cost": [5000.0, 1000.0],
                 "rank": [1, 2],
             }
         )
@@ -134,9 +136,8 @@ class TestExportScheduleDetailed:
         selections = pd.DataFrame(
             {
                 "asset_id": ["A1"],
-                "intervention_type": ["Replace"],
-                "cost": [5000.0],
-                "risk_score": [0.8],
+                "action_type": ["replace"],
+                "direct_cost": [5000.0],
                 "rank": [1],
             }
         )
@@ -281,62 +282,3 @@ class TestSimulationResultToParquet:
         """Invalid format raises ValueError."""
         with pytest.raises(ValueError, match="Unknown format"):
             sim_result.to_parquet(tmp_path / "out.parquet", format="invalid")
-
-
-class TestOptimizationResultToParquet:
-    """Tests for OptimizationResult.to_parquet method."""
-
-    @pytest.fixture
-    def opt_result(self) -> OptimizationResult:
-        """Create test OptimizationResult."""
-        selections = pd.DataFrame(
-            {
-                "asset_id": ["A1", "A2"],
-                "intervention_type": ["Replace", "Repair"],
-                "cost": [5000.0, 1000.0],
-                "risk_score": [0.8, 0.3],
-                "rank": [1, 2],
-                "risk_before": [0.8, 0.3],
-                "risk_after": [0.0, 0.2],
-            }
-        )
-        budget_summary = pd.DataFrame(
-            {
-                "budget": [10000.0],
-                "spent": [6000.0],
-                "remaining": [4000.0],
-                "utilization_pct": [60.0],
-            }
-        )
-        return OptimizationResult(
-            selections=selections,
-            budget_summary=budget_summary,
-            strategy="greedy",
-        )
-
-    def test_minimal_format(
-        self, opt_result: OptimizationResult, tmp_path: Path
-    ) -> None:
-        """Minimal format has 4 columns."""
-        output_path = tmp_path / "minimal.parquet"
-        opt_result.to_parquet(output_path, format="minimal", year=2024)
-
-        result = pd.read_parquet(output_path)
-        assert list(result.columns) == ["asset_id", "year", "intervention_type", "cost"]
-
-    def test_detailed_format(
-        self, opt_result: OptimizationResult, tmp_path: Path
-    ) -> None:
-        """Detailed format includes risk columns."""
-        output_path = tmp_path / "detailed.parquet"
-        opt_result.to_parquet(output_path, format="detailed", year=2024)
-
-        result = pd.read_parquet(output_path)
-        assert "risk_reduction" in result.columns
-
-    def test_invalid_format_raises(
-        self, opt_result: OptimizationResult, tmp_path: Path
-    ) -> None:
-        """Invalid format raises ValueError."""
-        with pytest.raises(ValueError, match="Unknown format"):
-            opt_result.to_parquet(tmp_path / "out.parquet", format="invalid")

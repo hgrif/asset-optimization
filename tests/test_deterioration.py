@@ -20,16 +20,6 @@ class TestDeteriorationModelInterface:
         with pytest.raises(TypeError, match="Can't instantiate abstract class"):
             DeteriorationModel()
 
-    def test_interface_defines_failure_rate(self):
-        """Verify failure_rate is an abstract method."""
-        assert hasattr(DeteriorationModel, "failure_rate")
-        assert getattr(DeteriorationModel.failure_rate, "__isabstractmethod__", False)
-
-    def test_interface_defines_transform(self):
-        """Verify transform is an abstract method."""
-        assert hasattr(DeteriorationModel, "transform")
-        assert getattr(DeteriorationModel.transform, "__isabstractmethod__", False)
-
     def test_interface_defines_calculate_conditional_probability(self):
         """Verify conditional probability is an abstract method."""
         assert hasattr(DeteriorationModel, "calculate_conditional_probability")
@@ -105,8 +95,8 @@ class TestWeibullModelInit:
         assert "PVC" in repr_str
 
 
-class TestWeibullModelTransform:
-    """Test WeibullModel transform method."""
+class TestWeibullModelEnrichPortfolio:
+    """Test WeibullModel _enrich_portfolio method."""
 
     @pytest.fixture
     def params(self):
@@ -124,99 +114,96 @@ class TestWeibullModelTransform:
             }
         )
 
-    def test_transform_adds_columns(self, params, sample_df):
-        """Transform adds failure_rate and failure_probability columns."""
+    def test_enrich_adds_columns(self, params, sample_df):
+        """_enrich_portfolio adds failure_rate and failure_probability columns."""
         model = WeibullModel(params)
-        result = model.transform(sample_df)
+        result = model._enrich_portfolio(sample_df)
 
         assert "failure_rate" in result.columns
         assert "failure_probability" in result.columns
 
-    def test_transform_returns_copy(self, params, sample_df):
-        """Transform returns a new DataFrame, doesn't modify original."""
+    def test_enrich_returns_copy(self, params, sample_df):
+        """_enrich_portfolio returns a new DataFrame, doesn't modify original."""
         model = WeibullModel(params)
         original_columns = sample_df.columns.tolist()
 
-        result = model.transform(sample_df)
+        result = model._enrich_portfolio(sample_df)
 
-        # Original should be unchanged
         assert sample_df.columns.tolist() == original_columns
         assert "failure_rate" not in sample_df.columns
-
-        # Result should be different object
         assert result is not sample_df
 
-    def test_transform_preserves_original_columns(self, params, sample_df):
-        """Transform preserves all original columns in output."""
+    def test_enrich_preserves_original_columns(self, params, sample_df):
+        """_enrich_portfolio preserves all original columns in output."""
         model = WeibullModel(params)
-        result = model.transform(sample_df)
+        result = model._enrich_portfolio(sample_df)
 
         for col in sample_df.columns:
             assert col in result.columns
 
-    def test_transform_correct_row_count(self, params, sample_df):
-        """Transform output has same number of rows as input."""
+    def test_enrich_correct_row_count(self, params, sample_df):
+        """_enrich_portfolio output has same number of rows as input."""
         model = WeibullModel(params)
-        result = model.transform(sample_df)
+        result = model._enrich_portfolio(sample_df)
 
         assert len(result) == len(sample_df)
 
-    def test_transform_failure_rate_positive(self, params, sample_df):
+    def test_enrich_failure_rate_positive(self, params, sample_df):
         """Failure rates are non-negative."""
         model = WeibullModel(params)
-        result = model.transform(sample_df)
+        result = model._enrich_portfolio(sample_df)
 
         assert (result["failure_rate"] >= 0).all()
 
-    def test_transform_failure_probability_range(self, params, sample_df):
+    def test_enrich_failure_probability_range(self, params, sample_df):
         """Failure probabilities are between 0 and 1."""
         model = WeibullModel(params)
-        result = model.transform(sample_df)
+        result = model._enrich_portfolio(sample_df)
 
         assert (result["failure_probability"] >= 0).all()
         assert (result["failure_probability"] <= 1).all()
 
-    def test_transform_missing_type_column_raises(self, params):
+    def test_enrich_missing_type_column_raises(self, params):
         """Missing type column raises ValueError."""
         model = WeibullModel(params)
         df = pd.DataFrame({"age": [10, 20]})
 
         with pytest.raises(ValueError, match="Required columns missing"):
-            model.transform(df)
+            model._enrich_portfolio(df)
 
-    def test_transform_missing_age_column_raises(self, params):
+    def test_enrich_missing_age_column_raises(self, params):
         """Missing age column raises ValueError."""
         model = WeibullModel(params)
         df = pd.DataFrame({"material": ["PVC", "Cast Iron"]})
 
         with pytest.raises(ValueError, match="Required columns missing"):
-            model.transform(df)
+            model._enrich_portfolio(df)
 
-    def test_transform_unknown_asset_type_raises(self, params):
+    def test_enrich_unknown_asset_type_raises(self, params):
         """Unknown asset type raises ValueError."""
         model = WeibullModel(params)
         df = pd.DataFrame(
             {
-                "material": ["HDPE"],  # Not in params
+                "material": ["HDPE"],
                 "age": [10],
             }
         )
 
         with pytest.raises(ValueError, match="Asset types in data missing from params"):
-            model.transform(df)
+            model._enrich_portfolio(df)
 
-    def test_transform_non_numeric_age_raises(self, params):
+    def test_enrich_non_numeric_age_raises(self, params):
         """Non-numeric age column raises TypeError."""
         model = WeibullModel(params)
         df = pd.DataFrame(
             {
                 "material": ["PVC"],
-                "age": ["ten years"],  # String, not numeric
+                "age": ["ten years"],
             }
         )
 
         with pytest.raises(TypeError, match="must be numeric"):
-            model.transform(df)
+            model._enrich_portfolio(df)
 
 
 class TestWeibullModelMathematical:
@@ -224,7 +211,7 @@ class TestWeibullModelMathematical:
 
     def test_failure_rate_increases_with_age_shape_gt_1(self):
         """For shape > 1, failure rate increases with age."""
-        params = {"PVC": (2.5, 50)}  # shape=2.5 > 1
+        params = {"PVC": (2.5, 50)}
         model = WeibullModel(params)
 
         df = pd.DataFrame(
@@ -234,10 +221,9 @@ class TestWeibullModelMathematical:
             }
         )
 
-        result = model.transform(df)
+        result = model._enrich_portfolio(df)
         rates = result["failure_rate"].values
 
-        # Each rate should be higher than the previous
         for i in range(1, len(rates)):
             assert rates[i] > rates[i - 1], (
                 f"Rate at age {df['age'].iloc[i]} should be higher than at age {df['age'].iloc[i - 1]}"
@@ -255,10 +241,9 @@ class TestWeibullModelMathematical:
             }
         )
 
-        result = model.transform(df)
+        result = model._enrich_portfolio(df)
         probs = result["failure_probability"].values
 
-        # Each probability should be higher than the previous
         for i in range(1, len(probs)):
             assert probs[i] > probs[i - 1]
 
@@ -271,9 +256,8 @@ class TestWeibullModelMathematical:
         ages = np.array([10, 20, 30, 40, 50])
         df = pd.DataFrame({"material": ["Test"] * len(ages), "age": ages})
 
-        result = model.transform(df)
+        result = model._enrich_portfolio(df)
 
-        # Expected hazard: h(t) = (k/lambda) * (t/lambda)^(k-1)
         expected = (shape / scale) * np.power(ages / scale, shape - 1)
 
         np.testing.assert_allclose(result["failure_rate"].values, expected, rtol=1e-10)
@@ -287,9 +271,8 @@ class TestWeibullModelMathematical:
         ages = np.array([10, 20, 30, 40, 50])
         df = pd.DataFrame({"material": ["Test"] * len(ages), "age": ages})
 
-        result = model.transform(df)
+        result = model._enrich_portfolio(df)
 
-        # Expected CDF from scipy
         expected = weibull_min.cdf(ages, c=shape, scale=scale)
 
         np.testing.assert_allclose(
@@ -308,13 +291,10 @@ class TestWeibullModelMathematical:
             }
         )
 
-        result = model.transform(df)
+        result = model._enrich_portfolio(df)
 
-        # Should not be NaN
         assert not np.isnan(result["failure_rate"].iloc[0])
         assert not np.isnan(result["failure_probability"].iloc[0])
-
-        # Age 0 should have very low failure probability
         assert result["failure_probability"].iloc[0] == pytest.approx(0.0, abs=1e-10)
 
 
@@ -322,8 +302,7 @@ class TestWeibullModelPerformance:
     """Test performance requirements from success criteria."""
 
     def test_performance_1000_assets_under_1_second(self):
-        """Transform 1000+ assets in under 1 second (DTRN-03)."""
-        # Generate 1000 assets with mixed types
+        """_enrich_portfolio 1000+ assets in under 1 second (DTRN-03)."""
         n_assets = 1000
         params = {"PVC": (2.5, 50), "Cast Iron": (3.0, 40)}
         model = WeibullModel(params)
@@ -336,13 +315,11 @@ class TestWeibullModelPerformance:
             }
         )
 
-        # Time the transform
         start = time.time()
-        result = model.transform(df)
+        result = model._enrich_portfolio(df)
         elapsed = time.time() - start
 
-        # Must be under 1 second (success criterion)
-        assert elapsed < 1.0, f"Transform took {elapsed:.2f}s, must be <1s"
+        assert elapsed < 1.0, f"_enrich_portfolio took {elapsed:.2f}s, must be <1s"
         assert len(result) == n_assets
 
     def test_performance_10000_assets(self):
@@ -360,11 +337,10 @@ class TestWeibullModelPerformance:
         )
 
         start = time.time()
-        result = model.transform(df)
+        result = model._enrich_portfolio(df)
         elapsed = time.time() - start
 
-        # Should still be fast for 10K assets
-        assert elapsed < 5.0, f"Transform took {elapsed:.2f}s for 10K assets"
+        assert elapsed < 5.0, f"_enrich_portfolio took {elapsed:.2f}s for 10K assets"
         assert len(result) == n_assets
 
 
@@ -411,15 +387,12 @@ class TestWeibullModelMultipleTypes:
 
     def test_different_params_per_type(self):
         """Different types use their respective parameters."""
-        # PVC with shape=2 (gradual wear)
-        # Cast Iron with shape=4 (steep wear)
         params = {
             "PVC": (2.0, 50),
             "Cast Iron": (4.0, 40),
         }
         model = WeibullModel(params)
 
-        # Same age, different types
         df = pd.DataFrame(
             {
                 "material": ["PVC", "Cast Iron"],
@@ -427,17 +400,12 @@ class TestWeibullModelMultipleTypes:
             }
         )
 
-        result = model.transform(df)
+        result = model._enrich_portfolio(df)
 
-        # Failure rates should be different
         pvc_rate = result[result["material"] == "PVC"]["failure_rate"].iloc[0]
         ci_rate = result[result["material"] == "Cast Iron"]["failure_rate"].iloc[0]
 
         assert pvc_rate != ci_rate
-
-        # With shape=4 vs shape=2 at same age, higher shape has higher hazard at later ages
-        # At age 30, shape=4, scale=40: h = (4/40) * (30/40)^3 = 0.1 * 0.4219 = 0.0422
-        # At age 30, shape=2, scale=50: h = (2/50) * (30/50)^1 = 0.04 * 0.6 = 0.024
         assert ci_rate > pvc_rate
 
     def test_five_asset_types(self):
@@ -458,9 +426,8 @@ class TestWeibullModelMultipleTypes:
             }
         )
 
-        result = model.transform(df)
+        result = model._enrich_portfolio(df)
 
-        # All rows should have valid values
         assert not result["failure_rate"].isna().any()
         assert not result["failure_probability"].isna().any()
 

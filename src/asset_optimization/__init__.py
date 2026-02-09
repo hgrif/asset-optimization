@@ -23,7 +23,7 @@ from asset_optimization.models import (
     WeibullModel,
 )
 from asset_optimization.objective import Objective, ObjectiveBuilder, ObjectiveTerm
-from asset_optimization.optimization import OptimizationResult, Optimizer
+from asset_optimization.optimization import Optimizer
 from asset_optimization.planner import Planner
 from asset_optimization.protocols import (
     AssetRepository,
@@ -87,7 +87,6 @@ __all__ = [
     "Objective",
     "ObjectiveBuilder",
     "ObjectiveTerm",
-    "OptimizationResult",
     "Optimizer",
     "Planner",
     "AssetRepository",

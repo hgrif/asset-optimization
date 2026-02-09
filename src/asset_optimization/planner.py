@@ -8,6 +8,7 @@ import pandas as pd
 
 from asset_optimization.constraints import ConstraintSet
 from asset_optimization.exceptions import ModelError
+from asset_optimization.models.base import DeteriorationModel
 from asset_optimization.objective import Objective
 from asset_optimization.protocols import (
     AssetRepository,
@@ -16,6 +17,9 @@ from asset_optimization.protocols import (
     PlanOptimizer,
     RiskModel,
 )
+from asset_optimization.simulation.config import SimulationConfig
+from asset_optimization.simulation.result import SimulationResult
+from asset_optimization.simulation.simulator import Simulator
 from asset_optimization.types import (
     DataFrameLike,
     PlanResult,
@@ -220,6 +224,34 @@ class Planner:
             candidates=candidates,
             risk_measure=risk_measure,
         )
+
+    def simulate_horizon(self, config: SimulationConfig) -> SimulationResult:
+        """Run a multi-timestep simulation over the portfolio.
+
+        Parameters
+        ----------
+        config : SimulationConfig
+            Simulation configuration (n_years, random_seed, etc.).
+
+        Returns
+        -------
+        SimulationResult
+            Results containing summary stats, cost breakdown, and failure log.
+
+        Raises
+        ------
+        TypeError
+            If risk_model is not a DeteriorationModel (required for simulation).
+        """
+        if not isinstance(self.risk_model, DeteriorationModel):
+            raise TypeError(
+                "simulate_horizon requires risk_model to be a DeteriorationModel "
+                f"instance, got {type(self.risk_model).__name__}"
+            )
+
+        assets = self.repository.load_assets()
+        sim = Simulator(self.risk_model, config)
+        return sim.run(assets)
 
     def _predict_failures(
         self,

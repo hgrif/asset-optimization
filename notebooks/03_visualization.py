@@ -41,10 +41,16 @@ import pandas as pd
 
 # SDK imports
 from asset_optimization import (
-    WeibullModel,
+    ConstraintSet,
+    DataFrameRepository,
+    ObjectiveBuilder,
+    Optimizer,
+    Planner,
+    PlanningHorizon,
+    RuleBasedEffectModel,
     Simulator,
     SimulationConfig,
-    Optimizer,
+    WeibullModel,
     set_sdk_theme,
     plot_cost_over_time,
     plot_failures_by_year,
@@ -72,7 +78,7 @@ install_dates = [
     for _ in range(n_assets)
 ]
 
-data = pd.DataFrame(
+portfolio = pd.DataFrame(
     {
         "asset_id": [f"PIPE-{i:04d}" for i in range(n_assets)],
         "install_date": pd.to_datetime(install_dates),
@@ -83,7 +89,6 @@ data = pd.DataFrame(
     }
 )
 
-portfolio = data
 print(portfolio.head())
 
 # %%
@@ -112,11 +117,30 @@ print(sim_result)
 sim_result.asset_history
 
 # %%
-# Run optimization
-optimizer = Optimizer(strategy="greedy", min_risk_threshold=0.1)
-optimizer.fit(portfolio, model, budget=500_000)
-opt_result = optimizer.result
-print(opt_result)
+# Run optimization via Planner
+portfolio["age"] = (pd.Timestamp.now() - portfolio["install_date"]).dt.days / 365.25
+
+repository = DataFrameRepository(assets=portfolio)
+planner = Planner(
+    repository=repository,
+    risk_model=model,
+    effect_model=RuleBasedEffectModel(),
+    simulator=Simulator(model, SimulationConfig(n_years=1)),
+    optimizer=Optimizer(),
+)
+planner.fit()
+
+objective = ObjectiveBuilder().add_expected_risk_reduction().build()
+constraints = ConstraintSet().add_budget_limit(500_000)
+horizon = PlanningHorizon("2024-01-01", "2024-12-31", "yearly")
+
+opt_result = planner.optimize_plan(
+    horizon=horizon,
+    scenarios=None,
+    objective=objective,
+    constraints=constraints,
+)
+print(f"Selected {opt_result.metadata['selected_count']} actions")
 
 # %%
 
@@ -171,21 +195,22 @@ plt.show()
 # %% [markdown]
 # ## 5. Risk Distribution
 #
-# Histogram showing the distribution of risk scores for selected interventions.
+# Histogram showing the distribution of risk-related metrics.
 
 # %%
-# Risk distribution of selected assets
-ax = plot_risk_distribution(opt_result.selections)
-plt.show()
+# Risk distribution of selected assets (using expected_benefit as proxy)
+if "expected_benefit" in opt_result.selected_actions.columns:
+    ax = plot_risk_distribution(
+        opt_result.selected_actions,
+        risk_column="expected_benefit",
+        title="Expected Benefit Distribution of Selected Assets",
+    )
+    plt.show()
 
 # %%
-# You can also plot failure probability from portfolio data
-# First enrich the portfolio with failure probabilities
+# Plot failure probability from enriched portfolio data
 portfolio_with_risk = portfolio.copy()
-portfolio_with_risk["age"] = (
-    pd.Timestamp.now() - portfolio_with_risk["install_date"]
-).dt.days / 365.25
-portfolio_enriched = model.transform(portfolio_with_risk)
+portfolio_enriched = model._enrich_portfolio(portfolio_with_risk)
 
 # Plot with different column name
 ax = plot_risk_distribution(
@@ -267,13 +292,9 @@ plt.show()
 sim_result.to_parquet("sim_summary.parquet", format="summary")
 sim_result.to_parquet("sim_projections.parquet", format="cost_projections")
 
-# Export optimization results
-opt_result.to_parquet("opt_schedule.parquet", format="minimal", year=2024)
-
 print("Files exported:")
 print("  - sim_summary.parquet")
 print("  - sim_projections.parquet")
-print("  - opt_schedule.parquet")
 
 # %% [markdown]
 # ### Reading Exports
@@ -317,7 +338,10 @@ plot_failures_by_year(sim_result, ax=axes[0, 1], title="Failures by Year")
 
 # Bottom left: Risk distribution
 plot_risk_distribution(
-    opt_result.selections, ax=axes[1, 0], title="Selected Assets Risk Distribution"
+    portfolio_enriched,
+    risk_column="failure_probability",
+    ax=axes[1, 0],
+    title="Failure Probability Distribution",
 )
 
 # Bottom right: Scenario comparison
@@ -335,7 +359,11 @@ fig, axes = plt.subplots(2, 2, figsize=(14, 10))
 
 plot_cost_over_time(sim_result, ax=axes[0, 0])
 plot_failures_by_year(sim_result, ax=axes[0, 1])
-plot_risk_distribution(opt_result.selections, ax=axes[1, 0])
+plot_risk_distribution(
+    portfolio_enriched,
+    risk_column="failure_probability",
+    ax=axes[1, 0],
+)
 plot_scenario_comparison(comparison, metric="total_cost", ax=axes[1, 1])
 
 fig.suptitle("Asset Optimization Dashboard", fontsize=16, fontweight="bold", y=1.02)
@@ -366,7 +394,6 @@ plt.close()
 for f in [
     "sim_summary.parquet",
     "sim_projections.parquet",
-    "opt_schedule.parquet",
     "cost_chart.png",
     "dashboard.png",
 ]:

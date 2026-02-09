@@ -210,7 +210,7 @@ def plot_risk_distribution(
     ----------
     data : pd.DataFrame
         DataFrame containing risk scores. Can be:
-        - OptimizationResult.selections (with risk_score column)
+        - PlanResult.selected_actions (with expected_benefit column)
         - Portfolio data with failure_probability
     risk_column : str, default 'risk_score'
         Name of the column containing risk values

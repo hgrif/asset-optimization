@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 
 from asset_optimization.models.base import DeteriorationModel
-from asset_optimization.portfolio import validate_portfolio
 from asset_optimization.simulation.config import SimulationConfig
 from asset_optimization.simulation.interventions import (
     DO_NOTHING,
@@ -139,8 +138,7 @@ class Simulator:
         >>> print(f"Total cost: ${result.total_cost():,.0f}")
         >>> print(f"Total failures: {result.total_failures()}")
         """
-        validated = validate_portfolio(portfolio)
-        state = validated.copy()
+        state = portfolio.copy()
 
         # Calculate initial ages from install_date relative to start_year
         start_date = pd.Timestamp(year=self.config.start_year, month=1, day=1)
@@ -415,71 +413,6 @@ class Simulator:
             Conditional failure probabilities for each asset.
         """
         return self.model.calculate_conditional_probability(state)
-
-    def get_intervention_options(self, state: pd.DataFrame, year: int) -> pd.DataFrame:
-        """Generate available intervention options for each asset.
-
-        This method exposes what interventions *could* be done at the current
-        timestep. Phase 4 optimization will use this to select optimal actions.
-
-        Parameters
-        ----------
-        state : pd.DataFrame
-            Current asset state with 'asset_id' and 'age' columns.
-        year : int
-            Current simulation year (for context).
-
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame with columns:
-            - asset_id: Asset identifier
-            - intervention_type: Name of intervention
-            - cost: Direct cost of intervention
-            - age_effect: Description of age effect
-
-        Examples
-        --------
-        >>> state = portfolio.data.copy()
-        >>> state['age'] = 26.0
-        >>> options = sim.get_intervention_options(state, 2026)
-        >>> print(options.head())
-           asset_id intervention_type     cost    age_effect
-        0  PIPE-001         DoNothing      0.0     no change
-        1  PIPE-001           Inspect    500.0     no change
-        2  PIPE-001            Repair   5000.0     age - 5
-        3  PIPE-001           Replace  50000.0     age = 0
-        """
-        rows = []
-
-        for _, asset in state.iterrows():
-            asset_id = asset["asset_id"]
-            current_age = asset.get("age", 0.0)
-
-            for intervention in self.interventions.values():
-                # Describe age effect
-                new_age = intervention.apply_age_effect(current_age)
-                if new_age == current_age:
-                    age_effect_desc = "no change"
-                elif new_age == 0:
-                    age_effect_desc = "age = 0"
-                else:
-                    age_diff = current_age - new_age
-                    if age_diff > 0:
-                        age_effect_desc = f"age - {age_diff:.0f}"
-                    else:
-                        age_effect_desc = f"age + {-age_diff:.0f}"
-
-                rows.append(
-                    {
-                        "asset_id": asset_id,
-                        "intervention_type": intervention.name,
-                        "cost": intervention.cost,
-                        "age_effect": age_effect_desc,
-                    }
-                )
-
-        return pd.DataFrame(rows)
 
     def __repr__(self) -> str:
         """Return informative string representation."""

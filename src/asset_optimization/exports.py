@@ -16,8 +16,8 @@ def export_schedule_minimal(
     Parameters
     ----------
     selections : pd.DataFrame
-        Selections DataFrame from OptimizationResult with columns:
-        asset_id, intervention_type, cost, risk_score, rank
+        Selected actions from PlanResult with columns:
+        asset_id, action_type, direct_cost, rank
     path : str or Path
         Output path for parquet file
     year : int, default 2024
@@ -25,14 +25,14 @@ def export_schedule_minimal(
 
     Notes
     -----
-    Minimal format columns: asset_id, year, intervention_type, cost
+    Minimal format columns: asset_id, year, action_type, direct_cost
     """
     minimal = pd.DataFrame(
         {
             "asset_id": selections["asset_id"],
             "year": year,
-            "intervention_type": selections["intervention_type"],
-            "cost": selections["cost"],
+            "action_type": selections["action_type"],
+            "direct_cost": selections["direct_cost"],
         }
     )
     minimal.to_parquet(path, index=False)
@@ -49,7 +49,7 @@ def export_schedule_detailed(
     Parameters
     ----------
     selections : pd.DataFrame
-        Selections DataFrame from OptimizationResult
+        Selected actions from PlanResult.
     path : str or Path
         Output path for parquet file
     year : int, default 2024
@@ -60,26 +60,14 @@ def export_schedule_detailed(
 
     Notes
     -----
-    Detailed format columns: asset_id, year, intervention_type, cost,
-    risk_score, rank, material, age, risk_before, risk_after, risk_reduction
-
-    risk_before and risk_after must be present in selections DataFrame
-    (added by Optimizer during fit). risk_reduction is computed as difference.
+    Detailed format columns: asset_id, year, action_type, direct_cost,
+    expected_benefit, rank, material, age
     """
-    detailed = selections[
-        ["asset_id", "intervention_type", "cost", "risk_score", "rank"]
-    ].copy()
+    detailed = selections[["asset_id", "action_type", "direct_cost", "rank"]].copy()
     detailed["year"] = year
 
-    # Add risk columns if present
-    if "risk_before" in selections.columns:
-        detailed["risk_before"] = selections["risk_before"]
-    if "risk_after" in selections.columns:
-        detailed["risk_after"] = selections["risk_after"]
-    if "risk_before" in selections.columns and "risk_after" in selections.columns:
-        detailed["risk_reduction"] = (
-            selections["risk_before"] - selections["risk_after"]
-        )
+    if "expected_benefit" in selections.columns:
+        detailed["expected_benefit"] = selections["expected_benefit"]
 
     # Join portfolio for material and age if provided
     if portfolio is not None:
@@ -93,8 +81,8 @@ def export_schedule_detailed(
         detailed = detailed.merge(portfolio_cols, on="asset_id", how="left")
 
     # Reorder columns for consistency
-    col_order = ["asset_id", "year", "intervention_type", "cost", "risk_score", "rank"]
-    optional_cols = ["material", "age", "risk_before", "risk_after", "risk_reduction"]
+    col_order = ["asset_id", "year", "action_type", "direct_cost", "rank"]
+    optional_cols = ["expected_benefit", "material", "age"]
     for col in optional_cols:
         if col in detailed.columns:
             col_order.append(col)
