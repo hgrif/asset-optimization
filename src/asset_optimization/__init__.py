@@ -14,6 +14,7 @@ from asset_optimization.exceptions import (
 )
 from asset_optimization.models import (
     DeteriorationModel,
+    GroupPropagationRiskModel,
     ProportionalHazardsModel,
     WeibullModel,
 )
@@ -50,6 +51,7 @@ __all__ = [
     "OptimizationError",
     "ValidationError",
     "DeteriorationModel",
+    "GroupPropagationRiskModel",
     "ProportionalHazardsModel",
     "WeibullModel",
     "Objective",

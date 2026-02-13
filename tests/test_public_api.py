@@ -5,6 +5,7 @@ import types
 import asset_optimization as ao
 from asset_optimization.constraints import ConstraintSet
 from asset_optimization.effects import RuleBasedEffectModel
+from asset_optimization.models.group_propagation import GroupPropagationRiskModel
 from asset_optimization.objective import ObjectiveBuilder
 from asset_optimization.planner import Planner
 from asset_optimization.protocols import RiskModel
@@ -22,6 +23,7 @@ def test_root_package_exports_proposal_a_symbols() -> None:
     assert ao.PlanningHorizon is PlanningHorizon
     assert ao.PlanResult is PlanResult
     assert ao.RiskModel is RiskModel
+    assert ao.GroupPropagationRiskModel is GroupPropagationRiskModel
 
 
 def test_root_package_exports_registry_module_and_helpers() -> None:
