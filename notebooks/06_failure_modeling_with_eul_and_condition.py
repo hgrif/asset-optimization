@@ -7,7 +7,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.16.4
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
@@ -23,12 +23,13 @@ This notebook shows a basic reliability workflow for two valve asset types:
 
 We model failure time with a Weibull proportional-hazards model:
 
-`h(t | c) = h0(t) * exp(beta * (c - 3))`
+`h(t | c) = h0(t) * exp(beta * (c - 1))`
 
 where:
 
-- `h0(t)` is Weibull baseline hazard
+- `h0(t) = (k / eta) * (t / eta)^(k - 1)` is the Weibull baseline hazard
 - `c` is condition score (1 to 5)
+- `c = 1` is the baseline hazard level
 - each +1 condition step multiplies hazard by `exp(beta)`
 
 Supplier End-of-Useful-Life (EUL) estimates are incorporated as priors on the
@@ -54,6 +55,8 @@ In real use, replace this section with your actual asset registry + work orders.
 OBSERVATION_YEARS = 10.0
 BASE_INSTALL_DATE = pd.Timestamp("2016-01-01")
 RNG = np.random.default_rng(7)
+# `0.5` means supplier EUL is interpreted as median life: S(EUL) = 0.5.
+EUL_SURVIVAL_PROBABILITY = 0.5
 
 
 def simulate_asset_history(
@@ -65,7 +68,7 @@ def simulate_asset_history(
 ) -> pd.DataFrame:
     """Simulate first-failure outcomes with right censoring at OBSERVATION_YEARS."""
     condition_score = RNG.integers(1, 6, size=n_assets)
-    condition_centered = condition_score - 3
+    condition_centered = condition_score - 1
 
     u = RNG.random(n_assets)
     event_time_years = true_eta * (
@@ -135,20 +138,32 @@ For each asset record:
 
 - `t_i`: observed time (failure or censoring)
 - `d_i`: event flag (1 if failed, else 0)
-- `x_i = condition_score - 3`
+- `x_i = condition_score - 1` (so score `1` is baseline)
 
 Cumulative hazard is:
 
 `H_i(t) = (t / eta)^k * exp(beta * x_i)`
 
-Supplier EUL is treated as a prior on `eta` by assuming EUL ~= median life.
+Supplier EUL is treated as a prior on `eta`. The parameter that controls how EUL
+is interpreted is `EUL_SURVIVAL_PROBABILITY`.
+
+- `EUL_SURVIVAL_PROBABILITY = 0.5` means EUL is median life (`S(EUL)=0.5`)
+- change this value if supplier EUL should represent another quantile
 """
 
 
 # %%
-def eul_to_log_eta_prior_mean(eul_years: float, k_reference: float = 2.0) -> float:
-    """Map median-life EUL to log(eta) using a reference Weibull shape."""
-    eta_from_eul = eul_years / (np.log(2.0) ** (1.0 / k_reference))
+def eul_to_log_eta_prior_mean(
+    eul_years: float,
+    eul_survival_probability: float = EUL_SURVIVAL_PROBABILITY,
+    k_reference: float = 2.0,
+) -> float:
+    """Map EUL to log(eta) under a chosen Weibull survival quantile interpretation."""
+    if not (0.0 < eul_survival_probability < 1.0):
+        raise ValueError("eul_survival_probability must be between 0 and 1.")
+    eta_from_eul = eul_years / (
+        (-np.log(eul_survival_probability)) ** (1.0 / k_reference)
+    )
     return float(np.log(eta_from_eul))
 
 
@@ -190,13 +205,18 @@ def fit_weibull_ph(
     frame: pd.DataFrame,
     eul_years: float | None = None,
     eul_prior_sigma: float = 0.20,
+    eul_survival_probability: float = EUL_SURVIVAL_PROBABILITY,
+    use_condition: bool = True,
     beta_prior: tuple[float, float] | None = None,
 ) -> dict[str, float]:
     """Fit Weibull PH model by MAP optimization (or near-MLE with weak priors)."""
     t = frame["observed_years"].to_numpy(dtype=float)
     t = np.clip(t, 1e-6, None)
     d = frame["event_observed"].to_numpy(dtype=float)
-    x = frame["condition_score"].to_numpy(dtype=float) - 3.0
+    if use_condition:
+        x = frame["condition_score"].to_numpy(dtype=float) - 1.0
+    else:
+        x = np.zeros_like(t)
 
     if d.sum() > 0:
         initial_eta = float(np.median(t[d == 1.0]))
@@ -207,7 +227,13 @@ def fit_weibull_ph(
 
     log_eta_prior = None
     if eul_years is not None:
-        log_eta_prior = (eul_to_log_eta_prior_mean(eul_years), eul_prior_sigma)
+        log_eta_prior = (
+            eul_to_log_eta_prior_mean(
+                eul_years,
+                eul_survival_probability=eul_survival_probability,
+            ),
+            eul_prior_sigma,
+        )
 
     result = minimize(
         negative_log_posterior,
@@ -236,15 +262,33 @@ def fit_weibull_ph(
     }
 
 
+def fit_weibull_no_condition(
+    frame: pd.DataFrame,
+    eul_years: float | None = None,
+    eul_prior_sigma: float = 0.20,
+    eul_survival_probability: float = EUL_SURVIVAL_PROBABILITY,
+) -> dict[str, float]:
+    """Fit Weibull baseline model with no condition effect."""
+    return fit_weibull_ph(
+        frame=frame,
+        eul_years=eul_years,
+        eul_prior_sigma=eul_prior_sigma,
+        eul_survival_probability=eul_survival_probability,
+        use_condition=False,
+        beta_prior=(0.0, 0.05),
+    )
+
+
 # %% [markdown]
 """
 ## 3. Fit rich vs sparse asset types
 
 We use this workflow:
 
-1. Fit `bfly valves` with and without EUL prior.
-2. Use `bfly` condition effect as a prior for `surge` (partial pooling idea).
-3. Fit `surge valves` without prior and with EUL + condition prior.
+1. Fit without EUL and without condition.
+2. Add EUL prior only.
+3. Add condition effect only.
+4. Fit with both EUL and condition.
 """
 
 # %%
@@ -253,52 +297,61 @@ SUPPLIER_EUL_YEARS = {
     "surge valves": 12.0,
 }
 
-bfly_mle_like = fit_weibull_ph(
-    bfly_history,
-    eul_years=None,
-    beta_prior=None,
-)
-bfly_eul = fit_weibull_ph(
-    bfly_history,
-    eul_years=SUPPLIER_EUL_YEARS["bfly valves"],
-    beta_prior=None,
-)
+bfly_models = {
+    "Without EUL & condition": fit_weibull_no_condition(
+        bfly_history,
+        eul_years=None,
+    ),
+    "With EUL only": fit_weibull_no_condition(
+        bfly_history,
+        eul_years=SUPPLIER_EUL_YEARS["bfly valves"],
+    ),
+    "With condition only": fit_weibull_ph(
+        bfly_history,
+        eul_years=None,
+    ),
+    "With EUL + condition": fit_weibull_ph(
+        bfly_history,
+        eul_years=SUPPLIER_EUL_YEARS["bfly valves"],
+    ),
+}
 
-surge_mle_like = fit_weibull_ph(
-    surge_history,
-    eul_years=None,
-    beta_prior=None,
-)
-surge_eul_plus_condition_pooling = fit_weibull_ph(
-    surge_history,
-    eul_years=SUPPLIER_EUL_YEARS["surge valves"],
-    beta_prior=(bfly_eul["beta"], 0.35),
-)
+surge_models = {
+    "Without EUL & condition": fit_weibull_no_condition(
+        surge_history,
+        eul_years=None,
+    ),
+    "With EUL only": fit_weibull_no_condition(
+        surge_history,
+        eul_years=SUPPLIER_EUL_YEARS["surge valves"],
+    ),
+    "With condition only": fit_weibull_ph(
+        surge_history,
+        eul_years=None,
+    ),
+    "With EUL + condition": fit_weibull_ph(
+        surge_history,
+        eul_years=SUPPLIER_EUL_YEARS["surge valves"],
+    ),
+}
 
-results = pd.DataFrame(
-    [
-        {
-            "asset_type": "bfly valves",
-            "model": "No EUL prior",
-            **bfly_mle_like,
-        },
-        {
-            "asset_type": "bfly valves",
-            "model": "With EUL prior",
-            **bfly_eul,
-        },
-        {
-            "asset_type": "surge valves",
-            "model": "No EUL prior",
-            **surge_mle_like,
-        },
-        {
-            "asset_type": "surge valves",
-            "model": "With EUL + pooled condition prior",
-            **surge_eul_plus_condition_pooling,
-        },
-    ]
-)
+all_models = {
+    "bfly valves": bfly_models,
+    "surge valves": surge_models,
+}
+
+results_rows = []
+for asset_type, model_set in all_models.items():
+    for model_name, params in model_set.items():
+        results_rows.append(
+            {
+                "asset_type": asset_type,
+                "model": model_name,
+                **params,
+            }
+        )
+
+results = pd.DataFrame(results_rows)
 
 summary_counts = history.groupby("asset_type", as_index=False).agg(
     n_assets=("asset_id", "count"),
@@ -311,9 +364,9 @@ results.merge(summary_counts, on="asset_type").round(3)
 """
 Interpretation:
 
-- For `bfly valves` (many failures), EUL prior has little impact.
-- For `surge valves` (sparse), EUL + pooled condition prior stabilizes `eta` and
-  gives a more realistic condition effect than sparse-data-only fitting.
+- For `bfly valves` (many failures), the model variants are usually close.
+- For `surge valves` (sparse), adding EUL and/or condition assumptions can
+  materially shift parameter estimates.
 """
 
 # %% [markdown]
@@ -337,7 +390,7 @@ def conditional_failure_probability(
     k = model["k"]
     eta = model["eta"]
     beta = model["beta"]
-    x = condition_score - 3.0
+    x = condition_score - 1.0
 
     def cumulative_hazard(age: float) -> float:
         return ((age / eta) ** k) * np.exp(beta * x)
@@ -347,14 +400,14 @@ def conditional_failure_probability(
 
 
 rows = []
-for condition in [2, 3, 4, 5]:
+for condition in [1, 2, 3, 4, 5]:
     rows.append(
         {
             "asset_type": "bfly valves",
-            "model": "With EUL prior",
+            "model": "With EUL + condition",
             "condition_score": condition,
             "p_fail_next_year": conditional_failure_probability(
-                bfly_eul,
+                bfly_models["With EUL + condition"],
                 age_now=9.0,
                 horizon=1.0,
                 condition_score=condition,
@@ -364,10 +417,10 @@ for condition in [2, 3, 4, 5]:
     rows.append(
         {
             "asset_type": "surge valves",
-            "model": "No EUL prior",
+            "model": "With condition only",
             "condition_score": condition,
             "p_fail_next_year": conditional_failure_probability(
-                surge_mle_like,
+                surge_models["With condition only"],
                 age_now=9.0,
                 horizon=1.0,
                 condition_score=condition,
@@ -377,10 +430,10 @@ for condition in [2, 3, 4, 5]:
     rows.append(
         {
             "asset_type": "surge valves",
-            "model": "With EUL + pooled condition prior",
+            "model": "With EUL + condition",
             "condition_score": condition,
             "p_fail_next_year": conditional_failure_probability(
-                surge_eul_plus_condition_pooling,
+                surge_models["With EUL + condition"],
                 age_now=9.0,
                 horizon=1.0,
                 condition_score=condition,
@@ -396,18 +449,17 @@ probability_table
 
 # %% [markdown]
 """
-The `surge valves` rows compare sparse-data-only vs EUL+condition pooling.
-That is the core worked example for incorporating both supplier information and
-condition score in a sparse setting.
+The `surge valves` rows compare condition-only vs EUL+condition under sparse
+data, while `bfly valves` shows the same calculation for a rich-data type.
 """
 
 # %% [markdown]
 """
-## 5. Visual check of the sparse type
+## 5. Curves by model variant for both asset types
 """
 
 # %%
-conditions_to_plot = [2, 4]
+REFERENCE_CONDITION_FOR_CURVES = 4
 ages = np.linspace(0.1, 20.0, 200)
 
 
@@ -417,31 +469,29 @@ def survival_curve(
     k = model["k"]
     eta = model["eta"]
     beta = model["beta"]
-    x = condition - 3.0
+    x = condition - 1.0
     return np.exp(-((ages_years / eta) ** k) * np.exp(beta * x))
 
 
-fig, ax = plt.subplots(figsize=(9, 5))
-for condition in conditions_to_plot:
-    ax.plot(
-        ages,
-        survival_curve(surge_mle_like, ages, condition),
-        linestyle="--",
-        label=f"Surge no EUL (condition {condition})",
-    )
-    ax.plot(
-        ages,
-        survival_curve(surge_eul_plus_condition_pooling, ages, condition),
-        linestyle="-",
-        label=f"Surge EUL+pooling (condition {condition})",
-    )
+fig, axes = plt.subplots(1, 2, figsize=(14, 5), sharey=True)
+for ax, asset_type in zip(axes, ["bfly valves", "surge valves"], strict=False):
+    for model_name, model in all_models[asset_type].items():
+        ax.plot(
+            ages,
+            survival_curve(model, ages, REFERENCE_CONDITION_FOR_CURVES),
+            label=model_name,
+        )
 
-ax.set_title("Surge Valve Survival Curves: Sparse Data vs EUL+Condition Pooling")
-ax.set_xlabel("Age (years)")
-ax.set_ylabel("Survival probability")
-ax.set_ylim(0, 1)
-ax.grid(alpha=0.3)
-ax.legend()
+    ax.set_title(
+        f"{asset_type}: model variants\n(condition score = {REFERENCE_CONDITION_FOR_CURVES})"
+    )
+    ax.set_xlabel("Age (years)")
+    ax.grid(alpha=0.3)
+
+axes[0].set_ylabel("Survival probability")
+axes[0].set_ylim(0, 1)
+axes[1].legend(loc="upper right")
+fig.tight_layout()
 fig
 
 # %% [markdown]
@@ -449,8 +499,10 @@ fig
 ## Summary
 
 - Weibull PH handles ageing plus condition-score effects in one model.
-- Supplier EUL should be used as a prior anchor, especially for sparse asset
-  types like `surge valves`.
-- A practical extension is partial pooling of the condition effect from richer
-  asset types (`bfly valves`) into sparse ones.
+- `c = 1` is now the baseline hazard level, and each +1 score step multiplies
+  hazard by `exp(beta)`.
+- `EUL_SURVIVAL_PROBABILITY` is the explicit parameter that sets the EUL
+  interpretation (`0.5` means EUL is median life).
+- Comparing the four variants (none, EUL-only, condition-only, both) makes the
+  incremental impact of each assumption visible for rich vs sparse asset types.
 """
