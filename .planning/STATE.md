@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 9 of 10 (Asset Groupings)
-Plan: 1 of TBD in current phase
+Plan: 2 of TBD in current phase
 Status: In progress
-Last activity: 2026-02-13 — Completed plan 09-01 (GroupPropagationRiskModel)
+Last activity: 2026-02-13 — Completed plan 09-02 (Group Coherence Constraint)
 
 Progress: [######....] 60% v2 (phases 7-10 + 7.1 + 11)
 
@@ -28,9 +28,9 @@ Progress: [######....] 60% v2 (phases 7-10 + 7.1 + 11)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9 (v2: phases 7, 7.1, 8, 9) + Phase 11 refactoring
+- Total plans completed: 10 (v2: phases 7, 7.1, 8, 9) + Phase 11 refactoring
 - Average duration: 4 min
-- Total execution time: 36 min (Phase 11: 32 min, Phase 9 plan 01: 4 min)
+- Total execution time: 41 min (Phase 11: 32 min, Phase 9: 9 min total)
 
 **By Phase:**
 
@@ -39,7 +39,7 @@ Progress: [######....] 60% v2 (phases 7-10 + 7.1 + 11)
 | 7. Proportional Hazards | 3/3 | Complete |
 | 7.1. Documentation Workflow | 2/2 | Complete |
 | 8. Roads Domain | 3/3 | Complete |
-| 9. Asset Groupings | 1/TBD | In progress |
+| 9. Asset Groupings | 2/TBD | In progress |
 | 11. Refactoring (Proposal A) | 8/8 | Complete |
 
 *Updated after each plan completion*
@@ -56,6 +56,7 @@ Recent decisions affecting current work:
 - [Phase 11]: Proposal A service-oriented API adopted. Planner orchestrator, service protocols, ObjectiveBuilder/ConstraintSet DSL, plugin registry added.
 - [Phase 11 cleanup]: Old APIs removed — Optimizer.fit(), OptimizationResult, DeteriorationModel.transform()/failure_rate() replaced by private _enrich_portfolio()/_failure_rate()
 - [Phase 9 plan 01]: Mean-field propagation formula for grouped assets: P_i_new = min(P_i * (1 + factor * P_group), 1.0). Singleton groups and ungrouped assets unchanged.
+- [Phase 9 plan 02]: Group coherence constraint enforces all-or-nothing selection. Null group_id values treated as singletons. Groups ranked by group-level benefit/cost ratio.
 
 ### Roadmap Evolution
 
@@ -73,7 +74,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed Phase 9 plan 01 — GroupPropagationRiskModel wrapper with 14 tests passing
+Stopped at: Completed Phase 9 plan 02 — Group coherence constraint with 11 tests, all quality gates passing
 Resume file: None
 
 ## Next Steps
