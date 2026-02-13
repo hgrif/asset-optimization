@@ -9,7 +9,7 @@ import math
 import numpy as np
 import pandas as pd
 
-from asset_optimization.constraints import ConstraintSet
+from asset_optimization.constraints import Constraint, ConstraintSet
 from asset_optimization.objective import Objective
 from asset_optimization.exceptions import OptimizationError
 from asset_optimization.types import PlanResult
@@ -74,8 +74,17 @@ class Optimizer:
 
         budget_limit = self._extract_budget_limit(constraints)
         ranked = self._prepare_ranked_candidates(candidates)
+
+        # Apply group coherence constraint if present
+        group_constraints = constraints.find("group_coherence")
+        if group_constraints:
+            ranked = self._enforce_group_coherence(ranked, group_constraints[-1])
+            group_column = group_constraints[-1].params.get("group_column", "group_id")
+        else:
+            group_column = None
+
         selected_actions, remaining_budget = self._select_with_budget(
-            ranked, budget_limit
+            ranked, budget_limit, group_column=group_column
         )
         objective_breakdown = self._compute_objective_breakdown(
             objective, selected_actions
@@ -131,6 +140,107 @@ class Optimizer:
         return budget
 
     @staticmethod
+    def _enforce_group_coherence(
+        ranked_candidates: pd.DataFrame,
+        constraint: Constraint,
+    ) -> pd.DataFrame:
+        """Re-rank candidates by group-level benefit/cost ratio.
+
+        Parameters
+        ----------
+        ranked_candidates : pd.DataFrame
+            Asset-level ranked candidates.
+        constraint : Constraint
+            Group coherence constraint with group_column parameter.
+
+        Returns
+        -------
+        pd.DataFrame
+            Re-ranked candidates with group-contiguous ordering.
+        """
+
+        group_column = constraint.params.get("group_column", "group_id")
+
+        if group_column not in ranked_candidates.columns:
+            return ranked_candidates
+
+        working = ranked_candidates.copy(deep=True)
+
+        # Fill null group_id with unique singleton identifiers
+        null_mask = working[group_column].isna()
+        working.loc[null_mask, group_column] = (
+            working.loc[null_mask, "asset_id"] + "_singleton"
+        )
+
+        # Aggregate to group level
+        group_agg = (
+            working.groupby(group_column, as_index=False)
+            .agg(
+                {
+                    "direct_cost": "sum",
+                    "expected_benefit": "sum",
+                }
+            )
+            .rename(
+                columns={
+                    "direct_cost": "group_cost",
+                    "expected_benefit": "group_benefit",
+                }
+            )
+        )
+
+        # Compute group-level benefit/cost ratio
+        with np.errstate(divide="ignore", invalid="ignore"):
+            group_agg["group_ratio"] = np.divide(
+                group_agg["group_benefit"].to_numpy(dtype=float),
+                group_agg["group_cost"].to_numpy(dtype=float),
+                out=np.zeros(len(group_agg), dtype=float),
+                where=group_agg["group_cost"].to_numpy(dtype=float) > 0,
+            )
+
+        # Handle zero-cost groups
+        zero_cost_positive_benefit = (group_agg["group_cost"] <= 0) & (
+            group_agg["group_benefit"] > 0
+        )
+        zero_cost_non_positive = (group_agg["group_cost"] <= 0) & (
+            group_agg["group_benefit"] <= 0
+        )
+        group_agg.loc[zero_cost_positive_benefit, "group_ratio"] = np.inf
+        group_agg.loc[zero_cost_non_positive, "group_ratio"] = 0.0
+
+        # Sort groups by ratio desc, then benefit desc
+        group_agg = group_agg.sort_values(
+            by=["group_ratio", "group_benefit"],
+            ascending=[False, False],
+        ).reset_index(drop=True)
+
+        # Merge group ordering back to asset level
+        working = working.merge(
+            group_agg[[group_column, "group_ratio", "group_benefit", "group_cost"]],
+            on=group_column,
+            how="left",
+        )
+
+        # Sort assets by group ranking, then preserve original asset-level ranking within group
+        working["original_rank"] = np.arange(len(working))
+        reranked = working.sort_values(
+            by=["group_ratio", "group_benefit", "original_rank"],
+            ascending=[False, False, True],
+        ).reset_index(drop=True)
+
+        # Drop intermediate columns
+        reranked = reranked.drop(
+            columns=[
+                "group_ratio",
+                "group_benefit",
+                "group_cost",
+                "original_rank",
+            ]
+        )
+
+        return reranked
+
+    @staticmethod
     def _prepare_ranked_candidates(candidates: pd.DataFrame) -> pd.DataFrame:
         working = candidates.copy(deep=True)
         numeric_columns = ["direct_cost", "expected_benefit"]
@@ -175,25 +285,112 @@ class Optimizer:
 
     @staticmethod
     def _select_with_budget(
-        ranked_candidates: pd.DataFrame, budget_limit: float
+        ranked_candidates: pd.DataFrame,
+        budget_limit: float,
+        group_column: str | None = None,
     ) -> tuple[pd.DataFrame, float]:
+        """Select candidates within budget, respecting group boundaries if specified.
+
+        Parameters
+        ----------
+        ranked_candidates : pd.DataFrame
+            Ranked candidate actions.
+        budget_limit : float
+            Budget constraint (may be inf for unbounded).
+        group_column : str or None
+            If provided, enforce all-or-nothing group selection.
+
+        Returns
+        -------
+        tuple[pd.DataFrame, float]
+            Selected actions and remaining budget.
+        """
         if ranked_candidates.empty:
             return ranked_candidates.copy(), budget_limit
 
-        selected_rows: list[pd.Series] = []
+        # No group column or not in dataframe: use existing asset-level selection
+        if group_column is None or group_column not in ranked_candidates.columns:
+            selected_rows: list[pd.Series] = []
+            remaining_budget = budget_limit
+            unbounded_budget = not math.isfinite(budget_limit)
+
+            for _, row in ranked_candidates.iterrows():
+                cost = float(row["direct_cost"])
+                if unbounded_budget or cost <= remaining_budget:
+                    selected_rows.append(row)
+                    if not unbounded_budget:
+                        remaining_budget -= cost
+
+            selected_actions = (
+                pd.DataFrame(selected_rows).reset_index(drop=True)
+                if selected_rows
+                else ranked_candidates.iloc[0:0].copy().reset_index(drop=True)
+            )
+            selected_actions["rank"] = np.arange(
+                1, len(selected_actions) + 1, dtype=int
+            )
+
+            ordered_columns = [
+                "asset_id",
+                "action_type",
+                "direct_cost",
+                "expected_benefit",
+                "benefit_cost_ratio",
+                "rank",
+            ]
+            remaining_columns = [
+                column
+                for column in selected_actions.columns
+                if column not in set(ordered_columns)
+            ]
+            return (
+                selected_actions[ordered_columns + remaining_columns],
+                remaining_budget,
+            )
+
+        # Group-aware selection: treat each group as a unit
+        working = ranked_candidates.copy(deep=True)
+
+        # Fill null group_id with unique singleton identifiers
+        null_mask = working[group_column].isna()
+        working.loc[null_mask, group_column] = (
+            working.loc[null_mask, "asset_id"] + "_singleton"
+        )
+
+        # Pre-compute group costs
+        group_costs = working.groupby(group_column)["direct_cost"].sum()
+
+        selected_rows_group: list[pd.Series] = []
         remaining_budget = budget_limit
         unbounded_budget = not math.isfinite(budget_limit)
+        seen_groups: set[str] = set()
 
-        for _, row in ranked_candidates.iterrows():
-            cost = float(row["direct_cost"])
-            if unbounded_budget or cost <= remaining_budget:
-                selected_rows.append(row)
+        for _, row in working.iterrows():
+            group_id = row[group_column]
+
+            if group_id in seen_groups:
+                # Already decided this group
+                continue
+
+            group_cost = float(group_costs.loc[group_id])
+
+            if unbounded_budget or group_cost <= remaining_budget:
+                # Select entire group
+                group_assets = working[working[group_column] == group_id]
+                for _, asset_row in group_assets.iterrows():
+                    selected_rows_group.append(asset_row)
+
                 if not unbounded_budget:
-                    remaining_budget -= cost
+                    remaining_budget -= group_cost
+
+                seen_groups.add(group_id)
+            else:
+                # Can't afford this group; mark as seen so we don't retry it
+                seen_groups.add(group_id)
 
         selected_actions = (
-            pd.DataFrame(selected_rows).reset_index(drop=True)
-            if selected_rows
+            pd.DataFrame(selected_rows_group).reset_index(drop=True)
+            if selected_rows_group
             else ranked_candidates.iloc[0:0].copy().reset_index(drop=True)
         )
         selected_actions["rank"] = np.arange(1, len(selected_actions) + 1, dtype=int)

@@ -139,3 +139,170 @@ class TestSolveEdgeCases:
         bad_df = pd.DataFrame({"asset_id": ["A1"], "direct_cost": [100.0]})
         with pytest.raises(OptimizationError, match="required columns"):
             opt.solve(objective, constraints, bad_df)
+
+
+class TestGroupCoherence:
+    """Tests for group coherence constraint in optimizer."""
+
+    def test_group_coherence_selects_complete_groups(self):
+        """Optimizer selects all assets in a group together."""
+        opt = Optimizer()
+        candidates = pd.DataFrame(
+            {
+                "asset_id": ["A1", "A2", "A3", "A4"],
+                "action_type": ["repair", "repair", "replace", "replace"],
+                "direct_cost": [1000.0, 1000.0, 2000.0, 2000.0],
+                "expected_benefit": [500.0, 500.0, 1500.0, 1500.0],
+                "group_id": ["group_1", "group_1", "group_2", "group_2"],
+            }
+        )
+        objective = (
+            ObjectiveBuilder()
+            .add_expected_risk_reduction()
+            .add_total_cost(weight=-1.0)
+            .build()
+        )
+        constraints = ConstraintSet().add_budget_limit(2500.0).add_group_coherence()
+
+        result = opt.solve(objective, constraints, candidates)
+
+        # Budget allows group_1 (2000 total) but not group_2 (4000 total)
+        assert len(result.selected_actions) == 2
+        assert set(result.selected_actions["asset_id"]) == {"A1", "A2"}
+        assert result.selected_actions["direct_cost"].sum() == 2000.0
+
+    def test_group_coherence_skips_unaffordable_group(self):
+        """Optimizer skips entire group if budget insufficient."""
+        opt = Optimizer()
+        candidates = pd.DataFrame(
+            {
+                "asset_id": ["A1", "A2", "A3"],
+                "action_type": ["repair", "repair", "replace"],
+                "direct_cost": [1000.0, 1000.0, 500.0],
+                "expected_benefit": [800.0, 800.0, 300.0],
+                "group_id": ["group_1", "group_1", None],
+            }
+        )
+        objective = (
+            ObjectiveBuilder()
+            .add_expected_risk_reduction()
+            .add_total_cost(weight=-1.0)
+            .build()
+        )
+        constraints = ConstraintSet().add_budget_limit(1500.0).add_group_coherence()
+
+        result = opt.solve(objective, constraints, candidates)
+
+        # Budget can't afford group_1 (2000), but can afford singleton A3
+        assert len(result.selected_actions) == 1
+        assert result.selected_actions["asset_id"].tolist() == ["A3"]
+
+    def test_group_coherence_null_group_ids_as_singletons(self):
+        """Assets with null group_id are treated as singletons."""
+        opt = Optimizer()
+        candidates = pd.DataFrame(
+            {
+                "asset_id": ["A1", "A2", "A3"],
+                "action_type": ["repair", "repair", "inspect"],
+                "direct_cost": [1000.0, 1000.0, 200.0],
+                "expected_benefit": [600.0, 500.0, 100.0],
+                "group_id": [None, None, None],
+            }
+        )
+        objective = (
+            ObjectiveBuilder()
+            .add_expected_risk_reduction()
+            .add_total_cost(weight=-1.0)
+            .build()
+        )
+        constraints = ConstraintSet().add_budget_limit(1500.0).add_group_coherence()
+
+        result = opt.solve(objective, constraints, candidates)
+
+        # All null group_id → treated as individual singletons
+        assert len(result.selected_actions) == 2
+        assert set(result.selected_actions["asset_id"]) == {"A1", "A3"}
+
+    def test_group_coherence_no_group_column(self):
+        """Group coherence constraint is no-op when group_id column missing."""
+        opt = Optimizer()
+        candidates = pd.DataFrame(
+            {
+                "asset_id": ["A1", "A2"],
+                "action_type": ["repair", "replace"],
+                "direct_cost": [1000.0, 2000.0],
+                "expected_benefit": [800.0, 1500.0],
+            }
+        )
+        objective = (
+            ObjectiveBuilder()
+            .add_expected_risk_reduction()
+            .add_total_cost(weight=-1.0)
+            .build()
+        )
+        constraints = ConstraintSet().add_budget_limit(3500.0).add_group_coherence()
+
+        result = opt.solve(objective, constraints, candidates)
+
+        # No group_id column → behaves like normal budget selection
+        # A1 ratio=0.8, A2 ratio=0.75 → both selected within budget
+        assert len(result.selected_actions) == 2
+        assert set(result.selected_actions["asset_id"]) == {"A1", "A2"}
+
+    def test_group_coherence_with_budget_limit(self):
+        """Group coherence respects budget by selecting groups in priority order."""
+        opt = Optimizer()
+        candidates = pd.DataFrame(
+            {
+                "asset_id": ["A1", "A2", "A3", "A4", "A5"],
+                "action_type": ["repair"] * 5,
+                "direct_cost": [500.0, 500.0, 1000.0, 1000.0, 300.0],
+                "expected_benefit": [400.0, 400.0, 1200.0, 1200.0, 150.0],
+                "group_id": ["grp_A", "grp_A", "grp_B", "grp_B", None],
+            }
+        )
+        objective = (
+            ObjectiveBuilder()
+            .add_expected_risk_reduction()
+            .add_total_cost(weight=-1.0)
+            .build()
+        )
+        constraints = ConstraintSet().add_budget_limit(2500.0).add_group_coherence()
+
+        result = opt.solve(objective, constraints, candidates)
+
+        # grp_B has best group ratio (1200*2 / 2000 = 1.2)
+        # grp_A has ratio (400*2 / 1000 = 0.8)
+        # A5 singleton ratio = 0.5
+        # Budget 2500 allows grp_B (2000) + A5 (300)
+        assert len(result.selected_actions) == 3
+        assert set(result.selected_actions["asset_id"]) == {"A3", "A4", "A5"}
+
+    def test_optimizer_without_group_coherence_unchanged(self):
+        """Optimizer without group coherence constraint works as before."""
+        opt = Optimizer()
+        candidates = pd.DataFrame(
+            {
+                "asset_id": ["A1", "A2", "A3"],
+                "action_type": ["repair", "repair", "replace"],
+                "direct_cost": [1000.0, 1000.0, 2000.0],
+                "expected_benefit": [800.0, 600.0, 1500.0],
+                "group_id": ["group_1", "group_1", "group_2"],
+            }
+        )
+        objective = (
+            ObjectiveBuilder()
+            .add_expected_risk_reduction()
+            .add_total_cost(weight=-1.0)
+            .build()
+        )
+        # No group coherence constraint
+        constraints = ConstraintSet().add_budget_limit(2500.0)
+
+        result = opt.solve(objective, constraints, candidates)
+
+        # Without group coherence, optimizer picks best individual assets
+        # A1 ratio=0.8, A2 ratio=0.6, A3 ratio=0.75
+        # Picks A1, A3 (total 3000) but budget is 2500, so only A1, A2
+        assert len(result.selected_actions) == 2
+        assert set(result.selected_actions["asset_id"]) == {"A1", "A2"}
