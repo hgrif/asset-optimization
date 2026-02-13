@@ -80,6 +80,26 @@ class ConstraintSet:
             raise ValueError("minimum_service_level must be between 0 and 1")
         return self._add("minimum_service_level", minimum_service_level=value)
 
+    def add_group_coherence(self, group_column: str = "group_id") -> "ConstraintSet":
+        """Require all assets in a group to be selected together.
+
+        Parameters
+        ----------
+        group_column : str, default='group_id'
+            Column name in the asset DataFrame that identifies asset groups.
+            Assets with the same non-null value are treated as a group.
+            Assets with null values are treated as singletons.
+
+        Returns
+        -------
+        ConstraintSet
+            Self for fluent chaining.
+        """
+        normalized_column = group_column.strip()
+        if not normalized_column:
+            raise ValueError("group_column must be a non-empty string")
+        return self._add("group_coherence", group_column=normalized_column)
+
     def find(self, kind: str) -> tuple[Constraint, ...]:
         """Return all constraints matching ``kind``."""
         normalized_kind = kind.strip().lower()

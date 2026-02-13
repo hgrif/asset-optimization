@@ -60,3 +60,50 @@ def test_constraint_is_frozen() -> None:
     constraint = Constraint(kind="budget_limit", params={"annual_capex": 5})
     with pytest.raises(FrozenInstanceError):
         constraint.params = {}
+
+
+def test_add_group_coherence_default() -> None:
+    """add_group_coherence() uses 'group_id' as default column."""
+    constraints = ConstraintSet().add_group_coherence()
+
+    assert len(constraints) == 1
+    assert constraints.constraints[0].kind == "group_coherence"
+    assert constraints.constraints[0].params["group_column"] == "group_id"
+
+
+def test_add_group_coherence_custom_column() -> None:
+    """add_group_coherence() accepts custom column name."""
+    constraints = ConstraintSet().add_group_coherence(group_column="trench_id")
+
+    assert len(constraints) == 1
+    assert constraints.constraints[0].kind == "group_coherence"
+    assert constraints.constraints[0].params["group_column"] == "trench_id"
+
+
+def test_add_group_coherence_chaining() -> None:
+    """add_group_coherence() supports fluent chaining."""
+    constraints = ConstraintSet().add_budget_limit(100_000).add_group_coherence()
+
+    assert len(constraints) == 2
+    assert constraints.constraints[0].kind == "budget_limit"
+    assert constraints.constraints[1].kind == "group_coherence"
+
+
+def test_find_group_coherence() -> None:
+    """find('group_coherence') returns group coherence constraints."""
+    constraints = (
+        ConstraintSet()
+        .add_budget_limit(10_000)
+        .add_group_coherence(group_column="custom_group")
+    )
+
+    matched = constraints.find("group_coherence")
+    assert len(matched) == 1
+    assert matched[0].kind == "group_coherence"
+    assert matched[0].params["group_column"] == "custom_group"
+
+
+def test_add_group_coherence_validates_non_empty() -> None:
+    """add_group_coherence() rejects empty column name."""
+    with pytest.raises(ValueError, match="non-empty string"):
+        ConstraintSet().add_group_coherence(group_column="   ")
