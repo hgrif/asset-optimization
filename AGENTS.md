@@ -14,6 +14,8 @@
 - Fast sync only (no execution): `make docs-sync`
 - Execute notebook sources and sync: `make docs` (runs `docs-py` then `docs-sync`)
 - Execute only notebook sources: `make docs-py`
+- Do not manually edit `.ipynb` notebooks; make notebook changes in the paired `.py` source files.
+- Lint and test notebook `.py` sources before converting/syncing them into `.ipynb` files.
 - Commit notebooks with their executed outputs (run `make docs` before committing).
 
 ## Quality Gates
