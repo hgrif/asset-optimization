@@ -13,7 +13,7 @@
 # ---
 
 # %% [markdown]
-"""
+r"""
 # Worked Example: Failure Modeling with EUL + Condition Score (PyMC)
 
 This notebook mirrors `06_failure_modeling_with_eul_and_condition.py` but uses
@@ -27,11 +27,15 @@ For each asset:
 
 Hazard model:
 
-`h(t | c) = h0(t) * exp(beta * (c - 1))`
+$$
+h(t \mid c) = h_0(t)\exp\left(\beta(c - 1)\right)
+$$
 
 with Weibull baseline:
 
-`h0(t) = (k / eta) * (t / eta)^(k - 1)`
+$$
+h_0(t) = \frac{k}{\eta}\left(\frac{t}{\eta}\right)^{k - 1}
+$$
 
 Supplier EUL estimates are encoded as priors on `log(eta)`.
 """
@@ -123,17 +127,19 @@ history = pd.concat([bfly_history, surge_history], ignore_index=True)
 history.groupby("asset_type")["event_observed"].agg(["count", "sum"])
 
 # %% [markdown]
-"""
+r"""
 ## 2. PyMC Weibull PH model with optional EUL prior
 
 Likelihood per asset:
 
-`log L_i = d_i * log h_i(t_i) - H_i(t_i)`
+$$
+\log L_i = d_i \log h_i(t_i) - H_i(t_i)
+$$
 
 where:
 
-- `H_i(t) = (t / eta)^k * exp(beta * x_i)`
-- `x_i = condition_score - 1` when condition is used, else `0`
+- $H_i(t) = \left(\frac{t}{\eta}\right)^k \exp\left(\beta x_i\right)$
+- $x_i = \mathrm{condition\_score} - 1$ when condition is used, else $0$
 
 `EUL_SURVIVAL_PROBABILITY` controls how supplier EUL is mapped into the prior on
 `eta`.
@@ -339,10 +345,13 @@ summary_counts = history.groupby("asset_type", as_index=False).agg(
 results.merge(summary_counts, on="asset_type").round(3)
 
 # %% [markdown]
-"""
+r"""
 ## 4. Worked probability example
 
-`P(t < T <= t+1 | T > t, c) = 1 - exp(-(H(t+1,c) - H(t,c)))`
+$$
+P\left(t < T \le t+1 \mid T > t, c\right)
+= 1 - \exp\left(-\left(H(t+1,c) - H(t,c)\right)\right)
+$$
 """
 
 

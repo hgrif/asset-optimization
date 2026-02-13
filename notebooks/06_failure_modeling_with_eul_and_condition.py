@@ -13,7 +13,7 @@
 # ---
 
 # %% [markdown]
-"""
+r"""
 # Worked Example: Failure Modeling with EUL + Condition Score
 
 This notebook shows a basic reliability workflow for two valve asset types:
@@ -23,14 +23,16 @@ This notebook shows a basic reliability workflow for two valve asset types:
 
 We model failure time with a Weibull proportional-hazards model:
 
-`h(t | c) = h0(t) * exp(beta * (c - 1))`
+$$
+h(t \mid c) = h_0(t)\exp\left(\beta(c - 1)\right)
+$$
 
 where:
 
-- `h0(t) = (k / eta) * (t / eta)^(k - 1)` is the Weibull baseline hazard
-- `c` is condition score (1 to 5)
-- `c = 1` is the baseline hazard level
-- each +1 condition step multiplies hazard by `exp(beta)`
+- $h_0(t) = \frac{k}{\eta}\left(\frac{t}{\eta}\right)^{k - 1}$ is the Weibull baseline hazard
+- $c$ is condition score (1 to 5)
+- $c = 1$ is the baseline hazard level
+- each +1 condition step multiplies hazard by $\exp(\beta)$
 
 Supplier End-of-Useful-Life (EUL) estimates are incorporated as priors on the
 Weibull scale parameter.
@@ -131,23 +133,25 @@ You should see many failures for `bfly valves` and only a handful for
 """
 
 # %% [markdown]
-"""
+r"""
 ## 2. Weibull + condition-score model with optional priors
 
 For each asset record:
 
-- `t_i`: observed time (failure or censoring)
-- `d_i`: event flag (1 if failed, else 0)
-- `x_i = condition_score - 1` (so score `1` is baseline)
+- $t_i$: observed time (failure or censoring)
+- $d_i$: event flag (1 if failed, else 0)
+- $x_i = \mathrm{condition\_score} - 1$ (so score $1$ is baseline)
 
 Cumulative hazard is:
 
-`H_i(t) = (t / eta)^k * exp(beta * x_i)`
+$$
+H_i(t) = \left(\frac{t}{\eta}\right)^k \exp\left(\beta x_i\right)
+$$
 
 Supplier EUL is treated as a prior on `eta`. The parameter that controls how EUL
 is interpreted is `EUL_SURVIVAL_PROBABILITY`.
 
-- `EUL_SURVIVAL_PROBABILITY = 0.5` means EUL is median life (`S(EUL)=0.5`)
+- `EUL_SURVIVAL_PROBABILITY = 0.5` means EUL is median life ($S(\mathrm{EUL}) = 0.5$)
 - change this value if supplier EUL should represent another quantile
 """
 
@@ -370,12 +374,15 @@ Interpretation:
 """
 
 # %% [markdown]
-"""
+r"""
 ## 4. Worked probability example
 
 Compute next-year failure probability for an asset currently at age 9 years:
 
-`P(t < T <= t+1 | T > t, c) = 1 - exp(-(H(t+1,c) - H(t,c)))`
+$$
+P\left(t < T \le t+1 \mid T > t, c\right)
+= 1 - \exp\left(-\left(H(t+1,c) - H(t,c)\right)\right)
+$$
 """
 
 
@@ -495,12 +502,12 @@ fig.tight_layout()
 fig
 
 # %% [markdown]
-"""
+r"""
 ## Summary
 
 - Weibull PH handles ageing plus condition-score effects in one model.
-- `c = 1` is now the baseline hazard level, and each +1 score step multiplies
-  hazard by `exp(beta)`.
+- $c = 1$ is now the baseline hazard level, and each +1 score step multiplies
+  hazard by $\exp(\beta)$.
 - `EUL_SURVIVAL_PROBABILITY` is the explicit parameter that sets the EUL
   interpretation (`0.5` means EUL is median life).
 - Comparing the four variants (none, EUL-only, condition-only, both) makes the
