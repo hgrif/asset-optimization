@@ -466,7 +466,7 @@ data, while `bfly valves` shows the same calculation for a rich-data type.
 """
 
 # %%
-REFERENCE_CONDITION_FOR_CURVES = 4
+CONDITIONS_FOR_CURVES = (1, 4)
 ages = np.linspace(0.1, 20.0, 200)
 
 
@@ -480,24 +480,30 @@ def survival_curve(
     return np.exp(-((ages_years / eta) ** k) * np.exp(beta * x))
 
 
-fig, axes = plt.subplots(1, 2, figsize=(14, 5), sharey=True)
-for ax, asset_type in zip(axes, ["bfly valves", "surge valves"], strict=False):
-    for model_name, model in all_models[asset_type].items():
-        ax.plot(
-            ages,
-            survival_curve(model, ages, REFERENCE_CONDITION_FOR_CURVES),
-            label=model_name,
-        )
+asset_types = ("bfly valves", "surge valves")
+fig, axes = plt.subplots(
+    len(CONDITIONS_FOR_CURVES),
+    len(asset_types),
+    figsize=(14, 9),
+    sharex=True,
+    sharey=True,
+)
 
-    ax.set_title(
-        f"{asset_type}: model variants\n(condition score = {REFERENCE_CONDITION_FOR_CURVES})"
-    )
-    ax.set_xlabel("Age (years)")
-    ax.grid(alpha=0.3)
+for row, condition in enumerate(CONDITIONS_FOR_CURVES):
+    for col, asset_type in enumerate(asset_types):
+        ax = axes[row, col]
+        for model_name, model in all_models[asset_type].items():
+            ax.plot(ages, survival_curve(model, ages, condition), label=model_name)
+        ax.set_title(f"{asset_type}\n(condition score = {condition})")
+        ax.grid(alpha=0.3)
 
-axes[0].set_ylabel("Survival probability")
-axes[0].set_ylim(0, 1)
-axes[1].legend(loc="upper right")
+for col, asset_type in enumerate(asset_types):
+    axes[-1, col].set_xlabel("Age (years)")
+for row in range(len(CONDITIONS_FOR_CURVES)):
+    axes[row, 0].set_ylabel("Survival probability")
+
+axes[0, 0].set_ylim(0, 1)
+axes[0, -1].legend(loc="upper right")
 fig.tight_layout()
 fig
 
